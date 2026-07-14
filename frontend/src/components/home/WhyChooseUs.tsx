@@ -1,0 +1,42 @@
+import { motion } from "framer-motion";
+import { BadgeCheck, PackageCheck, RotateCcw, Truck } from "lucide-react";
+import { WHY_CHOOSE_US } from "@/data/homeContent";
+
+const ICONS = [BadgeCheck, PackageCheck, Truck, RotateCcw];
+
+export function WhyChooseUs() {
+  return (
+    <section className="bg-cream-300/60 py-20">
+      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+        <div className="mb-12 text-center">
+          <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Why Anandi Saree</span>
+          <h2 className="mt-3 font-display text-3xl text-royal-700 sm:text-4xl">
+            Why Choose Authentic Maharashtrian Sarees
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {WHY_CHOOSE_US.map((item, i) => {
+            const Icon = ICONS[i];
+            return (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="rounded-xl2 bg-white p-7 text-center shadow-soft"
+              >
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-royal-600/10 text-royal-600">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <h3 className="mt-5 font-heading text-base font-semibold text-charcoal">{item.title}</h3>
+                <p className="mt-2 text-sm text-charcoal/70">{item.description}</p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}

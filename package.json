@@ -1,0 +1,29 @@
+{
+  "name": "anandi-saree",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Premium Maharashtrian & Indian saree e-commerce platform",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "admin",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:admin": "npm run dev --workspace=admin",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "build:admin": "npm run build --workspace=admin",
+    "build:shared": "npm run build --workspace=packages/shared",
+    "build": "npm run build:shared && npm run build:backend && npm run build:frontend && npm run build:admin",
+    "prisma:generate": "npm run prisma:generate --workspace=backend",
+    "prisma:migrate": "npm run prisma:migrate --workspace=backend",
+    "prisma:studio": "npm run prisma:studio --workspace=backend",
+    "prisma:seed": "npm run prisma:seed --workspace=backend"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

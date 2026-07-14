@@ -1,0 +1,81 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: ["class"],
+  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        // Deep purple sampled from the Anandi Sarees logo (#54208C)
+        royal: {
+          DEFAULT: "#54208C",
+          50: "#F2EAFB",
+          100: "#E1CCF5",
+          200: "#C39AEA",
+          300: "#A46BDB",
+          400: "#8746C4",
+          500: "#6B2FA5",
+          600: "#54208C",
+          700: "#401A6B",
+          800: "#2D124C",
+          900: "#1B0A2E",
+        },
+        // Gold sampled from the logo's knot mark (#F7BA67)
+        gold: {
+          DEFAULT: "#F7BA67",
+          50: "#FEF8EF",
+          100: "#FCEBD1",
+          200: "#F9D9A8",
+          300: "#F7BA67",
+          400: "#F2A53F",
+          500: "#E58C22",
+          600: "#BD6E17",
+          700: "#905414",
+          800: "#623A0F",
+          900: "#392209",
+        },
+        cream: {
+          DEFAULT: "#FBF5EC",
+          100: "#FFFDFB",
+          200: "#FBF5EC",
+          300: "#F3E7D3",
+        },
+        charcoal: {
+          DEFAULT: "#211F1E",
+          light: "#3A3634",
+        },
+      },
+      fontFamily: {
+        display: ["'Playfair Display'", "serif"],
+        heading: ["'Poppins'", "sans-serif"],
+        body: ["'Inter'", "sans-serif"],
+      },
+      boxShadow: {
+        soft: "0 10px 40px -10px rgba(84, 32, 140, 0.18)",
+        gold: "0 0 0 1px rgba(247, 186, 103, 0.4)",
+      },
+      backgroundImage: {
+        "gold-gradient": "linear-gradient(135deg, #FCEBD1 0%, #F7BA67 50%, #E58C22 100%)",
+        "royal-gradient": "linear-gradient(135deg, #6B2FA5 0%, #401A6B 100%)",
+      },
+      borderRadius: {
+        xl2: "1.25rem",
+      },
+      keyframes: {
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        "scroll-x": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+      },
+      animation: {
+        marquee: "marquee 22s linear infinite",
+        "scroll-x": "scroll-x 32s linear infinite",
+        "scroll-x-slow": "scroll-x 48s linear infinite",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+};

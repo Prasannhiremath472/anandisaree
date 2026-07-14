@@ -1,0 +1,77 @@
+import { Link } from "react-router-dom";
+import { Heart, ShoppingBag } from "lucide-react";
+import { motion } from "framer-motion";
+import type { ProductCard as ProductCardData } from "@/data/homeContent";
+
+export function ProductCard({ product }: { product: ProductCardData }) {
+  const discountPct = Math.round(((product.mrp - product.price) / product.mrp) * 100);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.4 }}
+      className="group"
+    >
+      <Link to={`/product/${product.id}`} className="block">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-xl2 bg-cream-300 shadow-soft">
+          <img
+            src={product.image}
+            alt={product.name}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+
+          <div className="absolute left-3 top-3 flex flex-col gap-2">
+            {product.isNew && (
+              <span className="rounded-full bg-royal-600 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+                New
+              </span>
+            )}
+            {product.isBestSeller && (
+              <span className="rounded-full bg-gold-gradient px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-royal-800">
+                Bestseller
+              </span>
+            )}
+            {discountPct > 0 && (
+              <span className="rounded-full bg-charcoal/80 px-3 py-1 text-[10px] font-semibold text-white">
+                {discountPct}% OFF
+              </span>
+            )}
+          </div>
+
+          <button
+            aria-label="Add to wishlist"
+            onClick={(e) => e.preventDefault()}
+            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-royal-600 opacity-0 shadow-sm transition-opacity duration-300 group-hover:opacity-100"
+          >
+            <Heart className="h-4 w-4" />
+          </button>
+
+          <button
+            onClick={(e) => e.preventDefault()}
+            className="absolute inset-x-3 bottom-3 flex translate-y-4 items-center justify-center gap-2 rounded-full bg-royal-600 py-2.5 text-xs font-heading font-semibold text-white opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+          >
+            <ShoppingBag className="h-3.5 w-3.5" />
+            Quick Add
+          </button>
+        </div>
+
+        <div className="mt-3">
+          <p className="text-xs uppercase tracking-wide text-gold-700">{product.category}</p>
+          <h3 className="mt-1 truncate font-heading text-sm font-medium text-charcoal">{product.name}</h3>
+          <p className="mt-0.5 text-xs text-charcoal/60">{product.fabric}</p>
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="font-heading text-sm font-semibold text-royal-700">
+              ₹{product.price.toLocaleString("en-IN")}
+            </span>
+            {product.mrp > product.price && (
+              <span className="text-xs text-charcoal/40 line-through">₹{product.mrp.toLocaleString("en-IN")}</span>
+            )}
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}

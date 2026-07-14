@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm audit *)",
+      "Bash(npx vite *)",
+      "Bash(disown)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -o /dev/null -w \"frontend\\(5175\\): %{http_code}\\\\n\" http://localhost:5175/)",
+      "Bash(curl -s -o /dev/null -w \"admin\\(5176\\): %{http_code}\\\\n\" http://localhost:5176/)",
+      "WebFetch(domain:www.morpankhsaree.com)",
+      "Bash(curl -s http://localhost:5175/ -o /dev/null -w \"frontend\\(5175\\): %{http_code}\\\\n\")",
+      "WebSearch",
+      "WebFetch(domain:unsplash.com)",
+      "Read(//c/Users/Admin/AppData/Local/Temp/saree_check/**)",
+      "Bash(cd /tmp/saree_check && ls *.jpg | grep -v \"^img[1567]\")"
+    ]
+  }
+}
