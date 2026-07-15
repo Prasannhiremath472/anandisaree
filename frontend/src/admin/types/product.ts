@@ -51,6 +51,7 @@ export interface Product {
   createdAt: string;
   images: ProductImage[];
   categories: ProductCategoryRef[];
+  variants: ProductVariant[];
 }
 
 export interface CategoryLookup {

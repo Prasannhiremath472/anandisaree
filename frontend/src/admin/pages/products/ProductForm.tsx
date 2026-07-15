@@ -7,6 +7,7 @@ import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
 import { useCategoriesLookup, useCreateProduct, useProduct, useUpdateProduct } from "@/admin/hooks/api/useProducts";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
+import { VariantsCard, type VariantOption, type VariantRow } from "./VariantsCard";
 
 const emptyForm = {
   // Core
@@ -67,6 +68,8 @@ export function ProductForm() {
   const uploadMutation = useImageUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState(emptyForm);
+  const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
+  const [variants, setVariants] = useState<VariantRow[]>([]);
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -120,6 +123,25 @@ export function ProductForm() {
         metaTitle: "",
         metaDescription: "",
       });
+
+      if (existing.variants?.length) {
+        const colors = [...new Set(existing.variants.map((v) => v.color).filter(Boolean))] as string[];
+        const sizes = [...new Set(existing.variants.map((v) => v.size).filter(Boolean))] as string[];
+        const options: VariantOption[] = [];
+        if (colors.length) options.push({ id: crypto.randomUUID(), name: "Color", values: colors });
+        if (sizes.length) options.push({ id: crypto.randomUUID(), name: "Size", values: sizes });
+        setVariantOptions(options);
+        setVariants(
+          existing.variants.map((v) => ({
+            key: [v.color, v.size].filter(Boolean).join(" / "),
+            color: v.color ?? undefined,
+            size: v.size ?? undefined,
+            sku: v.sku,
+            priceDelta: v.priceDelta,
+            stockQuantity: String(v.stockQuantity),
+          }))
+        );
+      }
     }
   }, [existing]);
 
@@ -170,6 +192,15 @@ export function ProductForm() {
       metaDescription: form.metaDescription || undefined,
       categoryIds: form.categoryId ? [form.categoryId] : [],
       images: form.imageUrl ? [{ url: form.imageUrl, isPrimary: true }] : [],
+      variants: variants.length
+        ? variants.map((v) => ({
+            sku: v.sku,
+            color: v.color,
+            size: v.size,
+            priceDelta: Number(v.priceDelta || 0),
+            stockQuantity: Number(v.stockQuantity || 0),
+          }))
+        : undefined,
     };
 
     try {
@@ -395,6 +426,14 @@ export function ProductForm() {
                 <textarea rows={2} value={form.washCare} onChange={(e) => setForm({ ...form, washCare: e.target.value })} className={inputClass} />
               </Field>
             </Card>
+
+            <VariantsCard
+              options={variantOptions}
+              onOptionsChange={setVariantOptions}
+              variants={variants}
+              onVariantsChange={setVariants}
+              baseSku={form.sku}
+            />
 
             <Card title="Search Engine Listing">
               <div className="space-y-4">
