@@ -25,7 +25,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
 
           <div className="absolute left-3 top-3 flex flex-col gap-2">
             {product.isNew && (
-              <span className="rounded-full bg-royal-600 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+              <span className="rounded-full bg-royal-gradient px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-white shadow-soft">
                 New
               </span>
             )}
@@ -51,11 +51,13 @@ export function ProductCard({ product }: { product: ProductCardData }) {
 
           <button
             onClick={(e) => e.preventDefault()}
-            className="absolute inset-x-3 bottom-3 flex translate-y-4 items-center justify-center gap-2 rounded-full bg-royal-600 py-2.5 text-xs font-heading font-semibold text-white opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+            className="absolute inset-x-3 bottom-3 flex translate-y-4 items-center justify-center gap-2 rounded-full bg-royal-gold-gradient py-2.5 text-xs font-heading font-semibold text-white opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
             Quick Add
           </button>
+
+          <div className="pointer-events-none absolute inset-0 rounded-xl2 opacity-0 ring-2 ring-gold-400/70 transition-opacity duration-300 group-hover:opacity-100" />
         </div>
 
         <div className="mt-3">

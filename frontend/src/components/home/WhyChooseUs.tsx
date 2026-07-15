@@ -6,11 +6,11 @@ const ICONS = [BadgeCheck, PackageCheck, Truck, RotateCcw];
 
 export function WhyChooseUs() {
   return (
-    <section className="bg-cream-300/60 py-20">
+    <section className="bg-surface-gradient py-20">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="mb-12 text-center">
-          <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Why Anandi Saree</span>
-          <h2 className="mt-3 font-display text-3xl text-royal-700 sm:text-4xl">
+          <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Why Anandi Sarees</span>
+          <h2 className="mt-3 font-display text-3xl text-gradient-royal sm:text-4xl">
             Why Choose Authentic Maharashtrian Sarees
           </h2>
         </div>
@@ -25,13 +25,14 @@ export function WhyChooseUs() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="rounded-xl2 bg-white p-7 text-center shadow-soft"
+                className="group relative overflow-hidden rounded-xl2 bg-white p-7 text-center shadow-soft transition-shadow hover:shadow-gold"
               >
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-royal-600/10 text-royal-600">
+                <div className="pointer-events-none absolute inset-0 bg-card-sheen opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-royal-gradient text-white shadow-soft">
                   <Icon className="h-6 w-6" />
                 </div>
-                <h3 className="mt-5 font-heading text-base font-semibold text-charcoal">{item.title}</h3>
-                <p className="mt-2 text-sm text-charcoal/70">{item.description}</p>
+                <h3 className="relative mt-5 font-heading text-base font-semibold text-charcoal">{item.title}</h3>
+                <p className="relative mt-2 text-sm text-charcoal/70">{item.description}</p>
               </motion.div>
             );
           })}

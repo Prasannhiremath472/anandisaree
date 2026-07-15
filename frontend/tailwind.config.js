@@ -43,6 +43,11 @@ export default {
           DEFAULT: "#211F1E",
           light: "#3A3634",
         },
+        // Admin panel neutral surface background
+        surface: {
+          DEFAULT: "#F7F5F2",
+          dark: "#161414",
+        },
       },
       fontFamily: {
         display: ["'Playfair Display'", "serif"],
@@ -55,7 +60,14 @@ export default {
       },
       backgroundImage: {
         "gold-gradient": "linear-gradient(135deg, #FCEBD1 0%, #F7BA67 50%, #E58C22 100%)",
+        "gold-gradient-vertical": "linear-gradient(180deg, #F9D9A8 0%, #F7BA67 60%, #BD6E17 100%)",
         "royal-gradient": "linear-gradient(135deg, #6B2FA5 0%, #401A6B 100%)",
+        "royal-gradient-radial": "radial-gradient(circle at 30% 20%, #8746C4 0%, #54208C 45%, #2D124C 100%)",
+        "royal-gold-gradient": "linear-gradient(120deg, #401A6B 0%, #54208C 45%, #BD6E17 100%)",
+        "mesh-hero": "radial-gradient(at 15% 20%, rgba(135,70,196,0.55) 0px, transparent 55%), radial-gradient(at 85% 15%, rgba(247,186,103,0.35) 0px, transparent 50%), radial-gradient(at 50% 90%, rgba(64,26,107,0.6) 0px, transparent 55%)",
+        "surface-gradient": "linear-gradient(180deg, #FFFDFB 0%, #FBF5EC 60%, #F3E7D3 100%)",
+        "card-sheen": "linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 40%)",
+        "sidebar-gradient": "linear-gradient(180deg, #ffffff 0%, #F7F5F2 100%)",
       },
       borderRadius: {
         xl2: "1.25rem",

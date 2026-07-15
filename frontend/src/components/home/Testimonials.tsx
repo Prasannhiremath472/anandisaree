@@ -7,7 +7,7 @@ export function Testimonials() {
     <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
       <div className="mb-12 text-center">
         <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Customer Love</span>
-        <h2 className="mt-3 font-display text-3xl text-royal-700 sm:text-4xl">What Our Customers Say</h2>
+        <h2 className="mt-3 font-display text-3xl text-gradient-royal sm:text-4xl">What Our Customers Say</h2>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">

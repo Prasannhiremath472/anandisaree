@@ -4,7 +4,7 @@ import { ARTISAN_STORY_IMAGE } from "@/data/homeContent";
 
 export function ArtisanStory() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+    <section className="mx-auto max-w-7xl overflow-x-clip px-4 py-20 lg:px-8">
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -28,7 +28,7 @@ export function ArtisanStory() {
           transition={{ duration: 0.6 }}
         >
           <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Our Craft</span>
-          <h2 className="mt-3 text-balance font-display text-3xl text-royal-700 sm:text-4xl">
+          <h2 className="mt-3 text-balance font-display text-3xl text-gradient-royal sm:text-4xl">
             Woven by Hand, Rooted in Maharashtra
           </h2>
           <p className="mt-5 text-charcoal/80">

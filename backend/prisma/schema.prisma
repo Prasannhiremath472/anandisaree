@@ -132,6 +132,7 @@ model User {
   referredById      String?
   referredBy        User?     @relation("Referrals", fields: [referredById], references: [id])
   referrals         User[]    @relation("Referrals")
+  claimedCoupons    UserCoupon[]
 
   @@index([role])
   @@index([deletedAt])
@@ -397,7 +398,7 @@ model ProductImage {
   id        String   @id @default(cuid())
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  url       String
+  url       String   @db.LongText // stores either a base64 data URI or an external URL
   altText   String?
   sortOrder Int      @default(0)
   isPrimary Boolean  @default(false)
@@ -659,8 +660,24 @@ model Coupon {
   createdAt      DateTime   @default(now())
 
   orders         Order[]
+  claimedBy      UserCoupon[]
 
   @@index([isActive])
+}
+
+model UserCoupon {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  couponId  String
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  source    String   @default("popup") // popup, referral, manual, etc.
+  isUsed    Boolean  @default(false)
+  claimedAt DateTime @default(now())
+  usedAt    DateTime?
+
+  @@unique([userId, couponId])
+  @@index([userId])
 }
 
 // ============================================================

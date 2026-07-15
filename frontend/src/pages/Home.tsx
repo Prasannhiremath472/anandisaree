@@ -3,6 +3,7 @@ import { Marquee } from "@/components/home/Marquee";
 import { FeaturedCategories } from "@/components/home/FeaturedCategories";
 import { CollectionBanner } from "@/components/home/CollectionBanner";
 import { ProductRail } from "@/components/home/ProductRail";
+import { Reels } from "@/components/home/Reels";
 import { ArtisanStory } from "@/components/home/ArtisanStory";
 import { WhyChooseUs } from "@/components/home/WhyChooseUs";
 import { Testimonials } from "@/components/home/Testimonials";
@@ -56,6 +57,7 @@ export function Home() {
         viewAllHref="/best-sellers"
       />
 
+      <Reels />
       <ArtisanStory />
       <WhyChooseUs />
       <Testimonials />

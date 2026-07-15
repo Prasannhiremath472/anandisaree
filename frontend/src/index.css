@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply bg-cream-200 text-charcoal font-body antialiased;
+    @apply bg-cream-200 text-charcoal font-body antialiased overflow-x-clip;
   }
 
   h1,
@@ -25,5 +25,14 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .text-gradient-gold {
+    @apply bg-gold-gradient bg-clip-text text-transparent;
+  }
+
+  .text-gradient-royal {
+    background-image: linear-gradient(120deg, #8746c4, #54208c 60%, #2d124c);
+    @apply bg-clip-text text-transparent;
   }
 }

@@ -105,6 +105,76 @@ export const BEST_SELLERS: ProductCard[] = [
   { id: "b4", name: "Asawali Paithani Silk", category: "Paithani", price: 23999, mrp: 29999, image: unsplash(IMG_FLATLAY_TEAL_SILK, 800), fabric: "Pure Silk", isBestSeller: true },
 ];
 
+/** Combined placeholder catalog for category/collection listing pages. */
+export const ALL_PRODUCTS: ProductCard[] = [...NEW_ARRIVALS, ...BEST_SELLERS];
+
+export interface RecentOrder {
+  id: string;
+  buyerName: string;
+  city: string;
+  productName: string;
+  productImage: string;
+  price: number;
+  orderCode: string;
+  minutesAgo: number;
+}
+
+/** Placeholder "recently ordered" entries for the social-proof popup. Swap for real order feed later. */
+export const RECENT_ORDERS: RecentOrder[] = [
+  { id: "ro1", buyerName: "Sonal Agarwal", city: "Pune", productName: "Yeola Pure Silk Paithani", productImage: unsplash(IMG_FLATLAY_RED_GOLD_BORDER, 200), price: 18999, orderCode: "ORD-3124", minutesAgo: 4 },
+  { id: "ro2", buyerName: "Priya Deshmukh", city: "Nashik", productName: "Peacock Motif Nauvari", productImage: unsplash(IMG_FLATLAY_STACK_TASSELS, 200), price: 6499, orderCode: "ORD-3119", minutesAgo: 9 },
+  { id: "ro3", buyerName: "Kavita Joshi", city: "Mumbai", productName: "Narayan Peth Handloom", productImage: unsplash(IMG_FLATLAY_TEAL_SILK, 200), price: 5299, orderCode: "ORD-3112", minutesAgo: 14 },
+  { id: "ro4", buyerName: "Ashwini Kulkarni", city: "Nagpur", productName: "Bangdi Mor Paithani", productImage: unsplash(IMG_FLATLAY_STACK_TASSELS, 200), price: 16999, orderCode: "ORD-3107", minutesAgo: 21 },
+  { id: "ro5", buyerName: "Meera Patil", city: "Kolhapur", productName: "Solapuri Cotton Handloom", productImage: unsplash(IMG_DRAPED_FABRIC, 200), price: 3299, orderCode: "ORD-3098", minutesAgo: 28 },
+];
+
+/** Friendly titles/descriptions for known category and collection slugs (nav links, footer links). */
+export const CATEGORY_INFO: Record<string, { title: string; description: string }> = {
+  paithani: {
+    title: "Paithani Sarees",
+    description: "Handloom silk Paithani sarees with rich zari borders, woven by Yeola's master artisans.",
+  },
+  nauvari: {
+    title: "Nauvari Sarees",
+    description: "Traditional nine-yard Maharashtrian drapes, ready-to-wear and classic Kashta styles.",
+  },
+  "narayan-peth": {
+    title: "Narayan Peth Sarees",
+    description: "Narayan Peth handloom sarees known for their understated elegance and durability.",
+  },
+  "solapuri-cotton": {
+    title: "Solapuri Cotton Sarees",
+    description: "Breathable, handwoven Solapur cotton sarees perfect for daily and office wear.",
+  },
+  handloom: {
+    title: "Handloom Collection",
+    description: "Authentic handloom weaves sourced directly from Maharashtra's weaver clusters.",
+  },
+  designer: {
+    title: "Designer Sarees",
+    description: "Contemporary designer sarees blending traditional motifs with modern silhouettes.",
+  },
+};
+
+export const COLLECTION_INFO: Record<string, { title: string; description: string }> = {
+  "maharashtrian-wedding": {
+    title: "Maharashtrian Wedding Collection",
+    description: "Curated bridal Paithani and silk sarees for haldi, sangeet and reception.",
+  },
+  festive: {
+    title: "Festive Collection",
+    description: "Diwali, Navratri and Ganesh Chaturthi ready — rich colors, traditional motifs.",
+  },
+  "gudi-padwa": {
+    title: "Gudi Padwa Special Collection",
+    description: "Celebrate the Marathi New Year in traditional Nauvari and Paithani drapes.",
+  },
+  handloom: {
+    title: "Handloom Collection",
+    description: "Authentic handloom weaves sourced directly from Maharashtra's weaver clusters.",
+  },
+};
+
 export const TESTIMONIALS = [
   {
     name: "Anjali Deshmukh",
@@ -136,6 +206,7 @@ export const INSTAGRAM_IMAGES = [
   unsplash(IMG_PINK_SILK_BRIDAL, 500),
   unsplash(IMG_GREEN_GOLD_SILK, 500),
   unsplash(IMG_YELLOW_CONTRAST, 500),
+  unsplash(IMG_RED_BRIDAL, 500),
 ] as const;
 
 export const WHY_CHOOSE_US = [

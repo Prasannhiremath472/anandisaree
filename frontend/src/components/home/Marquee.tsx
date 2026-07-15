@@ -6,7 +6,7 @@ export function Marquee({ items }: MarqueeProps) {
   const loopItems = [...items, ...items];
 
   return (
-    <div className="overflow-hidden border-y border-gold-300/40 bg-royal-700 py-3">
+    <div className="w-full overflow-hidden border-y border-gold-300/40 bg-royal-700 py-3">
       <div className="animate-marquee flex w-max gap-0 whitespace-nowrap">
         {loopItems.map((item, i) => (
           <span

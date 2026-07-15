@@ -1,6 +1,9 @@
 import { Outlet } from "react-router-dom";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { RecentOrderPopup } from "./RecentOrderPopup";
+import { FloatingSocialButton } from "./FloatingSocialButton";
+import { CouponPopup } from "./CouponPopup";
 
 export function RootLayout() {
   return (
@@ -10,6 +13,9 @@ export function RootLayout() {
         <Outlet />
       </main>
       <Footer />
+      <RecentOrderPopup />
+      <FloatingSocialButton />
+      <CouponPopup />
     </div>
   );
 }

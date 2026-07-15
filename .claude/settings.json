@@ -12,7 +12,8 @@
       "WebSearch",
       "WebFetch(domain:unsplash.com)",
       "Read(//c/Users/Admin/AppData/Local/Temp/saree_check/**)",
-      "Bash(cd /tmp/saree_check && ls *.jpg | grep -v \"^img[1567]\")"
+      "Bash(cd /tmp/saree_check && ls *.jpg | grep -v \"^img[1567]\")",
+      "Bash(chromium-cli --help)"
     ]
   }
 }

@@ -1,30 +1,33 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { toggleDrawer } from "@/store/cartSlice";
 import { BUSINESS } from "@/data/business";
+import { TopAnnouncementBar } from "./TopAnnouncementBar";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { label: "Paithani", to: "/category/paithani" },
-  { label: "Nauvari", to: "/category/nauvari" },
-  { label: "Wedding Collection", to: "/collection/maharashtrian-wedding" },
-  { label: "Festive", to: "/collection/festive" },
-  { label: "Handloom", to: "/collection/handloom" },
-  { label: "New Arrivals", to: "/new-arrivals" },
+  { label: "Home", to: "/" },
+  { label: "Products", to: "/products" },
+  { label: "Category", to: "/category" },
+  { label: "Blog", to: "/blog" },
+  { label: "Gallery", to: "/gallery" },
+  { label: "About", to: "/about" },
+  { label: "Contact", to: "/contact" },
 ];
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const cartCount = useAppSelector((s) => s.cart.items.reduce((sum, i) => sum + i.quantity, 0));
+  const isAuthenticated = useAppSelector((s) => Boolean(s.auth.accessToken));
   const dispatch = useAppDispatch();
 
   return (
+    <>
     <header className="sticky top-0 z-50 border-b border-gold-200/60 bg-cream-100/90 backdrop-blur-md">
-      <div className="bg-royal-600 py-2 text-center text-xs tracking-wide text-cream-100">
-        Free shipping across Maharashtra on orders above ₹4,999
-      </div>
+      <TopAnnouncementBar />
 
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
         <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
@@ -41,13 +44,21 @@ export function Header() {
 
         <nav className="hidden gap-8 lg:flex">
           {NAV_LINKS.map((link) => (
-            <Link
+            <NavLink
               key={link.to}
               to={link.to}
-              className="font-heading text-sm font-medium text-charcoal transition-colors hover:text-royal-500"
+              end={link.to === "/"}
+              className={({ isActive }) =>
+                cn(
+                  "relative py-1 font-heading text-sm font-medium transition-colors",
+                  isActive
+                    ? "text-royal-600 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-gold-gradient"
+                    : "text-charcoal hover:text-royal-500"
+                )
+              }
             >
               {link.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
 
@@ -58,7 +69,11 @@ export function Header() {
           <Link to="/wishlist" aria-label="Wishlist" className="text-charcoal hover:text-royal-500">
             <Heart className="h-5 w-5" />
           </Link>
-          <Link to="/account" aria-label="Account" className="hidden text-charcoal hover:text-royal-500 sm:block">
+          <Link
+            to={isAuthenticated ? "/account" : "/login"}
+            aria-label="Account"
+            className="hidden text-charcoal hover:text-royal-500 sm:block"
+          >
             <User className="h-5 w-5" />
           </Link>
           <button
@@ -68,41 +83,58 @@ export function Header() {
           >
             <ShoppingBag className="h-5 w-5" />
             {cartCount > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-royal-600 text-[10px] text-white">
+              <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-gold-gradient text-[10px] font-semibold text-royal-800 shadow-gold">
                 {cartCount}
               </span>
             )}
           </button>
         </div>
       </div>
+    </header>
 
-      <AnimatePresence>
-        {mobileOpen && (
+    <AnimatePresence>
+      {mobileOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[60] bg-royal-900/50 lg:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
           <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "tween", duration: 0.25 }}
-            className="fixed inset-y-0 left-0 z-50 w-72 bg-cream-100 p-6 shadow-soft lg:hidden"
+            className="fixed inset-y-0 left-0 z-[70] w-72 bg-surface-gradient p-6 shadow-soft lg:hidden"
           >
             <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="mb-6">
               <X className="h-6 w-6 text-royal-600" />
             </button>
             <nav className="flex flex-col gap-5">
               {NAV_LINKS.map((link) => (
-                <Link
+                <NavLink
                   key={link.to}
                   to={link.to}
+                  end={link.to === "/"}
                   onClick={() => setMobileOpen(false)}
-                  className="font-heading text-base text-charcoal hover:text-royal-500"
+                  className={({ isActive }) =>
+                    cn(
+                      "font-heading text-base transition-colors",
+                      isActive ? "font-semibold text-gradient-royal" : "text-charcoal hover:text-royal-500"
+                    )
+                  }
                 >
                   {link.label}
-                </Link>
+                </NavLink>
               ))}
             </nav>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
+        </>
+      )}
+    </AnimatePresence>
+    </>
   );
 }

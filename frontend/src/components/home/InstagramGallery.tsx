@@ -9,11 +9,11 @@ export function InstagramGallery() {
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="mb-10 text-center">
           <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Style Gallery</span>
-          <h2 className="mt-3 font-display text-3xl text-royal-700 sm:text-4xl">Follow @anandi_sareelive</h2>
+          <h2 className="mt-3 font-display text-3xl text-gradient-royal sm:text-4xl">Follow @anandi_sareelive</h2>
         </div>
       </div>
 
-      <div className="group/marquee overflow-hidden">
+      <div className="group/marquee w-full overflow-hidden">
         <div className="flex w-max animate-scroll-x gap-3 group-hover/marquee:[animation-play-state:paused]">
           {loopImages.map((src, i) => (
             <a

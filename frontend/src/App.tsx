@@ -1,29 +1,18 @@
-import { RouterProvider } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Provider } from "react-redux";
-import { HelmetProvider } from "react-helmet-async";
-import { Toaster } from "react-hot-toast";
-import { store } from "@/store";
-import { router } from "@/router";
+import { lazy, Suspense } from "react";
+import StorefrontApp from "@/StorefrontApp";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60 * 1000,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+const AdminApp = lazy(() => import("@/admin/AdminApp"));
+
+const isAdminRoute = window.location.pathname.startsWith("/admin");
 
 export default function App() {
-  return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <HelmetProvider>
-          <RouterProvider router={router} />
-          <Toaster position="top-center" />
-        </HelmetProvider>
-      </QueryClientProvider>
-    </Provider>
-  );
+  if (isAdminRoute) {
+    return (
+      <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-neutral-400">Loading admin panel...</div>}>
+        <AdminApp />
+      </Suspense>
+    );
+  }
+
+  return <StorefrontApp />;
 }

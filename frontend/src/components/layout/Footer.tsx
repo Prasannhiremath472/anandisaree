@@ -4,7 +4,7 @@ import { BUSINESS } from "@/data/business";
 
 export function Footer() {
   return (
-    <footer className="mt-24 bg-charcoal text-cream-100">
+    <footer className="mt-24 bg-[linear-gradient(180deg,#211F1E_0%,#2D124C_120%)] text-cream-100">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-16 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
         <div>
           <h3 className="font-display text-2xl text-gold-400">{BUSINESS.name}</h3>

@@ -25,7 +25,7 @@ export function ProductRail({ eyebrow, title, products, viewAllHref }: ProductRa
       <div className="mb-10 flex items-end justify-between">
         <div>
           <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">{eyebrow}</span>
-          <h2 className="mt-3 font-display text-3xl text-royal-700 sm:text-4xl">{title}</h2>
+          <h2 className="mt-3 font-display text-3xl text-gradient-royal sm:text-4xl">{title}</h2>
         </div>
 
         <div className="hidden items-center gap-3 sm:flex">
@@ -54,23 +54,25 @@ export function ProductRail({ eyebrow, title, products, viewAllHref }: ProductRa
         </div>
       </div>
 
-      <Swiper
-        modules={[Navigation]}
-        onSwiper={(s) => (swiperRef.current = s)}
-        slidesPerView={2}
-        spaceBetween={20}
-        breakpoints={{
-          640: { slidesPerView: 3, spaceBetween: 20 },
-          1024: { slidesPerView: 4, spaceBetween: 24 },
-        }}
-        className="!overflow-visible"
-      >
-        {products.map((product) => (
-          <SwiperSlide key={product.id}>
-            <ProductCard product={product} />
-          </SwiperSlide>
-        ))}
-      </Swiper>
+      <div className="overflow-x-hidden">
+        <Swiper
+          modules={[Navigation]}
+          onSwiper={(s) => (swiperRef.current = s)}
+          slidesPerView={2}
+          spaceBetween={20}
+          breakpoints={{
+            640: { slidesPerView: 3, spaceBetween: 20 },
+            1024: { slidesPerView: 4, spaceBetween: 24 },
+          }}
+          className="!overflow-visible"
+        >
+          {products.map((product) => (
+            <SwiperSlide key={product.id}>
+              <ProductCard product={product} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
 
       <div className="mt-8 text-center sm:hidden">
         <Link to={viewAllHref} className="font-heading text-sm font-medium text-royal-600">
