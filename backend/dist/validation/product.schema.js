@@ -1,0 +1,70 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.productUpdateSchema = exports.productCreateSchema = exports.productListQuerySchema = void 0;
+const zod_1 = require("zod");
+exports.productListQuerySchema = zod_1.z.object({
+    page: zod_1.z.coerce.number().int().positive().optional(),
+    pageSize: zod_1.z.coerce.number().int().positive().max(100).optional(),
+    search: zod_1.z.string().optional(),
+    categoryId: zod_1.z.string().optional(),
+    isActive: zod_1.z.coerce.boolean().optional(),
+    sortBy: zod_1.z.enum(["createdAt", "sellingPrice", "name", "stockQuantity"]).optional(),
+    sortOrder: zod_1.z.enum(["asc", "desc"]).optional(),
+});
+exports.productCreateSchema = zod_1.z.object({
+    sku: zod_1.z.string().min(1),
+    name: zod_1.z.string().min(2),
+    slug: zod_1.z.string().min(2),
+    shortDescription: zod_1.z.string().optional(),
+    description: zod_1.z.string().optional(),
+    brandId: zod_1.z.string().optional(),
+    fabric: zod_1.z.string().min(1),
+    weavingTechnique: zod_1.z.string().optional(),
+    isHandloom: zod_1.z.boolean().optional(),
+    borderType: zod_1.z.string().optional(),
+    palluDesign: zod_1.z.string().optional(),
+    designPattern: zod_1.z.string().optional(),
+    color: zod_1.z.string().min(1),
+    secondaryColors: zod_1.z.string().optional(),
+    sareeLength: zod_1.z.coerce.number().positive(),
+    blouseIncluded: zod_1.z.boolean().optional(),
+    blouseLength: zod_1.z.coerce.number().positive().optional(),
+    weightGrams: zod_1.z.coerce.number().int().positive().optional(),
+    craftOrigin: zod_1.z.string().optional(),
+    state: zod_1.z.string().optional(),
+    district: zod_1.z.string().optional(),
+    weaverDetails: zod_1.z.string().optional(),
+    mrp: zod_1.z.coerce.number().positive(),
+    sellingPrice: zod_1.z.coerce.number().positive(),
+    gstPercent: zod_1.z.coerce.number().min(0).max(100).optional(),
+    stockQuantity: zod_1.z.coerce.number().int().min(0).optional(),
+    lowStockThreshold: zod_1.z.coerce.number().int().min(0).optional(),
+    dispatchDays: zod_1.z.coerce.number().int().min(0).optional(),
+    deliveryEstimateDays: zod_1.z.coerce.number().int().min(0).optional(),
+    washCare: zod_1.z.string().optional(),
+    isActive: zod_1.z.boolean().optional(),
+    isFeatured: zod_1.z.boolean().optional(),
+    isNewArrival: zod_1.z.boolean().optional(),
+    isBestSeller: zod_1.z.boolean().optional(),
+    isTodaysDeal: zod_1.z.boolean().optional(),
+    metaTitle: zod_1.z.string().optional(),
+    metaDescription: zod_1.z.string().optional(),
+    categoryIds: zod_1.z.array(zod_1.z.string()).optional(),
+    collectionIds: zod_1.z.array(zod_1.z.string()).optional(),
+    occasionIds: zod_1.z.array(zod_1.z.string()).optional(),
+    images: zod_1.z.array(zod_1.z.object({ url: zod_1.z.string(), altText: zod_1.z.string().optional(), isPrimary: zod_1.z.boolean().optional() })).optional(),
+    variants: zod_1.z
+        .array(zod_1.z.object({
+        sku: zod_1.z.string().min(1),
+        color: zod_1.z.string().optional(),
+        size: zod_1.z.string().optional(),
+        priceDelta: zod_1.z.coerce.number().optional(),
+        stockQuantity: zod_1.z.coerce.number().int().min(0).optional(),
+        barcode: zod_1.z.string().optional(),
+        imageUrl: zod_1.z.string().optional(),
+        isActive: zod_1.z.boolean().optional(),
+    }))
+        .optional(),
+});
+exports.productUpdateSchema = exports.productCreateSchema.partial();
+//# sourceMappingURL=product.schema.js.map
