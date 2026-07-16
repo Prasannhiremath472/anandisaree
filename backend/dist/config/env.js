@@ -25,6 +25,15 @@ if (!process.env.DATABASE_URL && process.env.DB_HOST && process.env.DB_USER && p
     const name = process.env.DB_NAME;
     process.env.DATABASE_URL = `mysql://${user}:${password}@${host}:${port}/${name}`;
 }
+// TEMPORARY diagnostic: confirm what DATABASE_URL actually resolves to at
+// runtime, with the password redacted. Remove once the connection issue
+// is resolved.
+if (process.env.DATABASE_URL) {
+    console.log("[env-debug] DATABASE_URL resolved to:", process.env.DATABASE_URL.replace(/:([^:@]+)@/, ":***@"));
+}
+else {
+    console.log("[env-debug] DATABASE_URL is NOT set at all");
+}
 exports.env = {
     NODE_ENV: process.env.NODE_ENV ?? "development",
     PORT: Number(process.env.PORT ?? 5000),
