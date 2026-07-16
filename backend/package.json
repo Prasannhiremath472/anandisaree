@@ -16,7 +16,6 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@anandi/shared": "*",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",
@@ -30,6 +29,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.0",
     "nodemailer": "^9.0.3",
+    "prisma": "^5.20.0",
     "razorpay": "^2.9.5",
     "sharp": "^0.33.5",
     "winston": "^3.15.0",
@@ -45,7 +45,6 @@
     "@types/multer": "^1.4.13",
     "@types/node": "^22.7.5",
     "@types/nodemailer": "^7.0.4",
-    "prisma": "^5.20.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3"
   }
