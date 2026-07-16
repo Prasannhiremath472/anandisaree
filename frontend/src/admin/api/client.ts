@@ -3,7 +3,7 @@ import { adminStore } from "@/admin/store";
 import { clearAuth, setAccessToken } from "@/admin/store/authSlice";
 
 export const apiClient = axios.create({
-  baseURL: "/api",
+  baseURL: import.meta.env.VITE_API_URL ?? "/api",
   withCredentials: true,
 });
 
