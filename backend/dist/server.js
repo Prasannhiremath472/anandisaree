@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const app_1 = require("./app");
 const env_1 = require("./config/env");
+const app_1 = require("./app");
 const logger_1 = require("./config/logger");
 const prisma_1 = require("./config/prisma");
 async function main() {

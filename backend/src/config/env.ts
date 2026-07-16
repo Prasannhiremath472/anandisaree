@@ -10,6 +10,19 @@ function required(name: string, fallback?: string): string {
   return value;
 }
 
+// Prisma reads DATABASE_URL directly from process.env, so if it isn't set
+// but the individual DB_* parts are, build and export it before anything
+// else runs. This also sidesteps hand-encoding mistakes in a manually
+// assembled connection string (e.g. special characters in the password).
+if (!process.env.DATABASE_URL && process.env.DB_HOST && process.env.DB_USER && process.env.DB_NAME) {
+  const user = encodeURIComponent(process.env.DB_USER);
+  const password = encodeURIComponent(process.env.DB_PASSWORD ?? "");
+  const host = process.env.DB_HOST;
+  const port = process.env.DB_PORT ?? "3306";
+  const name = process.env.DB_NAME;
+  process.env.DATABASE_URL = `mysql://${user}:${password}@${host}:${port}/${name}`;
+}
+
 export const env = {
   NODE_ENV: process.env.NODE_ENV ?? "development",
   PORT: Number(process.env.PORT ?? 5000),
