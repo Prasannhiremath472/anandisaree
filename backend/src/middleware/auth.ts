@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import type { UserRole } from "@anandi/shared";
+import type { UserRole } from "../types/shared";
 import { ApiError } from "../utils/ApiError";
 import { verifyAccessToken } from "../utils/tokens";
 

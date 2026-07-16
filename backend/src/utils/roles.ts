@@ -1,4 +1,4 @@
-import type { UserRole } from "@anandi/shared";
+import type { UserRole } from "../types/shared";
 
 /** Any of these roles can access the admin panel. */
 export const ADMIN_ROLES: UserRole[] = [
