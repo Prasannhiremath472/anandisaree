@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const env_1 = require("./config/env");
 const app_1 = require("./app");
 const logger_1 = require("./config/logger");
-const prisma_1 = require("./config/prisma");
+const db_1 = require("./config/db");
 async function main() {
     const app = (0, app_1.createApp)();
-    await prisma_1.prisma.$connect().catch((err) => {
+    await db_1.pool.query("SELECT 1").catch((err) => {
         logger_1.logger.warn(`Database not connected yet: ${err.message}`);
     });
     app.listen(env_1.env.PORT, () => {
@@ -18,7 +18,7 @@ main().catch((err) => {
     process.exit(1);
 });
 process.on("SIGTERM", async () => {
-    await prisma_1.prisma.$disconnect();
+    await db_1.pool.end();
     process.exit(0);
 });
 //# sourceMappingURL=server.js.map

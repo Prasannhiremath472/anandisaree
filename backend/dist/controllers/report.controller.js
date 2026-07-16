@@ -2,17 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.customersReport = exports.inventoryReport = exports.topProductsReport = exports.orderStatusReport = exports.salesReport = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
-const prisma_1 = require("../config/prisma");
+const db_1 = require("../config/db");
 exports.salesReport = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const days = Math.min(365, Math.max(1, parseInt(String(req.query.days ?? "30"), 10) || 30));
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-    const orders = await prisma_1.prisma.order.findMany({
-        where: { createdAt: { gte: since }, paymentStatus: "PAID" },
-        select: { createdAt: true, totalAmount: true },
-    });
+    const orders = await (0, db_1.query)("SELECT createdAt, totalAmount FROM `Order` WHERE createdAt >= ? AND paymentStatus = 'PAID'", [since]);
     const byDay = new Map();
     for (const order of orders) {
-        const key = order.createdAt.toISOString().slice(0, 10);
+        const key = new Date(order.createdAt).toISOString().slice(0, 10);
         byDay.set(key, (byDay.get(key) ?? 0) + Number(order.totalAmount));
     }
     const series = Array.from(byDay.entries())
@@ -21,27 +18,23 @@ exports.salesReport = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     res.json({ success: true, data: { series, totalRevenue: orders.reduce((sum, o) => sum + Number(o.totalAmount), 0) } });
 });
 exports.orderStatusReport = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
-    const grouped = await prisma_1.prisma.order.groupBy({ by: ["status"], _count: true });
-    res.json({ success: true, data: grouped.map((g) => ({ status: g.status, count: g._count })) });
+    const grouped = await (0, db_1.query)("SELECT status, COUNT(*) as count FROM `Order` GROUP BY status");
+    res.json({ success: true, data: grouped.map((g) => ({ status: g.status, count: g.count })) });
 });
 exports.topProductsReport = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
-    const products = await prisma_1.prisma.product.findMany({
-        where: { deletedAt: null },
-        orderBy: { soldCount: "desc" },
-        take: 10,
-        select: { id: true, name: true, sku: true, soldCount: true, sellingPrice: true, stockQuantity: true },
-    });
+    const products = await (0, db_1.query)("SELECT id, name, sku, soldCount, sellingPrice, stockQuantity FROM `Product` WHERE deletedAt IS NULL ORDER BY soldCount DESC LIMIT 10");
     res.json({ success: true, data: products });
 });
 exports.inventoryReport = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
-    const lowStock = await prisma_1.prisma.$queryRaw `SELECT id, name, sku, stockQuantity, lowStockThreshold FROM Product WHERE deletedAt IS NULL AND stockQuantity <= lowStockThreshold ORDER BY stockQuantity ASC`;
+    const lowStock = await (0, db_1.query)("SELECT id, name, sku, stockQuantity, lowStockThreshold FROM `Product` WHERE deletedAt IS NULL AND stockQuantity <= lowStockThreshold ORDER BY stockQuantity ASC");
     res.json({ success: true, data: lowStock });
 });
 exports.customersReport = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
-    const totalCustomers = await prisma_1.prisma.user.count({ where: { role: "CUSTOMER" } });
-    const repeatCustomers = await prisma_1.prisma.user.count({
-        where: { role: "CUSTOMER", orders: { some: {} } },
+    const totalCustomersRow = await (0, db_1.queryOne)("SELECT COUNT(*) as count FROM `User` WHERE role = 'CUSTOMER'");
+    const repeatCustomersRow = await (0, db_1.queryOne)("SELECT COUNT(DISTINCT u.id) as count FROM `User` u JOIN `Order` o ON o.userId = u.id WHERE u.role = 'CUSTOMER'");
+    res.json({
+        success: true,
+        data: { totalCustomers: totalCustomersRow?.count ?? 0, repeatCustomers: repeatCustomersRow?.count ?? 0 },
     });
-    res.json({ success: true, data: { totalCustomers, repeatCustomers } });
 });
 //# sourceMappingURL=report.controller.js.map

@@ -4,7 +4,7 @@ import { getPagination } from "../utils/pagination";
 import * as productService from "../services/product.service";
 import { productCreateSchema, productListQuerySchema, productUpdateSchema } from "../validation/product.schema";
 import { z } from "zod";
-import { prisma } from "../config/prisma";
+import { query } from "../config/db";
 
 export const listProducts = asyncHandler(async (req: Request, res: Response) => {
   const query = productListQuerySchema.parse(req.query);
@@ -44,15 +44,13 @@ export const bulkDeleteProducts = asyncHandler(async (req: Request, res: Respons
 });
 
 export const listCategoriesLookup = asyncHandler(async (_req: Request, res: Response) => {
-  const categories = await prisma.category.findMany({
-    where: { deletedAt: null },
-    orderBy: [{ group: "asc" }, { sortOrder: "asc" }],
-    select: { id: true, name: true, slug: true, group: true, parentId: true },
-  });
+  const categories = await query(
+    "SELECT id, name, slug, `group`, parentId FROM `Category` WHERE deletedAt IS NULL ORDER BY `group` ASC, sortOrder ASC"
+  );
   res.json({ success: true, data: categories });
 });
 
 export const listBrandsLookup = asyncHandler(async (_req: Request, res: Response) => {
-  const brands = await prisma.brand.findMany({ where: { isActive: true }, select: { id: true, name: true } });
+  const brands = await query("SELECT id, name FROM `Brand` WHERE isActive = 1");
   res.json({ success: true, data: brands });
 });

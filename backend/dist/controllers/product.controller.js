@@ -39,7 +39,7 @@ const pagination_1 = require("../utils/pagination");
 const productService = __importStar(require("../services/product.service"));
 const product_schema_1 = require("../validation/product.schema");
 const zod_1 = require("zod");
-const prisma_1 = require("../config/prisma");
+const db_1 = require("../config/db");
 exports.listProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const query = product_schema_1.productListQuerySchema.parse(req.query);
     const pagination = (0, pagination_1.getPagination)(req);
@@ -71,15 +71,11 @@ exports.bulkDeleteProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) =
     res.json({ success: true, data: null, message: `${ids.length} products deleted` });
 });
 exports.listCategoriesLookup = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
-    const categories = await prisma_1.prisma.category.findMany({
-        where: { deletedAt: null },
-        orderBy: [{ group: "asc" }, { sortOrder: "asc" }],
-        select: { id: true, name: true, slug: true, group: true, parentId: true },
-    });
+    const categories = await (0, db_1.query)("SELECT id, name, slug, `group`, parentId FROM `Category` WHERE deletedAt IS NULL ORDER BY `group` ASC, sortOrder ASC");
     res.json({ success: true, data: categories });
 });
 exports.listBrandsLookup = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
-    const brands = await prisma_1.prisma.brand.findMany({ where: { isActive: true }, select: { id: true, name: true } });
+    const brands = await (0, db_1.query)("SELECT id, name FROM `Brand` WHERE isActive = 1");
     res.json({ success: true, data: brands });
 });
 //# sourceMappingURL=product.controller.js.map

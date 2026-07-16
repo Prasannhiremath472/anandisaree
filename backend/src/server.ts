@@ -1,12 +1,12 @@
 import { env } from "./config/env";
 import { createApp } from "./app";
 import { logger } from "./config/logger";
-import { prisma } from "./config/prisma";
+import { pool } from "./config/db";
 
 async function main() {
   const app = createApp();
 
-  await prisma.$connect().catch((err) => {
+  await pool.query("SELECT 1").catch((err) => {
     logger.warn(`Database not connected yet: ${err.message}`);
   });
 
@@ -21,6 +21,6 @@ main().catch((err) => {
 });
 
 process.on("SIGTERM", async () => {
-  await prisma.$disconnect();
+  await pool.end();
   process.exit(0);
 });

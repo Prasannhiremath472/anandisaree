@@ -1,36 +1,33 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
-import { prisma } from "../config/prisma";
+import { query, queryOne, execute } from "../config/db";
 import { getPagination, buildPaginatedResult } from "../utils/pagination";
-import type { Prisma } from "@prisma/client";
 
 export const listSubscribers = asyncHandler(async (req: Request, res: Response) => {
   const pagination = getPagination(req);
   const search = req.query.search as string | undefined;
 
-  const where: Prisma.NewsletterSubscriberWhereInput = search ? { email: { contains: search } } : {};
+  const whereClause = search ? "email LIKE ?" : "1=1";
+  const params = search ? [`%${search}%`] : [];
 
-  const [items, total] = await Promise.all([
-    prisma.newsletterSubscriber.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: pagination.skip,
-      take: pagination.take,
-    }),
-    prisma.newsletterSubscriber.count({ where }),
-  ]);
+  const items = await query(
+    `SELECT * FROM \`NewsletterSubscriber\` WHERE ${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+    [...params, pagination.take, pagination.skip]
+  );
+  const totalRow = await queryOne<{ count: number }>(
+    `SELECT COUNT(*) as count FROM \`NewsletterSubscriber\` WHERE ${whereClause}`,
+    params
+  );
 
-  res.json({ success: true, data: buildPaginatedResult(items, total, pagination) });
+  res.json({ success: true, data: buildPaginatedResult(items, totalRow?.count ?? 0, pagination) });
 });
 
 export const exportSubscribers = asyncHandler(async (_req: Request, res: Response) => {
-  const subscribers = await prisma.newsletterSubscriber.findMany({
-    where: { isSubscribed: true },
-    select: { email: true, createdAt: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const subscribers = await query<{ email: string; createdAt: Date }>(
+    "SELECT email, createdAt FROM `NewsletterSubscriber` WHERE isSubscribed = 1 ORDER BY createdAt DESC"
+  );
 
-  const csvRows = ["email,subscribed_at", ...subscribers.map((s) => `${s.email},${s.createdAt.toISOString()}`)];
+  const csvRows = ["email,subscribed_at", ...subscribers.map((s) => `${s.email},${new Date(s.createdAt).toISOString()}`)];
   const csv = csvRows.join("\n");
 
   res.setHeader("Content-Type", "text/csv");
@@ -39,6 +36,6 @@ export const exportSubscribers = asyncHandler(async (_req: Request, res: Respons
 });
 
 export const deleteSubscriber = asyncHandler(async (req: Request, res: Response) => {
-  await prisma.newsletterSubscriber.delete({ where: { id: req.params.id } }).catch(() => null);
+  await execute("DELETE FROM `NewsletterSubscriber` WHERE id = ?", [req.params.id]).catch(() => null);
   res.json({ success: true, data: null, message: "Subscriber removed" });
 });

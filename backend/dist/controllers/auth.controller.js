@@ -41,7 +41,8 @@ const asyncHandler_1 = require("../utils/asyncHandler");
 const env_1 = require("../config/env");
 const authService = __importStar(require("../services/auth.service"));
 const auth_schema_1 = require("../validation/auth.schema");
-const prisma_1 = require("../config/prisma");
+const db_1 = require("../config/db");
+const id_1 = require("../utils/id");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const ApiError_1 = require("../utils/ApiError");
 const tokens_1 = require("../utils/tokens");
@@ -89,16 +90,20 @@ exports.requestOtp = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
 exports.verifyOtpAndLogin = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const input = auth_schema_1.verifyOtpSchema.parse(req.body);
     await authService.verifyOtp(input.identifier, input.code, input.purpose);
-    const user = await prisma_1.prisma.user.findFirst({
-        where: { OR: [{ email: input.identifier }, { phone: input.identifier }] },
-    });
+    const user = await (0, db_1.queryOne)("SELECT * FROM `User` WHERE email = ? OR phone = ? LIMIT 1", [
+        input.identifier,
+        input.identifier,
+    ]);
     if (!user)
         throw ApiError_1.ApiError.notFound("No account found for this identifier");
     const accessToken = (0, tokens_1.signAccessToken)({ userId: user.id, email: user.email, role: user.role });
     const refreshToken = (0, tokens_1.generateRefreshTokenValue)();
-    await prisma_1.prisma.refreshToken.create({
-        data: { token: refreshToken, userId: user.id, expiresAt: (0, tokens_1.refreshTokenExpiryDate)() },
-    });
+    await (0, db_1.execute)("INSERT INTO `RefreshToken` (id, token, userId, expiresAt, createdAt) VALUES (?, ?, ?, ?, NOW(3))", [
+        (0, id_1.createId)(),
+        refreshToken,
+        user.id,
+        (0, tokens_1.refreshTokenExpiryDate)(),
+    ]);
     setRefreshCookie(res, refreshToken);
     res.json({ success: true, data: { user: authService.sanitizeUser(user), accessToken } });
 });
@@ -111,11 +116,11 @@ exports.resetPassword = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const input = auth_schema_1.resetPasswordSchema.parse(req.body);
     await authService.verifyOtp(input.email, input.code, "RESET_PASSWORD");
     const passwordHash = await bcryptjs_1.default.hash(input.newPassword, 12);
-    await prisma_1.prisma.user.update({ where: { email: input.email }, data: { passwordHash } });
+    await (0, db_1.execute)("UPDATE `User` SET passwordHash = ? WHERE email = ?", [passwordHash, input.email]);
     res.json({ success: true, data: null, message: "Password reset successful" });
 });
 exports.me = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
-    const user = await prisma_1.prisma.user.findUnique({ where: { id: req.user.userId } });
+    const user = await (0, db_1.queryOne)("SELECT * FROM `User` WHERE id = ? LIMIT 1", [req.user.userId]);
     if (!user)
         throw ApiError_1.ApiError.notFound("User not found");
     res.json({ success: true, data: authService.sanitizeUser(user) });

@@ -3,13 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.upsertSettings = exports.listSettings = void 0;
 const zod_1 = require("zod");
 const asyncHandler_1 = require("../utils/asyncHandler");
-const prisma_1 = require("../config/prisma");
+const db_1 = require("../config/db");
+const id_1 = require("../utils/id");
 exports.listSettings = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const group = req.query.group;
-    const settings = await prisma_1.prisma.setting.findMany({
-        where: group ? { group } : undefined,
-        orderBy: { key: "asc" },
-    });
+    const settings = group
+        ? await (0, db_1.query)("SELECT * FROM `Setting` WHERE `group` = ? ORDER BY `key` ASC", [group])
+        : await (0, db_1.query)("SELECT * FROM `Setting` ORDER BY `key` ASC");
     res.json({ success: true, data: settings });
 });
 const upsertSchema = zod_1.z.object({
@@ -17,12 +17,29 @@ const upsertSchema = zod_1.z.object({
 });
 exports.upsertSettings = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const { settings } = upsertSchema.parse(req.body);
-    await prisma_1.prisma.$transaction(settings.map((s) => prisma_1.prisma.setting.upsert({
-        where: { key: s.key },
-        update: { value: s.value, ...(s.group ? { group: s.group } : {}) },
-        create: { key: s.key, value: s.value, group: s.group ?? "general" },
-    })));
-    const updated = await prisma_1.prisma.setting.findMany({ where: { key: { in: settings.map((s) => s.key) } } });
+    await (0, db_1.withTransaction)(async (conn) => {
+        for (const s of settings) {
+            const [existingRows] = await conn.query("SELECT id FROM `Setting` WHERE `key` = ? LIMIT 1", [s.key]);
+            const existing = existingRows[0];
+            if (existing) {
+                if (s.group) {
+                    await conn.query("UPDATE `Setting` SET value = ?, `group` = ?, updatedAt = NOW(3) WHERE `key` = ?", [
+                        s.value,
+                        s.group,
+                        s.key,
+                    ]);
+                }
+                else {
+                    await conn.query("UPDATE `Setting` SET value = ?, updatedAt = NOW(3) WHERE `key` = ?", [s.value, s.key]);
+                }
+            }
+            else {
+                await conn.query("INSERT INTO `Setting` (id, `key`, value, `group`, updatedAt) VALUES (?, ?, ?, ?, NOW(3))", [(0, id_1.createId)(), s.key, s.value, s.group ?? "general"]);
+            }
+        }
+    });
+    const keys = settings.map((s) => s.key);
+    const updated = await (0, db_1.query)(`SELECT * FROM \`Setting\` WHERE \`key\` IN (${keys.map(() => "?").join(",")})`, keys);
     res.json({ success: true, data: updated });
 });
 //# sourceMappingURL=settings.controller.js.map

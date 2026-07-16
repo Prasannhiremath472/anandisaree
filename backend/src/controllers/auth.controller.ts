@@ -10,10 +10,21 @@ import {
   resetPasswordSchema,
   verifyOtpSchema,
 } from "../validation/auth.schema";
-import { prisma } from "../config/prisma";
+import { queryOne, execute } from "../config/db";
+import { createId } from "../utils/id";
 import bcrypt from "bcryptjs";
 import { ApiError } from "../utils/ApiError";
 import { generateRefreshTokenValue, refreshTokenExpiryDate, signAccessToken } from "../utils/tokens";
+
+interface UserRow {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  passwordHash: string | null;
+  role: string;
+  isActive: number;
+}
 
 const REFRESH_COOKIE = "refreshToken";
 
@@ -65,16 +76,20 @@ export const verifyOtpAndLogin = asyncHandler(async (req: Request, res: Response
   const input = verifyOtpSchema.parse(req.body);
   await authService.verifyOtp(input.identifier, input.code, input.purpose);
 
-  const user = await prisma.user.findFirst({
-    where: { OR: [{ email: input.identifier }, { phone: input.identifier }] },
-  });
+  const user = await queryOne<UserRow>("SELECT * FROM `User` WHERE email = ? OR phone = ? LIMIT 1", [
+    input.identifier,
+    input.identifier,
+  ]);
   if (!user) throw ApiError.notFound("No account found for this identifier");
 
   const accessToken = signAccessToken({ userId: user.id, email: user.email, role: user.role as never });
   const refreshToken = generateRefreshTokenValue();
-  await prisma.refreshToken.create({
-    data: { token: refreshToken, userId: user.id, expiresAt: refreshTokenExpiryDate() },
-  });
+  await execute("INSERT INTO `RefreshToken` (id, token, userId, expiresAt, createdAt) VALUES (?, ?, ?, ?, NOW(3))", [
+    createId(),
+    refreshToken,
+    user.id,
+    refreshTokenExpiryDate(),
+  ]);
 
   setRefreshCookie(res, refreshToken);
   res.json({ success: true, data: { user: authService.sanitizeUser(user), accessToken } });
@@ -91,13 +106,13 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
   await authService.verifyOtp(input.email, input.code, "RESET_PASSWORD");
 
   const passwordHash = await bcrypt.hash(input.newPassword, 12);
-  await prisma.user.update({ where: { email: input.email }, data: { passwordHash } });
+  await execute("UPDATE `User` SET passwordHash = ? WHERE email = ?", [passwordHash, input.email]);
 
   res.json({ success: true, data: null, message: "Password reset successful" });
 });
 
 export const me = asyncHandler(async (req: Request, res: Response) => {
-  const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
+  const user = await queryOne<UserRow>("SELECT * FROM `User` WHERE id = ? LIMIT 1", [req.user!.userId]);
   if (!user) throw ApiError.notFound("User not found");
   res.json({ success: true, data: authService.sanitizeUser(user) });
 });
