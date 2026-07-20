@@ -805,7 +805,7 @@ ALTER TABLE `UserCoupon` ADD CONSTRAINT `UserCoupon_userId_fkey` FOREIGN KEY (`u
 -- AddForeignKey
 ALTER TABLE `UserCoupon` ADD CONSTRAINT `UserCoupon_couponId_fkey` FOREIGN KEY (`couponId`) REFERENCES `Coupon`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 -- AlterTable
-ALTER TABLE `productimage` MODIFY `url` LONGTEXT NOT NULL;
+ALTER TABLE `ProductImage` MODIFY `url` LONGTEXT NOT NULL;
 -- ============================================================
 -- Seed data: categories, occasions, landing pages, admin user
 -- Generated to match prisma/schema.prisma exactly

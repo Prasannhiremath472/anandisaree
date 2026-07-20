@@ -54,9 +54,27 @@ const auth_1 = require("../middleware/auth");
 const roles_1 = require("../utils/roles");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const orderService = __importStar(require("../services/order.service"));
+const db_1 = require("../config/db");
 const router = (0, express_1.Router)();
 router.get("/health", (_req, res) => {
     res.json({ success: true, data: { status: "ok", timestamp: new Date().toISOString() } });
+});
+// TEMPORARY diagnostic endpoint: attempts a real DB query and returns the
+// actual error message, since Hostinger's runtime log panel isn't capturing
+// application errors. Remove once the DB connection issue is diagnosed.
+router.get("/health/db", async (_req, res) => {
+    try {
+        const [rows] = await db_1.pool.query("SELECT 1 as ok, DATABASE() as db, USER() as dbuser");
+        res.json({ success: true, data: rows });
+    }
+    catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err instanceof Error ? err.message : String(err),
+            code: err?.code,
+            errno: err?.errno,
+        });
+    }
 });
 router.use("/auth", auth_routes_1.default);
 router.get("/admin/dashboard", auth_1.authenticate, (0, auth_1.authorize)(...roles_1.ADMIN_ROLES), (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
