@@ -16,11 +16,29 @@ import { authenticate, authorize } from "../middleware/auth";
 import { ADMIN_ROLES } from "../utils/roles";
 import { asyncHandler } from "../utils/asyncHandler";
 import * as orderService from "../services/order.service";
+import { pool } from "../config/db";
 
 const router = Router();
 
 router.get("/health", (_req, res) => {
   res.json({ success: true, data: { status: "ok", timestamp: new Date().toISOString() } });
+});
+
+// TEMPORARY diagnostic endpoint: attempts a real DB query and returns the
+// actual error message, since Hostinger's runtime log panel isn't capturing
+// application errors. Remove once the DB connection issue is diagnosed.
+router.get("/health/db", async (_req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT 1 as ok, DATABASE() as db, USER() as dbuser");
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err instanceof Error ? err.message : String(err),
+      code: (err as { code?: string })?.code,
+      errno: (err as { errno?: number })?.errno,
+    });
+  }
 });
 
 router.use("/auth", authRoutes);
