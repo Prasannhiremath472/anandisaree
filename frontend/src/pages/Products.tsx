@@ -1,7 +1,9 @@
 import { ProductCard } from "@/components/home/ProductCard";
-import { ALL_PRODUCTS } from "@/data/homeContent";
+import { useStorefrontProducts } from "@/hooks/useStorefrontProducts";
 
 export function Products() {
+  const { data: products = [], isLoading } = useStorefrontProducts({ pageSize: 100 });
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
       <div className="mb-10 text-center">
@@ -11,11 +13,15 @@ export function Products() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-        {ALL_PRODUCTS.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {isLoading ? (
+        <p className="text-center text-sm text-charcoal/60">Loading products...</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

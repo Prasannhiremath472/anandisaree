@@ -10,9 +10,13 @@ import { Testimonials } from "@/components/home/Testimonials";
 import { InstagramGallery } from "@/components/home/InstagramGallery";
 import { StoreVisit } from "@/components/home/StoreVisit";
 import { Newsletter } from "@/components/home/Newsletter";
-import { GUDI_PADWA_COLLECTION, FESTIVE_COLLECTION, NEW_ARRIVALS, BEST_SELLERS } from "@/data/homeContent";
+import { GUDI_PADWA_COLLECTION, FESTIVE_COLLECTION } from "@/data/homeContent";
+import { useStorefrontProducts } from "@/hooks/useStorefrontProducts";
 
 export function Home() {
+  const { data: newArrivals = [] } = useStorefrontProducts({ isNewArrival: true, pageSize: 8 });
+  const { data: bestSellers = [] } = useStorefrontProducts({ isBestSeller: true, pageSize: 8 });
+
   return (
     <>
       <HeroSlider />
@@ -38,7 +42,7 @@ export function Home() {
       <ProductRail
         eyebrow="Just In"
         title="New Arrivals"
-        products={NEW_ARRIVALS}
+        products={newArrivals}
         viewAllHref="/new-arrivals"
       />
 
@@ -53,7 +57,7 @@ export function Home() {
       <ProductRail
         eyebrow="Customer Favorites"
         title="Best Sellers"
-        products={BEST_SELLERS}
+        products={bestSellers}
         viewAllHref="/best-sellers"
       />
 

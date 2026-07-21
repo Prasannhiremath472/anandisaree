@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listBrandsLookup = exports.listCategoriesLookup = exports.bulkDeleteProducts = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getProduct = exports.listProducts = void 0;
+exports.listBrandsLookup = exports.listCategoriesLookup = exports.bulkDeleteProducts = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getPublicProductBySlug = exports.listPublicProducts = exports.getProduct = exports.listProducts = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const pagination_1 = require("../utils/pagination");
 const productService = __importStar(require("../services/product.service"));
@@ -48,6 +48,27 @@ exports.listProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
 });
 exports.getProduct = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const product = await productService.getProductById(req.params.id);
+    res.json({ success: true, data: product });
+});
+const publicProductListQuerySchema = zod_1.z.object({
+    page: zod_1.z.coerce.number().int().positive().optional(),
+    pageSize: zod_1.z.coerce.number().int().positive().max(100).optional(),
+    search: zod_1.z.string().optional(),
+    categoryId: zod_1.z.string().optional(),
+    sortBy: zod_1.z.enum(["createdAt", "sellingPrice", "name", "stockQuantity"]).optional(),
+    sortOrder: zod_1.z.enum(["asc", "desc"]).optional(),
+    isNewArrival: zod_1.z.coerce.boolean().optional(),
+    isBestSeller: zod_1.z.coerce.boolean().optional(),
+    isFeatured: zod_1.z.coerce.boolean().optional(),
+});
+exports.listPublicProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const query = publicProductListQuerySchema.parse(req.query);
+    const pagination = (0, pagination_1.getPagination)(req);
+    const result = await productService.listPublicProducts(pagination, query);
+    res.json({ success: true, data: result });
+});
+exports.getPublicProductBySlug = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const product = await productService.getProductBySlug(req.params.slug);
     res.json({ success: true, data: product });
 });
 exports.createProduct = (0, asyncHandler_1.asyncHandler)(async (req, res) => {

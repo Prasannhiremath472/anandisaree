@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listProducts = listProducts;
+exports.listPublicProducts = listPublicProducts;
+exports.getProductBySlug = getProductBySlug;
 exports.getProductById = getProductById;
 exports.createProduct = createProduct;
 exports.updateProduct = updateProduct;
@@ -75,6 +77,42 @@ async function listProducts(pagination, filters) {
         images: p.images.slice(0, 1),
     }));
     return (0, pagination_1.buildPaginatedResult)(withPrimaryImage, totalRow?.count ?? 0, pagination);
+}
+async function listPublicProducts(pagination, filters) {
+    const conditions = ["deletedAt IS NULL", "isActive = 1"];
+    const params = [];
+    if (filters.categoryId) {
+        conditions.push("id IN (SELECT productId FROM `ProductCategory` WHERE categoryId = ?)");
+        params.push(filters.categoryId);
+    }
+    if (filters.search) {
+        conditions.push("(name LIKE ? OR fabric LIKE ?)");
+        const like = `%${filters.search}%`;
+        params.push(like, like);
+    }
+    if (filters.isNewArrival)
+        conditions.push("isNewArrival = 1");
+    if (filters.isBestSeller)
+        conditions.push("isBestSeller = 1");
+    if (filters.isFeatured)
+        conditions.push("isFeatured = 1");
+    const sortBy = filters.sortBy && SORTABLE_COLUMNS.has(filters.sortBy) ? filters.sortBy : "createdAt";
+    const sortOrder = filters.sortOrder === "asc" ? "ASC" : "DESC";
+    const whereClause = conditions.join(" AND ");
+    const items = await (0, db_1.query)(`SELECT * FROM \`Product\` WHERE ${whereClause} ORDER BY \`${sortBy}\` ${sortOrder} LIMIT ? OFFSET ?`, [...params, pagination.take, pagination.skip]);
+    const totalRow = await (0, db_1.queryOne)(`SELECT COUNT(*) as count FROM \`Product\` WHERE ${whereClause}`, params);
+    const withImages = await attachRelations(items);
+    const withPrimaryImage = withImages.map((p) => ({
+        ...p,
+        images: p.images.slice(0, 1),
+    }));
+    return (0, pagination_1.buildPaginatedResult)(withPrimaryImage, totalRow?.count ?? 0, pagination);
+}
+async function getProductBySlug(slug) {
+    const product = await (0, db_1.queryOne)("SELECT id FROM `Product` WHERE slug = ? AND deletedAt IS NULL AND isActive = 1 LIMIT 1", [slug]);
+    if (!product)
+        throw ApiError_1.ApiError.notFound("Product not found");
+    return getProductById(product.id);
 }
 async function getProductById(id) {
     const product = await (0, db_1.queryOne)("SELECT * FROM `Product` WHERE id = ? AND deletedAt IS NULL LIMIT 1", [id]);

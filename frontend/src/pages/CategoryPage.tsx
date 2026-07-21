@@ -1,10 +1,19 @@
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { ProductCard } from "@/components/home/ProductCard";
-import { ALL_PRODUCTS, CATEGORY_INFO, COLLECTION_INFO } from "@/data/homeContent";
+import { CATEGORY_INFO, COLLECTION_INFO } from "@/data/homeContent";
+import { useStorefrontProducts } from "@/hooks/useStorefrontProducts";
+import { apiClient } from "@/api/client";
 
 interface CategoryPageProps {
   kind: "category" | "collection";
+}
+
+interface ApiCategory {
+  id: string;
+  name: string;
+  slug: string;
 }
 
 function toTitleCase(slug: string) {
@@ -17,6 +26,23 @@ function toTitleCase(slug: string) {
 export function CategoryPage({ kind }: CategoryPageProps) {
   const { slug = "" } = useParams<{ slug: string }>();
   const info = (kind === "category" ? CATEGORY_INFO : COLLECTION_INFO)[slug];
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["storefront-categories"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ success: boolean; data: ApiCategory[] }>(
+        "/storefront/categories"
+      );
+      return data.data;
+    },
+    enabled: kind === "category",
+  });
+
+  const categoryId = kind === "category" ? categories.find((c) => c.slug === slug)?.id : undefined;
+  const { data: products = [], isLoading } = useStorefrontProducts({
+    categoryId,
+    pageSize: 100,
+  });
 
   const title = info?.title ?? toTitleCase(slug);
   const description =
@@ -37,11 +63,17 @@ export function CategoryPage({ kind }: CategoryPageProps) {
         <p className="mx-auto mt-4 max-w-xl text-sm text-cream-200">{description}</p>
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-        {ALL_PRODUCTS.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {isLoading ? (
+        <p className="text-center text-sm text-charcoal/60">Loading products...</p>
+      ) : products.length === 0 ? (
+        <p className="text-center text-sm text-charcoal/60">No products found in this category yet.</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

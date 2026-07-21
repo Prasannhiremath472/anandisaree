@@ -16,7 +16,6 @@ import { Wishlist } from "@/pages/Wishlist";
 import { Account } from "@/pages/Account";
 import { Login } from "@/pages/Login";
 import { Register } from "@/pages/Register";
-import { NEW_ARRIVALS, BEST_SELLERS } from "@/data/homeContent";
 
 export const router = createBrowserRouter([
   {
@@ -35,7 +34,7 @@ export const router = createBrowserRouter([
           <ProductListPage
             title="New Arrivals"
             description="The latest additions to our Maharashtrian and premium Indian saree collections."
-            products={NEW_ARRIVALS}
+            isNewArrival
           />
         ),
       },
@@ -45,7 +44,7 @@ export const router = createBrowserRouter([
           <ProductListPage
             title="Best Sellers"
             description="Customer favorites — the sarees our shoppers love most."
-            products={BEST_SELLERS}
+            isBestSeller
           />
         ),
       },

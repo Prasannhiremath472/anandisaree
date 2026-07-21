@@ -1,10 +1,28 @@
+import type { MouseEvent } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import type { ProductCard as ProductCardData } from "@/data/homeContent";
+import { useAppDispatch } from "@/hooks/redux";
+import { addItem, toggleDrawer } from "@/store/cartSlice";
 
 export function ProductCard({ product }: { product: ProductCardData }) {
+  const dispatch = useAppDispatch();
   const discountPct = Math.round(((product.mrp - product.price) / product.mrp) * 100);
+
+  function handleQuickAdd(e: MouseEvent) {
+    e.preventDefault();
+    dispatch(
+      addItem({
+        productId: product.id,
+        name: product.name,
+        imageUrl: product.image,
+        price: product.price,
+        quantity: 1,
+      })
+    );
+    dispatch(toggleDrawer(true));
+  }
 
   return (
     <motion.div
@@ -50,7 +68,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           </button>
 
           <button
-            onClick={(e) => e.preventDefault()}
+            onClick={handleQuickAdd}
             className="absolute inset-x-3 bottom-3 flex translate-y-4 items-center justify-center gap-2 rounded-full bg-royal-gold-gradient py-2.5 text-xs font-heading font-semibold text-white opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
           >
             <ShoppingBag className="h-3.5 w-3.5" />

@@ -102,6 +102,64 @@ export async function listProducts(pagination: PaginationParams, filters: ListFi
   return buildPaginatedResult(withPrimaryImage, totalRow?.count ?? 0, pagination);
 }
 
+interface PublicListFilters {
+  search?: string;
+  categoryId?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  isNewArrival?: boolean;
+  isBestSeller?: boolean;
+  isFeatured?: boolean;
+}
+
+export async function listPublicProducts(pagination: PaginationParams, filters: PublicListFilters) {
+  const conditions: string[] = ["deletedAt IS NULL", "isActive = 1"];
+  const params: QueryParams = [];
+
+  if (filters.categoryId) {
+    conditions.push("id IN (SELECT productId FROM `ProductCategory` WHERE categoryId = ?)");
+    params.push(filters.categoryId);
+  }
+  if (filters.search) {
+    conditions.push("(name LIKE ? OR fabric LIKE ?)");
+    const like = `%${filters.search}%`;
+    params.push(like, like);
+  }
+  if (filters.isNewArrival) conditions.push("isNewArrival = 1");
+  if (filters.isBestSeller) conditions.push("isBestSeller = 1");
+  if (filters.isFeatured) conditions.push("isFeatured = 1");
+
+  const sortBy = filters.sortBy && SORTABLE_COLUMNS.has(filters.sortBy) ? filters.sortBy : "createdAt";
+  const sortOrder = filters.sortOrder === "asc" ? "ASC" : "DESC";
+  const whereClause = conditions.join(" AND ");
+
+  const items = await query<Record<string, unknown>>(
+    `SELECT * FROM \`Product\` WHERE ${whereClause} ORDER BY \`${sortBy}\` ${sortOrder} LIMIT ? OFFSET ?`,
+    [...params, pagination.take, pagination.skip]
+  );
+  const totalRow = await queryOne<{ count: number }>(
+    `SELECT COUNT(*) as count FROM \`Product\` WHERE ${whereClause}`,
+    params
+  );
+
+  const withImages = await attachRelations(items);
+  const withPrimaryImage = withImages.map((p) => ({
+    ...p,
+    images: (p.images as Record<string, unknown>[]).slice(0, 1),
+  }));
+
+  return buildPaginatedResult(withPrimaryImage, totalRow?.count ?? 0, pagination);
+}
+
+export async function getProductBySlug(slug: string) {
+  const product = await queryOne<{ id: string }>(
+    "SELECT id FROM `Product` WHERE slug = ? AND deletedAt IS NULL AND isActive = 1 LIMIT 1",
+    [slug]
+  );
+  if (!product) throw ApiError.notFound("Product not found");
+  return getProductById(product.id);
+}
+
 export async function getProductById(id: string) {
   const product = await queryOne<Record<string, unknown>>(
     "SELECT * FROM `Product` WHERE id = ? AND deletedAt IS NULL LIMIT 1",

@@ -18,6 +18,30 @@ export const getProduct = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: product });
 });
 
+const publicProductListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  pageSize: z.coerce.number().int().positive().max(100).optional(),
+  search: z.string().optional(),
+  categoryId: z.string().optional(),
+  sortBy: z.enum(["createdAt", "sellingPrice", "name", "stockQuantity"]).optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+  isNewArrival: z.coerce.boolean().optional(),
+  isBestSeller: z.coerce.boolean().optional(),
+  isFeatured: z.coerce.boolean().optional(),
+});
+
+export const listPublicProducts = asyncHandler(async (req: Request, res: Response) => {
+  const query = publicProductListQuerySchema.parse(req.query);
+  const pagination = getPagination(req);
+  const result = await productService.listPublicProducts(pagination, query);
+  res.json({ success: true, data: result });
+});
+
+export const getPublicProductBySlug = asyncHandler(async (req: Request, res: Response) => {
+  const product = await productService.getProductBySlug(req.params.slug);
+  res.json({ success: true, data: product });
+});
+
 export const createProduct = asyncHandler(async (req: Request, res: Response) => {
   const input = productCreateSchema.parse(req.body);
   const product = await productService.createProduct(input);
