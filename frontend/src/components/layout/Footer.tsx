@@ -7,7 +7,11 @@ export function Footer() {
     <footer className="mt-24 bg-[linear-gradient(180deg,#211F1E_0%,#2D124C_120%)] text-cream-100">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-16 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
         <div>
-          <h3 className="font-display text-2xl text-gold-400">{BUSINESS.name}</h3>
+          <img
+            src="/images/anandi-sarees-logo-crop.png"
+            alt={BUSINESS.name}
+            className="h-12 w-auto rounded"
+          />
           <p className="mt-4 text-sm text-cream-300">
             A premium Maharashtrian saree boutique celebrating Paithani, Nauvari and handloom
             craftsmanship, alongside curated collections from across India.
