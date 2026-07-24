@@ -54,7 +54,7 @@ export function ProductRail({ eyebrow, title, products, viewAllHref }: ProductRa
         </div>
       </div>
 
-      <div className="overflow-x-hidden">
+      <div className="overflow-hidden">
         <Swiper
           modules={[Navigation]}
           onSwiper={(s) => (swiperRef.current = s)}
@@ -64,7 +64,6 @@ export function ProductRail({ eyebrow, title, products, viewAllHref }: ProductRa
             640: { slidesPerView: 3, spaceBetween: 20 },
             1024: { slidesPerView: 4, spaceBetween: 24 },
           }}
-          className="!overflow-visible"
         >
           {products.map((product) => (
             <SwiperSlide key={product.id}>
