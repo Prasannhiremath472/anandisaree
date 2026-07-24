@@ -17,16 +17,16 @@ const DEMO_REELS: ReelSlot[] = INSTAGRAM_IMAGES.slice(0, 6).map((thumbnail, i) =
 export function Reels() {
   return (
     <section className="py-20">
-      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+      <div className="mx-auto max-w-7xl px-ds-6 lg:px-ds-8">
         <div className="mb-10 text-center">
-          <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Watch &amp; Shop</span>
-          <h2 className="mt-3 font-display text-3xl text-gradient-royal sm:text-4xl">Style Reels</h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-charcoal/70">
+          <span className="font-heading text-ds-xs uppercase tracking-[0.3em] text-gold-600">Watch &amp; Shop</span>
+          <h2 className="mt-ds-4 font-display text-3xl text-gradient-royal sm:text-4xl">Style Reels</h2>
+          <p className="mx-auto mt-ds-4 max-w-xl text-ds-sm text-charcoal/70">
             Draping guides, new arrivals and behind-the-scenes from our boutique — reels added soon.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-ds-6 sm:grid-cols-3 lg:grid-cols-6">
           {DEMO_REELS.map((reel) => (
             <a
               key={reel.id}
@@ -49,7 +49,7 @@ export function Reels() {
                 </div>
               </div>
 
-              <p className="absolute inset-x-2 bottom-2 line-clamp-2 font-heading text-[11px] font-medium text-white sm:text-xs">
+              <p className="absolute inset-x-2 bottom-2 line-clamp-2 font-heading text-[11px] font-medium text-white sm:text-ds-xs">
                 {reel.caption}
               </p>
             </a>

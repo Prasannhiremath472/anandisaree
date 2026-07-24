@@ -4,7 +4,7 @@ import { ARTISAN_STORY_IMAGE } from "@/data/homeContent";
 
 export function ArtisanStory() {
   return (
-    <section className="mx-auto max-w-7xl overflow-x-clip px-4 py-20 lg:px-8">
+    <section className="mx-auto max-w-7xl overflow-x-clip px-ds-6 py-20 lg:px-ds-8">
       <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -27,8 +27,8 @@ export function ArtisanStory() {
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.6 }}
         >
-          <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Our Craft</span>
-          <h2 className="mt-3 text-balance font-display text-3xl text-gradient-royal sm:text-4xl">
+          <span className="font-heading text-ds-xs uppercase tracking-[0.3em] text-gold-600">Our Craft</span>
+          <h2 className="mt-ds-4 text-balance font-display text-3xl text-gradient-royal sm:text-4xl">
             Woven by Hand, Rooted in Maharashtra
           </h2>
           <p className="mt-5 text-charcoal/80">
@@ -38,13 +38,13 @@ export function ArtisanStory() {
             silk and real zari to create motifs like the peacock, lotus and Muniya border that
             define Maharashtrian tradition.
           </p>
-          <p className="mt-4 text-charcoal/80">
+          <p className="mt-ds-6 text-charcoal/80">
             We work directly with weaver families, ensuring fair wages and preserving a craft that
             is as much a part of Maharashtra's identity as it is a piece of wearable art.
           </p>
           <Link
             to="/about"
-            className="mt-8 inline-block rounded-full bg-royal-600 px-8 py-3 font-heading text-sm font-semibold text-white transition-colors hover:bg-royal-500"
+            className="mt-ds-8 inline-block rounded-full bg-royal-600 px-ds-8 py-ds-4 font-heading text-ds-sm font-semibold text-white transition-colors hover:bg-royal-500"
           >
             Read Our Story
           </Link>

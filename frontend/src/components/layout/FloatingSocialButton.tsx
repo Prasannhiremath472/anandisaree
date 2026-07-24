@@ -34,7 +34,7 @@ export function FloatingSocialButton() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center gap-3">
+    <div className="fixed bottom-5 right-5 z-40 flex flex-col items-center gap-ds-4">
       <AnimatePresence>
         {open &&
           SOCIAL_LINKS.map((link, i) => (

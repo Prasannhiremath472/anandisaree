@@ -49,24 +49,24 @@ export function CategoryPage({ kind }: CategoryPageProps) {
     info?.description ?? "Explore this collection of authentic Maharashtrian and premium Indian sarees.";
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+    <div className="mx-auto max-w-7xl px-ds-6 py-12 lg:px-ds-8">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-12 rounded-xl2 bg-royal-gradient px-8 py-12 text-center text-cream-100 shadow-soft"
+        className="mb-12 rounded-xl2 bg-royal-gradient px-ds-8 py-12 text-center text-cream-100 shadow-soft"
       >
-        <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-300">
+        <span className="font-heading text-ds-xs uppercase tracking-[0.3em] text-gold-300">
           {kind === "category" ? "Category" : "Collection"}
         </span>
-        <h1 className="mt-3 text-balance font-display text-3xl sm:text-4xl">{title}</h1>
-        <p className="mx-auto mt-4 max-w-xl text-sm text-cream-200">{description}</p>
+        <h1 className="mt-ds-4 text-balance font-display text-3xl sm:text-4xl">{title}</h1>
+        <p className="mx-auto mt-ds-6 max-w-xl text-ds-sm text-cream-200">{description}</p>
       </motion.div>
 
       {isLoading ? (
-        <p className="text-center text-sm text-charcoal/60">Loading products...</p>
+        <p className="text-center text-ds-sm text-charcoal/60">Loading products...</p>
       ) : products.length === 0 ? (
-        <p className="text-center text-sm text-charcoal/60">No products found in this category yet.</p>
+        <p className="text-center text-ds-sm text-charcoal/60">No products found in this category yet.</p>
       ) : (
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (

@@ -54,44 +54,44 @@ export function Account() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 lg:px-8">
-      <div className="flex items-center gap-4 rounded-xl2 bg-royal-gradient p-6 text-white shadow-soft">
+    <div className="mx-auto max-w-4xl px-ds-6 py-12 lg:px-ds-8">
+      <div className="flex items-center gap-ds-6 rounded-xl2 bg-royal-gradient p-ds-7 text-white shadow-soft">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 text-xl font-semibold">
           {user.name.charAt(0).toUpperCase()}
         </div>
         <div>
           <h1 className="font-display text-2xl">{user.name}</h1>
-          <p className="text-sm text-cream-200">{user.email}</p>
+          <p className="text-ds-sm text-cream-200">{user.email}</p>
         </div>
       </div>
 
-      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="mt-ds-8 grid grid-cols-2 gap-ds-6 sm:grid-cols-4">
         {MENU_ITEMS.map((item) => (
           <Link
             key={item.label}
             to={item.to}
-            className="flex flex-col items-center gap-2 rounded-xl2 border border-royal-100 bg-white p-5 text-center shadow-sm transition-shadow hover:shadow-soft"
+            className="flex flex-col items-center gap-ds-2 rounded-xl2 border border-royal-100 bg-white p-5 text-center shadow-sm transition-shadow hover:shadow-soft"
           >
             <item.icon className="h-6 w-6 text-royal-600" />
-            <span className="text-sm font-medium text-charcoal">{item.label}</span>
+            <span className="text-ds-sm font-medium text-charcoal">{item.label}</span>
           </Link>
         ))}
       </div>
 
       {coupons.length > 0 && (
-        <div className="mt-8 rounded-xl2 border border-royal-100 bg-white p-6">
-          <h2 className="flex items-center gap-2 font-heading text-base font-semibold text-charcoal">
+        <div className="mt-ds-8 rounded-xl2 border border-royal-100 bg-white p-ds-7">
+          <h2 className="flex items-center gap-ds-2 font-heading text-ds-md font-semibold text-charcoal">
             <Tag className="h-5 w-5 text-royal-600" /> My Coupons
           </h2>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="mt-ds-6 grid grid-cols-1 gap-ds-4 sm:grid-cols-2">
             {coupons.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between rounded-xl border border-dashed border-gold-400 bg-gold-50 px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-dashed border-gold-400 bg-gold-50 px-ds-6 py-ds-4"
               >
                 <div>
-                  <p className="font-mono text-sm font-bold text-royal-700">{c.coupon.code}</p>
-                  <p className="text-xs text-charcoal/60">
+                  <p className="font-mono text-ds-sm font-bold text-royal-700">{c.coupon.code}</p>
+                  <p className="text-ds-xs text-charcoal/60">
                     {c.coupon.type === "PERCENTAGE"
                       ? `${c.coupon.value}% off`
                       : c.coupon.type === "FLAT"
@@ -113,12 +113,12 @@ export function Account() {
         </div>
       )}
 
-      <div className="mt-8 rounded-xl2 border border-royal-100 bg-white p-6 text-center">
+      <div className="mt-ds-8 rounded-xl2 border border-royal-100 bg-white p-ds-7 text-center">
         <User className="mx-auto h-8 w-8 text-royal-300" />
-        <p className="mt-3 text-sm text-charcoal/70">You have no orders yet. Start exploring our collections.</p>
+        <p className="mt-ds-4 text-ds-sm text-charcoal/70">You have no orders yet. Start exploring our collections.</p>
         <Link
           to="/products"
-          className="mt-4 inline-block rounded-full bg-royal-600 px-6 py-2 text-sm font-semibold text-white hover:bg-royal-700"
+          className="mt-ds-6 inline-block rounded-full bg-royal-600 px-ds-7 py-ds-2 text-ds-sm font-semibold text-white hover:bg-royal-700"
         >
           Shop Now
         </Link>
@@ -126,7 +126,7 @@ export function Account() {
 
       <button
         onClick={handleLogout}
-        className="mt-8 flex items-center gap-2 text-sm font-medium text-charcoal/60 hover:text-royal-600"
+        className="mt-ds-8 flex items-center gap-ds-2 text-ds-sm font-medium text-charcoal/60 hover:text-royal-600"
       >
         <LogOut className="h-4 w-4" />
         Sign Out

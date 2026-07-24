@@ -40,42 +40,42 @@ export function Login() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16 lg:px-8">
+    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-ds-6 py-16 lg:px-ds-8">
       <h1 className="font-display text-3xl text-gradient-royal">Sign In</h1>
-      <p className="mt-2 text-sm text-charcoal/70">Welcome back to Anandi Sarees.</p>
+      <p className="mt-ds-2 text-ds-sm text-charcoal/70">Welcome back to Anandi Sarees.</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-ds-8 space-y-ds-6">
         <div>
-          <label className="text-sm font-medium text-charcoal">Email</label>
+          <label className="text-ds-sm font-medium text-charcoal">Email</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-royal-200 px-3 py-2.5 text-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
+            className="mt-1 w-full rounded-lg border border-royal-200 px-ds-4 py-2.5 text-ds-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-charcoal">Password</label>
+          <label className="text-ds-sm font-medium text-charcoal">Password</label>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-royal-200 px-3 py-2.5 text-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
+            className="mt-1 w-full rounded-lg border border-royal-200 px-ds-4 py-2.5 text-ds-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-full bg-royal-gradient py-3 font-heading text-sm font-semibold text-white shadow-soft transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="w-full rounded-full bg-royal-gradient py-ds-4 font-heading text-ds-sm font-semibold text-white shadow-soft transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-charcoal/70">
+      <p className="mt-ds-7 text-center text-ds-sm text-charcoal/70">
         New to Anandi Sarees?{" "}
         <Link to="/register" className="font-medium text-royal-600 hover:text-royal-500">
           Create an account

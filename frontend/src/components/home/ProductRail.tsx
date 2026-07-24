@@ -21,21 +21,21 @@ export function ProductRail({ eyebrow, title, products, viewAllHref }: ProductRa
   const swiperRef = useRef<SwiperType | null>(null);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
+    <section className="mx-auto max-w-7xl px-ds-6 py-16 lg:px-ds-8">
       <div className="mb-10 flex items-end justify-between">
         <div>
-          <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">{eyebrow}</span>
-          <h2 className="mt-3 font-display text-3xl text-gradient-royal sm:text-4xl">{title}</h2>
+          <span className="font-heading text-ds-xs uppercase tracking-[0.3em] text-gold-600">{eyebrow}</span>
+          <h2 className="mt-ds-4 font-display text-3xl text-gradient-royal sm:text-4xl">{title}</h2>
         </div>
 
-        <div className="hidden items-center gap-3 sm:flex">
+        <div className="hidden items-center gap-ds-4 sm:flex">
           <Link
             to={viewAllHref}
-            className="flex items-center gap-1 font-heading text-sm font-medium text-royal-600 hover:text-royal-500"
+            className="flex items-center gap-1 font-heading text-ds-sm font-medium text-royal-600 hover:text-royal-500"
           >
             View All <ArrowRight className="h-4 w-4" />
           </Link>
-          <div className="ml-4 flex gap-2">
+          <div className="ml-ds-6 flex gap-ds-2">
             <button
               aria-label="Previous"
               onClick={() => swiperRef.current?.slidePrev()}
@@ -74,8 +74,8 @@ export function ProductRail({ eyebrow, title, products, viewAllHref }: ProductRa
         </Swiper>
       </div>
 
-      <div className="mt-8 text-center sm:hidden">
-        <Link to={viewAllHref} className="font-heading text-sm font-medium text-royal-600">
+      <div className="mt-ds-8 text-center sm:hidden">
+        <Link to={viewAllHref} className="font-heading text-ds-sm font-medium text-royal-600">
           View All →
         </Link>
       </div>

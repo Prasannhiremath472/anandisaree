@@ -8,10 +8,10 @@ import "swiper/css/free-mode";
 
 export function FeaturedCategories() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+    <section className="mx-auto max-w-7xl px-ds-6 py-20 lg:px-ds-8">
       <div className="mb-12 text-center">
-        <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Shop By Craft</span>
-        <h2 className="mt-3 font-display text-3xl text-gradient-royal sm:text-4xl">Featured Categories</h2>
+        <span className="font-heading text-ds-xs uppercase tracking-[0.3em] text-gold-600">Shop By Craft</span>
+        <h2 className="mt-ds-4 font-display text-3xl text-gradient-royal sm:text-4xl">Featured Categories</h2>
       </div>
 
       <div className="overflow-x-hidden">
@@ -41,7 +41,7 @@ export function FeaturedCategories() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-royal-900/70 via-transparent to-transparent" />
                 </div>
-                <p className="mt-3 text-center font-heading text-sm font-medium text-charcoal group-hover:text-royal-600">
+                <p className="mt-ds-4 text-center font-heading text-ds-sm font-medium text-charcoal group-hover:text-royal-600">
                   {cat.name}
                 </p>
               </Link>

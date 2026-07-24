@@ -50,7 +50,7 @@ export function RecentOrderPopup() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="relative flex items-center gap-3 rounded-xl2 border border-gold-200/60 bg-white p-3 pr-8 shadow-soft"
+            className="relative flex items-center gap-ds-4 rounded-xl2 border border-gold-200/60 bg-white p-ds-4 pr-ds-8 shadow-soft"
           >
             <button
               aria-label="Dismiss"
@@ -69,11 +69,11 @@ export function RecentOrderPopup() {
               <p className="text-[11px] font-medium uppercase tracking-wide text-gold-600">
                 Recently Ordered
               </p>
-              <p className="truncate font-heading text-sm font-semibold text-charcoal">{order.productName}</p>
-              <p className="truncate text-xs text-charcoal/60">
+              <p className="truncate font-heading text-ds-sm font-semibold text-charcoal">{order.productName}</p>
+              <p className="truncate text-ds-xs text-charcoal/60">
                 by {order.buyerName} · {order.city}
               </p>
-              <div className="mt-1 flex items-center gap-2 text-xs">
+              <div className="mt-1 flex items-center gap-ds-2 text-ds-xs">
                 <span className="font-heading font-semibold text-royal-700">
                   ₹{order.price.toLocaleString("en-IN")}
                 </span>

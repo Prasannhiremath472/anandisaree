@@ -4,13 +4,13 @@ import { TESTIMONIALS } from "@/data/homeContent";
 
 export function Testimonials() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8">
+    <section className="mx-auto max-w-7xl px-ds-6 py-20 lg:px-ds-8">
       <div className="mb-12 text-center">
-        <span className="font-heading text-xs uppercase tracking-[0.3em] text-gold-600">Customer Love</span>
-        <h2 className="mt-3 font-display text-3xl text-gradient-royal sm:text-4xl">What Our Customers Say</h2>
+        <span className="font-heading text-ds-xs uppercase tracking-[0.3em] text-gold-600">Customer Love</span>
+        <h2 className="mt-ds-4 font-display text-3xl text-gradient-royal sm:text-4xl">What Our Customers Say</h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-ds-7 md:grid-cols-3">
         {TESTIMONIALS.map((t, i) => (
           <motion.div
             key={t.name}
@@ -25,10 +25,10 @@ export function Testimonials() {
                 <Star key={idx} className="h-4 w-4 fill-gold-500" />
               ))}
             </div>
-            <p className="mt-4 text-sm text-charcoal/80">"{t.message}"</p>
+            <p className="mt-ds-6 text-ds-sm text-charcoal/80">"{t.message}"</p>
             <div className="mt-5">
-              <p className="font-heading text-sm font-semibold text-royal-700">{t.name}</p>
-              <p className="text-xs text-charcoal/50">{t.location}</p>
+              <p className="font-heading text-ds-sm font-semibold text-royal-700">{t.name}</p>
+              <p className="text-ds-xs text-charcoal/50">{t.location}</p>
             </div>
           </motion.div>
         ))}
