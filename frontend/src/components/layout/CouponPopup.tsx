@@ -73,7 +73,7 @@ export function CouponPopup() {
             className="fixed inset-0 z-[90] bg-royal-900/60"
             onClick={handleClose}
           />
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-ds-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -90,26 +90,26 @@ export function CouponPopup() {
             </button>
 
             <div className="grid grid-cols-1 sm:grid-cols-2">
-              <div className="flex flex-col items-center justify-center gap-4 p-8 text-center sm:border-r sm:border-white/15">
+              <div className="flex flex-col items-center justify-center gap-ds-6 p-ds-8 text-center sm:border-r sm:border-white/15">
                 <img
                   src="/images/anandi-sarees-logo-crop.png"
                   alt={BUSINESS.name}
                   className="h-24 w-24 rounded-xl object-cover shadow-lg"
                 />
-                <p className="font-display text-lg text-cream-100">{BUSINESS.name}</p>
-                <p className="text-xs uppercase tracking-[0.2em] text-gold-300">Premium Maharashtrian Sarees</p>
+                <p className="font-display text-ds-lg text-cream-100">{BUSINESS.name}</p>
+                <p className="text-ds-xs uppercase tracking-[0.2em] text-gold-300">Premium Maharashtrian Sarees</p>
               </div>
 
-              <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
+              <div className="flex flex-col items-center justify-center gap-ds-6 p-ds-8 text-center">
                 <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">
                   Enjoy 15% OFF Instantly
                 </h2>
-                <p className="text-sm text-cream-200">
+                <p className="text-ds-sm text-cream-200">
                   Sign in or create an account to claim your exclusive welcome coupon.
                 </p>
                 <button
                   onClick={handleGetCode}
-                  className="mt-2 w-full max-w-xs rounded-full bg-gold-gradient px-8 py-3 font-heading text-sm font-bold text-royal-800 shadow-gold transition-transform hover:scale-105"
+                  className="mt-ds-2 w-full max-w-xs rounded-full bg-gold-gradient px-ds-8 py-ds-4 font-heading text-ds-sm font-bold text-royal-800 shadow-gold transition-transform hover:scale-105"
                 >
                   Get Coupon Code
                 </button>

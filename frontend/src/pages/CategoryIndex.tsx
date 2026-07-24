@@ -3,10 +3,10 @@ import { FEATURED_CATEGORIES } from "@/data/homeContent";
 
 export function CategoryIndex() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
+    <div className="mx-auto max-w-7xl px-ds-6 py-12 lg:px-ds-8">
       <div className="mb-10 text-center">
         <h1 className="font-display text-3xl text-gradient-royal sm:text-4xl">Shop By Category</h1>
-        <p className="mx-auto mt-3 max-w-xl text-sm text-charcoal/70">
+        <p className="mx-auto mt-ds-4 max-w-xl text-ds-sm text-charcoal/70">
           Explore our Maharashtrian and premium Indian saree categories.
         </p>
       </div>
@@ -23,7 +23,7 @@ export function CategoryIndex() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-royal-900/70 via-transparent to-transparent" />
             </div>
-            <p className="mt-3 text-center font-heading text-sm font-medium text-charcoal group-hover:text-royal-600">
+            <p className="mt-ds-4 text-center font-heading text-ds-sm font-medium text-charcoal group-hover:text-royal-600">
               {cat.name}
             </p>
           </Link>

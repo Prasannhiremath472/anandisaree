@@ -29,7 +29,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-gold-200/60 bg-cream-100/90 backdrop-blur-md">
       <TopAnnouncementBar />
 
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-ds-6 py-ds-6 lg:px-ds-8">
         <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
           <Menu className="h-6 w-6 text-royal-600" />
         </button>
@@ -42,7 +42,7 @@ export function Header() {
           />
         </Link>
 
-        <nav className="hidden gap-8 lg:flex">
+        <nav className="hidden gap-ds-8 lg:flex">
           {NAV_LINKS.map((link) => (
             <NavLink
               key={link.to}
@@ -50,7 +50,7 @@ export function Header() {
               end={link.to === "/"}
               className={({ isActive }) =>
                 cn(
-                  "relative py-1 font-heading text-sm font-medium transition-colors",
+                  "relative py-1 font-heading text-ds-sm font-medium transition-colors",
                   isActive
                     ? "text-royal-600 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-gold-gradient"
                     : "text-charcoal hover:text-royal-500"
@@ -62,7 +62,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-ds-6">
           <button aria-label="Search" className="text-charcoal hover:text-royal-500">
             <Search className="h-5 w-5" />
           </button>
@@ -108,9 +108,9 @@ export function Header() {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "tween", duration: 0.25 }}
-            className="fixed inset-y-0 left-0 z-[70] w-72 bg-surface-gradient p-6 shadow-soft lg:hidden"
+            className="fixed inset-y-0 left-0 z-[70] w-72 bg-surface-gradient p-ds-7 shadow-soft lg:hidden"
           >
-            <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="mb-6">
+            <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="mb-ds-7">
               <X className="h-6 w-6 text-royal-600" />
             </button>
             <nav className="flex flex-col gap-5">
@@ -122,7 +122,7 @@ export function Header() {
                   onClick={() => setMobileOpen(false)}
                   className={({ isActive }) =>
                     cn(
-                      "font-heading text-base transition-colors",
+                      "font-heading text-ds-md transition-colors",
                       isActive ? "font-semibold text-gradient-royal" : "text-charcoal hover:text-royal-500"
                     )
                   }

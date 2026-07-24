@@ -8,12 +8,12 @@ export function TopAnnouncementBar() {
   const loopItems = [...ANNOUNCEMENTS, ...ANNOUNCEMENTS, ...ANNOUNCEMENTS];
 
   return (
-    <div className="w-full overflow-hidden bg-royal-gold-gradient py-2">
+    <div className="w-full overflow-hidden bg-royal-gold-gradient py-ds-2">
       <div className="flex w-max animate-marquee gap-0 whitespace-nowrap">
         {loopItems.map((item, i) => (
           <span
             key={i}
-            className="mx-8 flex items-center font-heading text-xs font-medium tracking-wide text-cream-100 sm:text-sm"
+            className="mx-ds-8 flex items-center font-heading text-ds-xs font-medium tracking-wide text-cream-100 sm:text-ds-sm"
           >
             {item}
           </span>

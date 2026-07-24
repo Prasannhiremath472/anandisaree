@@ -24,7 +24,7 @@ export function Faq() {
   return (
     <InfoPage title="Frequently Asked Questions">
       {FAQS.map((item) => (
-        <div key={item.q} className="mb-6">
+        <div key={item.q} className="mb-ds-7">
           <h3 className="font-heading font-semibold text-royal-700">{item.q}</h3>
           <p className="mt-1">{item.a}</p>
         </div>

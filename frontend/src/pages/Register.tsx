@@ -39,51 +39,51 @@ export function Register() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16 lg:px-8">
+    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-ds-6 py-16 lg:px-ds-8">
       <h1 className="font-display text-3xl text-gradient-royal">Create Account</h1>
-      <p className="mt-2 text-sm text-charcoal/70">Join Anandi Sarees for a personalized shopping experience.</p>
+      <p className="mt-ds-2 text-ds-sm text-charcoal/70">Join Anandi Sarees for a personalized shopping experience.</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-ds-8 space-y-ds-6">
         <div>
-          <label className="text-sm font-medium text-charcoal">Full Name</label>
+          <label className="text-ds-sm font-medium text-charcoal">Full Name</label>
           <input
             type="text"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-royal-200 px-3 py-2.5 text-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
+            className="mt-1 w-full rounded-lg border border-royal-200 px-ds-4 py-2.5 text-ds-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-charcoal">Email</label>
+          <label className="text-ds-sm font-medium text-charcoal">Email</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-royal-200 px-3 py-2.5 text-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
+            className="mt-1 w-full rounded-lg border border-royal-200 px-ds-4 py-2.5 text-ds-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-charcoal">Phone (optional)</label>
+          <label className="text-ds-sm font-medium text-charcoal">Phone (optional)</label>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="9876543210"
-            className="mt-1 w-full rounded-lg border border-royal-200 px-3 py-2.5 text-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
+            className="mt-1 w-full rounded-lg border border-royal-200 px-ds-4 py-2.5 text-ds-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-charcoal">Password</label>
+          <label className="text-ds-sm font-medium text-charcoal">Password</label>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-royal-200 px-3 py-2.5 text-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
+            className="mt-1 w-full rounded-lg border border-royal-200 px-ds-4 py-2.5 text-ds-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
           />
-          <p className="mt-1 text-xs text-charcoal/50">
+          <p className="mt-1 text-ds-xs text-charcoal/50">
             At least 8 characters, with an uppercase letter, lowercase letter and a number.
           </p>
         </div>
@@ -91,13 +91,13 @@ export function Register() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-full bg-royal-gradient py-3 font-heading text-sm font-semibold text-white shadow-soft transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="w-full rounded-full bg-royal-gradient py-ds-4 font-heading text-ds-sm font-semibold text-white shadow-soft transition-opacity hover:opacity-90 disabled:opacity-60"
         >
           {loading ? "Creating account..." : "Create Account"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-charcoal/70">
+      <p className="mt-ds-7 text-center text-ds-sm text-charcoal/70">
         Already have an account?{" "}
         <Link to="/login" className="font-medium text-royal-600 hover:text-royal-500">
           Sign in
