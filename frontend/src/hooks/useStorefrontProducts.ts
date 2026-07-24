@@ -19,6 +19,7 @@ interface ApiProduct {
   mrp: string | number;
   isNewArrival: number | boolean;
   isBestSeller: number | boolean;
+  stockQuantity: number;
   images: ApiProductImage[];
   categories: ApiCategory[];
 }
@@ -31,17 +32,22 @@ interface ProductListResponse {
   totalPages: number;
 }
 
+const NIGHTWEAR_SIZES = ["Free Size", "2XL", "3XL"];
+
 function mapProduct(p: ApiProduct): ProductCardData {
+  const category = p.categories[0]?.category?.name ?? p.fabric;
   return {
     id: p.id,
     name: p.name,
-    category: p.categories[0]?.category?.name ?? p.fabric,
+    category,
     price: Number(p.sellingPrice),
     mrp: Number(p.mrp),
     image: p.images[0]?.url ?? "",
     fabric: p.fabric,
     isNew: Boolean(p.isNewArrival),
     isBestSeller: Boolean(p.isBestSeller),
+    stockQuantity: p.stockQuantity,
+    sizes: category === "Nightwear" ? NIGHTWEAR_SIZES : undefined,
   };
 }
 

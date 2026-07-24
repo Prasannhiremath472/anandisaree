@@ -89,6 +89,8 @@ export interface ProductCard {
   fabric: string;
   isNew?: boolean;
   isBestSeller?: boolean;
+  stockQuantity?: number;
+  sizes?: string[];
 }
 
 export const NEW_ARRIVALS: ProductCard[] = [
