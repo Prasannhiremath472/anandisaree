@@ -20,6 +20,33 @@
   ::selection {
     @apply bg-gold-300 text-royal-800;
   }
+
+  /* Consistent keyboard-focus indicator across every interactive element,
+     visible only for keyboard/assistive-tech users (not mouse clicks). */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  [tabindex]:not([tabindex="-1"]) {
+    @apply outline-none;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    @apply ring-2 ring-gold-500 ring-offset-2 ring-offset-cream-200;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
 }
 
 @layer utilities {

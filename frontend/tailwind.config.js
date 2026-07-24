@@ -54,6 +54,27 @@ export default {
         heading: ["'Poppins'", "sans-serif"],
         body: ["'Inter'", "sans-serif"],
       },
+      // Design-system reference scale (font.size.*, space.*) — additive tokens,
+      // namespaced so they don't override Tailwind's existing xs/sm/lg/xl/2xl
+      // scale already used throughout the site (colors/fonts stay unchanged).
+      fontSize: {
+        "ds-xs": ["13px", { lineHeight: "20.8px" }],
+        "ds-sm": ["14px", { lineHeight: "20.8px" }],
+        "ds-md": ["15px", { lineHeight: "20.8px" }],
+        "ds-lg": ["16px", { lineHeight: "20.8px" }],
+        "ds-xl": ["28px", { lineHeight: "1.2" }],
+        "ds-2xl": ["40px", { lineHeight: "1.15" }],
+      },
+      spacing: {
+        "ds-1": "7.5px",
+        "ds-2": "8px",
+        "ds-3": "10px",
+        "ds-4": "12px",
+        "ds-5": "14px",
+        "ds-6": "16px",
+        "ds-7": "23.24px",
+        "ds-8": "30px",
+      },
       boxShadow: {
         soft: "0 10px 40px -10px rgba(84, 32, 140, 0.18)",
         gold: "0 0 0 1px rgba(247, 186, 103, 0.4)",
