@@ -1,8 +1,28 @@
+import sharp from "sharp";
 import { query, queryOne, execute, withTransaction, QueryParams } from "../config/db";
 import { createId } from "../utils/id";
 import { ApiError } from "../utils/ApiError";
 import { buildPaginatedResult, PaginationParams } from "../utils/pagination";
 import type { ProductCreateInput, ProductUpdateInput } from "../validation/product.schema";
+
+const THUMBNAIL_WIDTH = 320;
+const THUMBNAIL_JPEG_QUALITY = 72;
+
+/** Generates a small JPEG data URI for list/grid views from a full-size data URI. Returns null for non-data-URI (external) image URLs. */
+async function generateThumbnail(url: string): Promise<string | null> {
+  const match = /^data:image\/\w+;base64,(.+)$/.exec(url);
+  if (!match) return null;
+  try {
+    const buf = Buffer.from(match[1], "base64");
+    const thumbBuf = await sharp(buf)
+      .resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true })
+      .jpeg({ quality: THUMBNAIL_JPEG_QUALITY })
+      .toBuffer();
+    return `data:image/jpeg;base64,${thumbBuf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
 
 interface ListFilters {
   search?: string;
@@ -96,10 +116,17 @@ export async function listProducts(pagination: PaginationParams, filters: ListFi
   // listProducts previously only included a single primary-sort image per product
   const withPrimaryImage = withImages.map((p) => ({
     ...p,
-    images: (p.images as Record<string, unknown>[]).slice(0, 1),
+    images: toThumbnailImages(p.images as Record<string, unknown>[]),
   }));
 
   return buildPaginatedResult(withPrimaryImage, totalRow?.count ?? 0, pagination);
+}
+
+/** List/grid views only need one small image, not the full-resolution data URI. */
+function toThumbnailImages(images: Record<string, unknown>[]) {
+  const primary = images[0];
+  if (!primary) return [];
+  return [{ ...primary, url: primary.thumbnailUrl ?? primary.url }];
 }
 
 interface PublicListFilters {
@@ -145,7 +172,7 @@ export async function listPublicProducts(pagination: PaginationParams, filters: 
   const withImages = await attachRelations(items);
   const withPrimaryImage = withImages.map((p) => ({
     ...p,
-    images: (p.images as Record<string, unknown>[]).slice(0, 1),
+    images: toThumbnailImages(p.images as Record<string, unknown>[]),
   }));
 
   return buildPaginatedResult(withPrimaryImage, totalRow?.count ?? 0, pagination);
@@ -295,9 +322,10 @@ export async function createProduct(input: ProductCreateInput) {
     if (imageList?.length) {
       for (let i = 0; i < imageList.length; i++) {
         const img = imageList[i];
+        const thumbnailUrl = await generateThumbnail(img.url);
         await conn.query(
-          "INSERT INTO `ProductImage` (id, productId, url, altText, isPrimary, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW(3))",
-          [createId(), productId, img.url, img.altText ?? null, img.isPrimary ?? i === 0, i]
+          "INSERT INTO `ProductImage` (id, productId, url, thumbnailUrl, altText, isPrimary, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(3))",
+          [createId(), productId, img.url, thumbnailUrl, img.altText ?? null, img.isPrimary ?? i === 0, i]
         );
       }
     }
@@ -382,9 +410,10 @@ export async function updateProduct(id: string, input: ProductUpdateInput) {
       await conn.query("DELETE FROM `ProductImage` WHERE productId = ?", [id]);
       for (let i = 0; i < imageList.length; i++) {
         const img = imageList[i];
+        const thumbnailUrl = await generateThumbnail(img.url);
         await conn.query(
-          "INSERT INTO `ProductImage` (id, productId, url, altText, isPrimary, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW(3))",
-          [createId(), id, img.url, img.altText ?? null, img.isPrimary ?? i === 0, i]
+          "INSERT INTO `ProductImage` (id, productId, url, thumbnailUrl, altText, isPrimary, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(3))",
+          [createId(), id, img.url, thumbnailUrl, img.altText ?? null, img.isPrimary ?? i === 0, i]
         );
       }
     }
