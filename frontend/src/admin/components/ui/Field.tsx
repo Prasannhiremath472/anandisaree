@@ -5,14 +5,18 @@ interface FieldProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
   error?: string;
   children: React.ReactNode;
   required?: boolean;
+  hint?: React.ReactNode;
 }
 
-export function Field({ label, error, children, required, className, ...rest }: FieldProps) {
+export function Field({ label, error, children, required, hint, className, ...rest }: FieldProps) {
   return (
     <label className={cn("block", className)} {...rest}>
-      <span className="text-sm font-medium text-neutral-700">
-        {label}
-        {required && <span className="text-red-500"> *</span>}
+      <span className="flex items-center justify-between">
+        <span className="text-sm font-medium text-neutral-700">
+          {label}
+          {required && <span className="text-red-500"> *</span>}
+        </span>
+        {hint}
       </span>
       <div className="mt-1">{children}</div>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}

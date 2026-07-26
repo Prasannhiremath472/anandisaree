@@ -5,7 +5,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { BackLink } from "@/admin/components/ui/BackLink";
 import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
-import { useCategoriesLookup, useCreateProduct, useProduct, useUpdateProduct } from "@/admin/hooks/api/useProducts";
+import { useCategoriesLookup, useCreateProduct, useGenerateDescription, useProduct, useUpdateProduct } from "@/admin/hooks/api/useProducts";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 import { VariantsCard, type VariantOption, type VariantRow } from "./VariantsCard";
 import { FABRIC_OPTIONS, WASH_CARE_BY_FABRIC } from "./fabricOptions";
@@ -67,11 +67,33 @@ export function ProductForm() {
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const uploadMutation = useImageUpload();
+  const generateDescriptionMutation = useGenerateDescription();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState(emptyForm);
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<VariantRow[]>([]);
   const [isCustomFabric, setIsCustomFabric] = useState(false);
+
+  async function handleGenerateDescription() {
+    if (!form.name || !form.fabric || !form.color) {
+      toast.error("Add a title, fabric and color first");
+      return;
+    }
+    try {
+      const categoryName = categories?.find((c) => c.id === form.categoryId)?.name;
+      const description = await generateDescriptionMutation.mutateAsync({
+        name: form.name,
+        fabric: form.fabric,
+        color: form.color,
+        category: categoryName,
+        shortDescription: form.shortDescription || undefined,
+      });
+      setForm((f) => ({ ...f, description }));
+      toast.success("Description generated");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Could not generate description");
+    }
+  }
 
   function handleFabricSelect(value: string) {
     if (value === "__custom__") {
@@ -265,7 +287,22 @@ export function ProductForm() {
                   />
                 </Field>
 
-                <Field label="Description">
+                <Field
+                  label="Description"
+                  hint={
+                    <button
+                      type="button"
+                      onClick={handleGenerateDescription}
+                      disabled={generateDescriptionMutation.isPending}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-royal-600 hover:text-royal-500 disabled:opacity-50"
+                    >
+                      {generateDescriptionMutation.isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : null}
+                      Generate with AI
+                    </button>
+                  }
+                >
                   <textarea
                     rows={6}
                     placeholder="Describe the fabric, craftsmanship and styling of this saree..."

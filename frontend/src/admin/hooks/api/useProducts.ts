@@ -64,6 +64,15 @@ export function useUpdateProduct() {
   });
 }
 
+export function useGenerateDescription() {
+  return useMutation({
+    mutationFn: async (input: { name: string; fabric: string; color: string; category?: string; shortDescription?: string }) => {
+      const res = await apiClient.post<{ data: { description: string } }>("/admin/products/generate-description", input);
+      return res.data.data.description;
+    },
+  });
+}
+
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
   return useMutation({
