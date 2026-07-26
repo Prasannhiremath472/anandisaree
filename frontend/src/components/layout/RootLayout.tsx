@@ -5,10 +5,12 @@ import { RecentOrderPopup } from "./RecentOrderPopup";
 import { FloatingSocialButton } from "./FloatingSocialButton";
 import { CouponPopup } from "./CouponPopup";
 import { CartDrawer } from "./CartDrawer";
+import { ScrollToTop } from "./ScrollToTop";
 
 export function RootLayout() {
   return (
     <div className="flex min-h-screen flex-col">
+      <ScrollToTop />
       <Header />
       <main className="flex-1">
         <Outlet />
