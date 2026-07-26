@@ -8,6 +8,7 @@ import { Field, inputClass } from "@/admin/components/ui/Field";
 import { useCategoriesLookup, useCreateProduct, useProduct, useUpdateProduct } from "@/admin/hooks/api/useProducts";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 import { VariantsCard, type VariantOption, type VariantRow } from "./VariantsCard";
+import { FABRIC_OPTIONS, WASH_CARE_BY_FABRIC } from "./fabricOptions";
 
 const emptyForm = {
   // Core
@@ -68,6 +69,21 @@ export function ProductForm() {
   const [form, setForm] = useState(emptyForm);
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<VariantRow[]>([]);
+  const [isCustomFabric, setIsCustomFabric] = useState(false);
+
+  function handleFabricSelect(value: string) {
+    if (value === "__custom__") {
+      setIsCustomFabric(true);
+      setForm((f) => ({ ...f, fabric: "" }));
+      return;
+    }
+    setIsCustomFabric(false);
+    setForm((f) => ({
+      ...f,
+      fabric: value,
+      washCare: f.washCare ? f.washCare : WASH_CARE_BY_FABRIC[value] ?? f.washCare,
+    }));
+  }
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -138,6 +154,9 @@ export function ProductForm() {
           }))
         );
       }
+      setIsCustomFabric(
+        Boolean(existing.fabric) && !FABRIC_OPTIONS.includes(existing.fabric as (typeof FABRIC_OPTIONS)[number])
+      );
     }
   }, [existing]);
 
@@ -349,7 +368,42 @@ export function ProductForm() {
             <Card title="Craft Details">
               <div className="grid grid-cols-3 gap-4">
                 <Field label="Fabric" required>
-                  <input required value={form.fabric} onChange={(e) => setForm({ ...form, fabric: e.target.value })} className={inputClass} />
+                  {isCustomFabric ? (
+                    <div className="flex gap-2">
+                      <input
+                        required
+                        autoFocus
+                        placeholder="Enter fabric name"
+                        value={form.fabric}
+                        onChange={(e) => setForm({ ...form, fabric: e.target.value })}
+                        className={inputClass}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleFabricSelect(FABRIC_OPTIONS[0])}
+                        className="shrink-0 rounded-lg border border-neutral-300 px-3 text-sm text-neutral-600 hover:bg-neutral-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      required
+                      value={FABRIC_OPTIONS.includes(form.fabric as (typeof FABRIC_OPTIONS)[number]) ? form.fabric : ""}
+                      onChange={(e) => handleFabricSelect(e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="" disabled>
+                        Select fabric
+                      </option>
+                      {FABRIC_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                      <option value="__custom__">Other (type your own)</option>
+                    </select>
+                  )}
                 </Field>
                 <Field label="Color" required>
                   <input required value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} className={inputClass} />
