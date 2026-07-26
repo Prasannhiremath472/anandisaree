@@ -7,7 +7,9 @@ import { ApiError } from "../utils/ApiError";
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB raw upload cap, before sharp compresses it
+  // Images are stored as-is (no server-side resize/compression), so this cap
+  // is the actual stored size, inflated ~33% again once base64-encoded.
+  limits: { fileSize: 3 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
       return cb(ApiError.badRequest("Only image files are allowed") as unknown as Error);
