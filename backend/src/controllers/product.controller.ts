@@ -28,6 +28,8 @@ const publicProductListQuerySchema = z.object({
   isNewArrival: z.coerce.boolean().optional(),
   isBestSeller: z.coerce.boolean().optional(),
   isFeatured: z.coerce.boolean().optional(),
+  isLiveSpecial: z.coerce.boolean().optional(),
+  isTopSelection: z.coerce.boolean().optional(),
 });
 
 export const listPublicProducts = asyncHandler(async (req: Request, res: Response) => {

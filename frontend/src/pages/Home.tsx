@@ -16,6 +16,8 @@ import { useStorefrontProducts } from "@/hooks/useStorefrontProducts";
 export function Home() {
   const { data: newArrivals = [] } = useStorefrontProducts({ isNewArrival: true, pageSize: 8 });
   const { data: bestSellers = [] } = useStorefrontProducts({ isBestSeller: true, pageSize: 8 });
+  const { data: liveSpecials = [] } = useStorefrontProducts({ isLiveSpecial: true, pageSize: 8 });
+  const { data: topSelection = [] } = useStorefrontProducts({ isTopSelection: true, pageSize: 8 });
 
   return (
     <>
@@ -45,6 +47,24 @@ export function Home() {
         products={newArrivals}
         viewAllHref="/new-arrivals"
       />
+
+      {liveSpecials.length > 0 && (
+        <ProductRail
+          eyebrow="Limited Time"
+          title="Live Special Today"
+          products={liveSpecials}
+          viewAllHref="/live-special-today"
+        />
+      )}
+
+      {topSelection.length > 0 && (
+        <ProductRail
+          eyebrow="Handpicked"
+          title="Top Selection"
+          products={topSelection}
+          viewAllHref="/top-selection"
+        />
+      )}
 
       <CollectionBanner
         title={FESTIVE_COLLECTION.title}

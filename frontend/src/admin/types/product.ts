@@ -46,6 +46,8 @@ export interface Product {
   isNewArrival: boolean;
   isBestSeller: boolean;
   isTodaysDeal: boolean;
+  isLiveSpecial: boolean;
+  isTopSelection: boolean;
   avgRating: string;
   reviewCount: number;
   createdAt: string;

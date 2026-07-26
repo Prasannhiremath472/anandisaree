@@ -55,6 +55,8 @@ interface UseStorefrontProductsParams {
   isNewArrival?: boolean;
   isBestSeller?: boolean;
   isFeatured?: boolean;
+  isLiveSpecial?: boolean;
+  isTopSelection?: boolean;
   categoryId?: string;
   search?: string;
   pageSize?: number;

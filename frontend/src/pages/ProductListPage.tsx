@@ -6,12 +6,23 @@ interface ProductListPageProps {
   description: string;
   isNewArrival?: boolean;
   isBestSeller?: boolean;
+  isLiveSpecial?: boolean;
+  isTopSelection?: boolean;
 }
 
-export function ProductListPage({ title, description, isNewArrival, isBestSeller }: ProductListPageProps) {
+export function ProductListPage({
+  title,
+  description,
+  isNewArrival,
+  isBestSeller,
+  isLiveSpecial,
+  isTopSelection,
+}: ProductListPageProps) {
   const { data: products = [], isLoading } = useStorefrontProducts({
     isNewArrival,
     isBestSeller,
+    isLiveSpecial,
+    isTopSelection,
     pageSize: 100,
   });
 
@@ -24,6 +35,8 @@ export function ProductListPage({ title, description, isNewArrival, isBestSeller
 
       {isLoading ? (
         <p className="text-center text-ds-sm text-charcoal/60">Loading products...</p>
+      ) : products.length === 0 ? (
+        <p className="text-center text-ds-sm text-charcoal/60">No products found here yet.</p>
       ) : (
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (

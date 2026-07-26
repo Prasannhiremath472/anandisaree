@@ -54,6 +54,26 @@ export const router = createBrowserRouter([
           />
         ),
       },
+      {
+        path: "live-special-today",
+        element: withSuspense(
+          <ProductListPage
+            title="Live Special Today"
+            description="Today's limited-time offers, picked by our team."
+            isLiveSpecial
+          />
+        ),
+      },
+      {
+        path: "top-selection",
+        element: withSuspense(
+          <ProductListPage
+            title="Top Selection"
+            description="Our handpicked selection of standout sarees and nightwear."
+            isTopSelection
+          />
+        ),
+      },
       { path: "about", element: withSuspense(<About />) },
       { path: "contact", element: withSuspense(<Contact />) },
       { path: "faq", element: withSuspense(<Faq />) },

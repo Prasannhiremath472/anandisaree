@@ -46,6 +46,8 @@ export const productCreateSchema = z.object({
   isNewArrival: z.coerce.boolean().optional(),
   isBestSeller: z.coerce.boolean().optional(),
   isTodaysDeal: z.coerce.boolean().optional(),
+  isLiveSpecial: z.coerce.boolean().optional(),
+  isTopSelection: z.coerce.boolean().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   categoryIds: z.array(z.string()).optional(),

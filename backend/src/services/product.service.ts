@@ -137,6 +137,8 @@ interface PublicListFilters {
   isNewArrival?: boolean;
   isBestSeller?: boolean;
   isFeatured?: boolean;
+  isLiveSpecial?: boolean;
+  isTopSelection?: boolean;
 }
 
 export async function listPublicProducts(pagination: PaginationParams, filters: PublicListFilters) {
@@ -155,6 +157,8 @@ export async function listPublicProducts(pagination: PaginationParams, filters: 
   if (filters.isNewArrival) conditions.push("isNewArrival = 1");
   if (filters.isBestSeller) conditions.push("isBestSeller = 1");
   if (filters.isFeatured) conditions.push("isFeatured = 1");
+  if (filters.isLiveSpecial) conditions.push("isLiveSpecial = 1");
+  if (filters.isTopSelection) conditions.push("isTopSelection = 1");
 
   const sortBy = filters.sortBy && SORTABLE_COLUMNS.has(filters.sortBy) ? filters.sortBy : "createdAt";
   const sortOrder = filters.sortOrder === "asc" ? "ASC" : "DESC";
@@ -264,6 +268,8 @@ const PRODUCT_COLUMNS = [
   "isNewArrival",
   "isBestSeller",
   "isTodaysDeal",
+  "isLiveSpecial",
+  "isTopSelection",
   "publishedAt",
   "metaTitle",
   "metaDescription",

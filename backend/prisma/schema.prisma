@@ -316,6 +316,8 @@ model Product {
   isNewArrival       Boolean   @default(false)
   isBestSeller       Boolean   @default(false)
   isTodaysDeal       Boolean   @default(false)
+  isLiveSpecial      Boolean   @default(false)
+  isTopSelection     Boolean   @default(false)
   publishedAt        DateTime?
   deletedAt          DateTime?
 
@@ -350,6 +352,8 @@ model Product {
   @@index([isNewArrival])
   @@index([isBestSeller])
   @@index([isTodaysDeal])
+  @@index([isLiveSpecial])
+  @@index([isTopSelection])
   @@index([deletedAt])
   @@index([sellingPrice])
   @@fulltext([name, description])
