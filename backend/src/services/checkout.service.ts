@@ -108,12 +108,19 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
   const orderId = createId();
   const orderNumber = generateOrderNumber();
 
+  // Create the Razorpay order first so a gateway failure never leaves behind
+  // a local PENDING order with stock already decremented.
+  let razorpayOrder: { id: string; amount: string | number; currency: string } | null = null;
+  if (input.paymentMethod === "RAZORPAY") {
+    razorpayOrder = await createRazorpayOrder(totalAmount, orderNumber);
+  }
+
   await withTransaction(async (conn) => {
     await conn.query(
       `INSERT INTO \`Order\`
-        (id, orderNumber, userId, addressId, status, paymentMethod, paymentStatus, subtotal, discountAmount, taxAmount, shippingAmount, totalAmount, createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, 'PENDING', ?, 'PENDING', ?, 0, 0, 0, ?, NOW(3), NOW(3))`,
-      [orderId, orderNumber, userId, input.addressId, input.paymentMethod, subtotal, totalAmount]
+        (id, orderNumber, userId, addressId, status, paymentMethod, paymentStatus, razorpayOrderId, subtotal, discountAmount, taxAmount, shippingAmount, totalAmount, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, 'PENDING', ?, 'PENDING', ?, ?, 0, 0, 0, ?, NOW(3), NOW(3))`,
+      [orderId, orderNumber, userId, input.addressId, input.paymentMethod, razorpayOrder?.id ?? null, subtotal, totalAmount]
     );
 
     for (const item of pricedItems) {
@@ -141,12 +148,6 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
       [createId(), orderId]
     );
   });
-
-  let razorpayOrder: { id: string; amount: string | number; currency: string } | null = null;
-  if (input.paymentMethod === "RAZORPAY") {
-    razorpayOrder = await createRazorpayOrder(totalAmount, orderNumber);
-    await query("UPDATE `Order` SET razorpayOrderId = ? WHERE id = ?", [razorpayOrder.id, orderId]);
-  }
 
   return {
     id: orderId,
