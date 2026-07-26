@@ -7,7 +7,7 @@ interface ApiProductImage {
 }
 
 interface ApiCategory {
-  category: { name: string };
+  category: { id: string; name: string };
 }
 
 interface ApiProduct {
@@ -15,11 +15,17 @@ interface ApiProduct {
   name: string;
   slug: string;
   fabric: string;
+  color: string;
+  shortDescription: string | null;
+  description: string | null;
+  washCare: string | null;
   sellingPrice: string | number;
   mrp: string | number;
   isNewArrival: number | boolean;
   isBestSeller: number | boolean;
   stockQuantity: number;
+  avgRating: string | number;
+  reviewCount: number;
   images: ApiProductImage[];
   categories: ApiCategory[];
 }
@@ -38,6 +44,7 @@ function mapProduct(p: ApiProduct): ProductCardData {
   const category = p.categories[0]?.category?.name ?? p.fabric;
   return {
     id: p.id,
+    slug: p.slug,
     name: p.name,
     category,
     price: Number(p.sellingPrice),
@@ -83,6 +90,44 @@ export function useStorefrontProduct(slug: string | undefined) {
         `/storefront/products/${slug}`
       );
       return mapProduct(data.data);
+    },
+    enabled: Boolean(slug),
+  });
+}
+
+export interface ProductDetail extends ProductCardData {
+  color: string;
+  shortDescription: string | null;
+  description: string | null;
+  washCare: string | null;
+  images: string[];
+  categoryId?: string;
+  avgRating: number;
+  reviewCount: number;
+}
+
+function mapProductDetail(p: ApiProduct): ProductDetail {
+  return {
+    ...mapProduct(p),
+    color: p.color,
+    shortDescription: p.shortDescription,
+    description: p.description,
+    washCare: p.washCare,
+    images: p.images.map((img) => img.url),
+    categoryId: p.categories[0]?.category?.id,
+    avgRating: Number(p.avgRating),
+    reviewCount: p.reviewCount,
+  };
+}
+
+export function useStorefrontProductDetail(slug: string | undefined) {
+  return useQuery({
+    queryKey: ["storefront-product-detail", slug],
+    queryFn: async () => {
+      const { data } = await apiClient.get<{ success: boolean; data: ApiProduct }>(
+        `/storefront/products/${slug}`
+      );
+      return mapProductDetail(data.data);
     },
     enabled: Boolean(slug),
   });

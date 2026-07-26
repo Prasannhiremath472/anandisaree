@@ -55,7 +55,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
       transition={{ duration: 0.4 }}
       className="group overflow-hidden rounded-xl2 border border-gold-200/60 bg-white shadow-soft transition-shadow hover:shadow-gold"
     >
-      <Link to={`/product/${product.id}`} className="block">
+      <Link to={`/product/${product.slug ?? product.id}`} className="block">
         <div className="relative aspect-[3/4] overflow-hidden bg-cream-300">
           <img
             src={product.image}
@@ -105,7 +105,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           </div>
         )}
 
-        <Link to={`/product/${product.id}`} className="block">
+        <Link to={`/product/${product.slug ?? product.id}`} className="block">
           <p className="text-ds-xs uppercase tracking-wide text-gold-700">{product.category}</p>
           <h3 className="mt-1 truncate font-heading text-ds-sm font-medium text-charcoal">{product.name}</h3>
 

@@ -81,6 +81,7 @@ export const FESTIVE_COLLECTION = {
 
 export interface ProductCard {
   id: string;
+  slug?: string;
   name: string;
   category: string;
   price: number;
