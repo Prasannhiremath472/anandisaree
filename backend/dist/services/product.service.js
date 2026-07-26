@@ -1,7 +1,4 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listProducts = listProducts;
 exports.listPublicProducts = listPublicProducts;
@@ -11,30 +8,10 @@ exports.createProduct = createProduct;
 exports.updateProduct = updateProduct;
 exports.softDeleteProduct = softDeleteProduct;
 exports.bulkDeleteProducts = bulkDeleteProducts;
-const sharp_1 = __importDefault(require("sharp"));
 const db_1 = require("../config/db");
 const id_1 = require("../utils/id");
 const ApiError_1 = require("../utils/ApiError");
 const pagination_1 = require("../utils/pagination");
-const THUMBNAIL_WIDTH = 320;
-const THUMBNAIL_JPEG_QUALITY = 72;
-/** Generates a small JPEG data URI for list/grid views from a full-size data URI. Returns null for non-data-URI (external) image URLs. */
-async function generateThumbnail(url) {
-    const match = /^data:image\/\w+;base64,(.+)$/.exec(url);
-    if (!match)
-        return null;
-    try {
-        const buf = Buffer.from(match[1], "base64");
-        const thumbBuf = await (0, sharp_1.default)(buf)
-            .resize({ width: THUMBNAIL_WIDTH, withoutEnlargement: true })
-            .jpeg({ quality: THUMBNAIL_JPEG_QUALITY })
-            .toBuffer();
-        return `data:image/jpeg;base64,${thumbBuf.toString("base64")}`;
-    }
-    catch {
-        return null;
-    }
-}
 const SORTABLE_COLUMNS = new Set([
     "createdAt",
     "updatedAt",
@@ -261,8 +238,7 @@ async function createProduct(input) {
         if (imageList?.length) {
             for (let i = 0; i < imageList.length; i++) {
                 const img = imageList[i];
-                const thumbnailUrl = await generateThumbnail(img.url);
-                await conn.query("INSERT INTO `ProductImage` (id, productId, url, thumbnailUrl, altText, isPrimary, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(3))", [(0, id_1.createId)(), productId, img.url, thumbnailUrl, img.altText ?? null, img.isPrimary ?? i === 0, i]);
+                await conn.query("INSERT INTO `ProductImage` (id, productId, url, altText, isPrimary, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW(3))", [(0, id_1.createId)(), productId, img.url, img.altText ?? null, img.isPrimary ?? i === 0, i]);
             }
         }
         const variantList = variants;
@@ -330,8 +306,7 @@ async function updateProduct(id, input) {
             await conn.query("DELETE FROM `ProductImage` WHERE productId = ?", [id]);
             for (let i = 0; i < imageList.length; i++) {
                 const img = imageList[i];
-                const thumbnailUrl = await generateThumbnail(img.url);
-                await conn.query("INSERT INTO `ProductImage` (id, productId, url, thumbnailUrl, altText, isPrimary, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(3))", [(0, id_1.createId)(), id, img.url, thumbnailUrl, img.altText ?? null, img.isPrimary ?? i === 0, i]);
+                await conn.query("INSERT INTO `ProductImage` (id, productId, url, altText, isPrimary, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW(3))", [(0, id_1.createId)(), id, img.url, img.altText ?? null, img.isPrimary ?? i === 0, i]);
             }
         }
         const variantList = variants;

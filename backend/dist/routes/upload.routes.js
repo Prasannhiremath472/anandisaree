@@ -44,7 +44,9 @@ const roles_1 = require("../utils/roles");
 const ApiError_1 = require("../utils/ApiError");
 const upload = (0, multer_1.default)({
     storage: multer_1.default.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB raw upload cap, before sharp compresses it
+    // Images are stored as-is (no server-side resize/compression), so this cap
+    // is the actual stored size, inflated ~33% again once base64-encoded.
+    limits: { fileSize: 3 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
         if (!file.mimetype.startsWith("image/")) {
             return cb(ApiError_1.ApiError.badRequest("Only image files are allowed"));
