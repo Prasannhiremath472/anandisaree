@@ -60,6 +60,8 @@ const publicProductListQuerySchema = zod_1.z.object({
     isNewArrival: zod_1.z.coerce.boolean().optional(),
     isBestSeller: zod_1.z.coerce.boolean().optional(),
     isFeatured: zod_1.z.coerce.boolean().optional(),
+    isLiveSpecial: zod_1.z.coerce.boolean().optional(),
+    isTopSelection: zod_1.z.coerce.boolean().optional(),
 });
 exports.listPublicProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const query = publicProductListQuerySchema.parse(req.query);
