@@ -15,6 +15,7 @@ export function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const couponFromUrl = searchParams.get("coupon");
+  const redirectTo = searchParams.get("redirect");
 
   useEffect(() => {
     if (couponFromUrl) {
@@ -31,7 +32,7 @@ export function Login() {
       dispatch(setCredentials({ user, accessToken }));
       toast.success(`Welcome back, ${user.name}!`);
       await claimPendingCouponIfAny();
-      navigate("/account");
+      navigate(redirectTo || "/account");
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? "Login failed. Please try again.");
     } finally {

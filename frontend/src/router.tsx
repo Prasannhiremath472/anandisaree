@@ -9,6 +9,7 @@ const CategoryIndex = lazy(() => import("@/pages/CategoryIndex").then((m) => ({ 
 const Products = lazy(() => import("@/pages/Products").then((m) => ({ default: m.Products })));
 const ProductDetail = lazy(() => import("@/pages/ProductDetail").then((m) => ({ default: m.ProductDetail })));
 const ProductListPage = lazy(() => import("@/pages/ProductListPage").then((m) => ({ default: m.ProductListPage })));
+const Checkout = lazy(() => import("@/pages/Checkout").then((m) => ({ default: m.Checkout })));
 const Gallery = lazy(() => import("@/pages/Gallery").then((m) => ({ default: m.Gallery })));
 const About = lazy(() => import("@/pages/About").then((m) => ({ default: m.About })));
 const Contact = lazy(() => import("@/pages/Contact").then((m) => ({ default: m.Contact })));
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
       { index: true, element: withSuspense(<Home />) },
       { path: "products", element: withSuspense(<Products />) },
       { path: "product/:slug", element: withSuspense(<ProductDetail />) },
+      { path: "checkout", element: withSuspense(<Checkout />) },
       { path: "category", element: withSuspense(<CategoryIndex />) },
       { path: "category/:slug", element: withSuspense(<CategoryPage kind="category" />) },
       { path: "collection/:slug", element: withSuspense(<CategoryPage kind="collection" />) },
@@ -85,7 +87,6 @@ export const router = createBrowserRouter([
       { path: "account", element: withSuspense(<Account />) },
       { path: "login", element: withSuspense(<Login />) },
       { path: "register", element: withSuspense(<Register />) },
-      // Cart and checkout routes are added in a later phase.
       { path: "*", element: withSuspense(<NotFound />) },
     ],
   },

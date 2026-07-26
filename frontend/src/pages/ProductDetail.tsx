@@ -51,6 +51,7 @@ export function ProductDetail() {
     dispatch(
       addItem({
         productId: product.id,
+        variantId: activeVariant?.id,
         size,
         name: product.name,
         imageUrl: product.image,

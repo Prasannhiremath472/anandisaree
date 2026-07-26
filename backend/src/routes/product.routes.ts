@@ -10,6 +10,7 @@ router.use(authenticate, authorize(...INVENTORY_ROLES));
 router.get("/", productController.listProducts);
 router.get("/lookups/categories", productController.listCategoriesLookup);
 router.get("/lookups/brands", productController.listBrandsLookup);
+router.post("/generate-description", productController.generateDescription);
 router.get("/:id", productController.getProduct);
 router.post("/", productController.createProduct);
 router.post("/bulk-delete", productController.bulkDeleteProducts);

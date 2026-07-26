@@ -4,6 +4,7 @@ import { Footer } from "./Footer";
 import { RecentOrderPopup } from "./RecentOrderPopup";
 import { FloatingSocialButton } from "./FloatingSocialButton";
 import { CouponPopup } from "./CouponPopup";
+import { CartDrawer } from "./CartDrawer";
 
 export function RootLayout() {
   return (
@@ -16,6 +17,7 @@ export function RootLayout() {
       <RecentOrderPopup />
       <FloatingSocialButton />
       <CouponPopup />
+      <CartDrawer />
     </div>
   );
 }

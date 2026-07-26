@@ -13,6 +13,7 @@ import settingsRoutes from "./settings.routes";
 import couponClaimRoutes from "./couponClaim.routes";
 import uploadRoutes from "./upload.routes";
 import storefrontRoutes from "./storefront.routes";
+import checkoutRoutes from "./checkout.routes";
 import { authenticate, authorize } from "../middleware/auth";
 import { ADMIN_ROLES } from "../utils/roles";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -51,5 +52,6 @@ router.use("/admin/upload", uploadRoutes);
 router.use("/coupons", couponClaimRoutes);
 
 router.use("/storefront", storefrontRoutes);
+router.use("/checkout", checkoutRoutes);
 
 export default router;

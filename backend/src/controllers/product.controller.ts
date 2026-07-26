@@ -5,6 +5,7 @@ import * as productService from "../services/product.service";
 import { productCreateSchema, productListQuerySchema, productUpdateSchema } from "../validation/product.schema";
 import { z } from "zod";
 import { query } from "../config/db";
+import { generateProductDescription } from "../services/gemini.service";
 
 export const listProducts = asyncHandler(async (req: Request, res: Response) => {
   const query = productListQuerySchema.parse(req.query);
@@ -59,6 +60,20 @@ export const updateProduct = asyncHandler(async (req: Request, res: Response) =>
 export const deleteProduct = asyncHandler(async (req: Request, res: Response) => {
   await productService.softDeleteProduct(req.params.id);
   res.json({ success: true, data: null, message: "Product deleted" });
+});
+
+const generateDescriptionSchema = z.object({
+  name: z.string().min(1),
+  fabric: z.string().min(1),
+  color: z.string().min(1),
+  category: z.string().optional(),
+  shortDescription: z.string().optional(),
+});
+
+export const generateDescription = asyncHandler(async (req: Request, res: Response) => {
+  const input = generateDescriptionSchema.parse(req.body);
+  const description = await generateProductDescription(input);
+  res.json({ success: true, data: { description } });
 });
 
 const bulkDeleteSchema = z.object({ ids: z.array(z.string()).min(1) });
