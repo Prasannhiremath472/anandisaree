@@ -9,7 +9,7 @@ const POLICIES: Record<string, { title: string; body: string }> = {
   },
   shipping: {
     title: "Shipping Policy",
-    body: `Orders are dispatched within 2 business days and delivered within ${BUSINESS.deliveryEstimate} depending on your location.`,
+    body: `Orders are delivered within ${BUSINESS.deliveryEstimate} depending on your location.`,
   },
   privacy: {
     title: "Privacy Policy",

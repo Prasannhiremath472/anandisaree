@@ -25,8 +25,6 @@ const emptyForm = {
   gstPercent: "5",
   stockQuantity: "0",
   lowStockThreshold: "5",
-  dispatchDays: "2",
-  deliveryEstimateDays: "7",
 
   // Craft details
   fabric: "",
@@ -99,8 +97,6 @@ export function ProductForm() {
         gstPercent: existing.gstPercent,
         stockQuantity: String(existing.stockQuantity),
         lowStockThreshold: String(existing.lowStockThreshold),
-        dispatchDays: "2",
-        deliveryEstimateDays: "7",
         fabric: existing.fabric,
         color: existing.color,
         sareeLength: existing.sareeLength,
@@ -179,8 +175,6 @@ export function ProductForm() {
       gstPercent: Number(form.gstPercent),
       stockQuantity: Number(form.stockQuantity),
       lowStockThreshold: Number(form.lowStockThreshold),
-      dispatchDays: Number(form.dispatchDays),
-      deliveryEstimateDays: Number(form.deliveryEstimateDays),
       isActive: form.isActive,
       isFeatured: form.isFeatured,
       isNewArrival: form.isNewArrival,
@@ -346,22 +340,6 @@ export function ProductForm() {
                     type="number"
                     value={form.lowStockThreshold}
                     onChange={(e) => setForm({ ...form, lowStockThreshold: e.target.value })}
-                    className={inputClass}
-                  />
-                </Field>
-              </div>
-            </Card>
-
-            <Card title="Shipping">
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Dispatch Time (days)">
-                  <input type="number" value={form.dispatchDays} onChange={(e) => setForm({ ...form, dispatchDays: e.target.value })} className={inputClass} />
-                </Field>
-                <Field label="Delivery Estimate (days)">
-                  <input
-                    type="number"
-                    value={form.deliveryEstimateDays}
-                    onChange={(e) => setForm({ ...form, deliveryEstimateDays: e.target.value })}
                     className={inputClass}
                   />
                 </Field>

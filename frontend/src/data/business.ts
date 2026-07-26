@@ -9,11 +9,11 @@ export const BUSINESS = {
   phoneRaw: "919146500080",
   email: "anandisaree96@gmail.com",
   address: "Maharashtra, India", // TODO: replace with full business address once provided
-  deliveryEstimate: "4 to 8 days",
+  deliveryEstimate: "4 to 10 days",
   social: {
     facebook: "https://www.facebook.com/anandisareelive?mibextid=ZbWKwL",
     youtube: "https://youtube.com/@anandisarees?si=CvXailGZybeu9zXl",
-    instagram: "https://www.instagram.com/anandi_sareelive?igsh=",
+    instagram: "https://www.instagram.com/anandi_sareelive",
     googleBusiness: "https://share.google/vg0bY9d4dZVfRvhdt",
   },
 } as const;
