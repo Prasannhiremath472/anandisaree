@@ -10,6 +10,15 @@ interface ApiCategory {
   category: { id: string; name: string };
 }
 
+interface ApiVariant {
+  id: string;
+  size: string | null;
+  color: string | null;
+  priceDelta: string | number;
+  stockQuantity: number;
+  isActive: number | boolean;
+}
+
 interface ApiProduct {
   id: string;
   name: string;
@@ -28,6 +37,7 @@ interface ApiProduct {
   reviewCount: number;
   images: ApiProductImage[];
   categories: ApiCategory[];
+  variants?: ApiVariant[];
 }
 
 interface ProductListResponse {
@@ -37,8 +47,6 @@ interface ProductListResponse {
   pageSize: number;
   totalPages: number;
 }
-
-const NIGHTWEAR_SIZES = ["Free Size", "2XL", "3XL"];
 
 function mapProduct(p: ApiProduct): ProductCardData {
   const category = p.categories[0]?.category?.name ?? p.fabric;
@@ -54,7 +62,6 @@ function mapProduct(p: ApiProduct): ProductCardData {
     isNew: Boolean(p.isNewArrival),
     isBestSeller: Boolean(p.isBestSeller),
     stockQuantity: p.stockQuantity,
-    sizes: category === "Nightwear" ? NIGHTWEAR_SIZES : undefined,
   };
 }
 
@@ -95,6 +102,14 @@ export function useStorefrontProduct(slug: string | undefined) {
   });
 }
 
+export interface ProductVariant {
+  id: string;
+  size: string | null;
+  color: string | null;
+  price: number;
+  stockQuantity: number;
+}
+
 export interface ProductDetail extends ProductCardData {
   color: string;
   shortDescription: string | null;
@@ -104,9 +119,21 @@ export interface ProductDetail extends ProductCardData {
   categoryId?: string;
   avgRating: number;
   reviewCount: number;
+  variants: ProductVariant[];
 }
 
 function mapProductDetail(p: ApiProduct): ProductDetail {
+  const basePrice = Number(p.sellingPrice);
+  const variants = (p.variants ?? [])
+    .filter((v) => Boolean(v.isActive))
+    .map((v) => ({
+      id: v.id,
+      size: v.size,
+      color: v.color,
+      price: basePrice + Number(v.priceDelta),
+      stockQuantity: v.stockQuantity,
+    }));
+
   return {
     ...mapProduct(p),
     color: p.color,
@@ -117,6 +144,8 @@ function mapProductDetail(p: ApiProduct): ProductDetail {
     categoryId: p.categories[0]?.category?.id,
     avgRating: Number(p.avgRating),
     reviewCount: p.reviewCount,
+    variants,
+    sizes: variants.length ? variants.map((v) => v.size).filter((s): s is string => Boolean(s)) : undefined,
   };
 }
 

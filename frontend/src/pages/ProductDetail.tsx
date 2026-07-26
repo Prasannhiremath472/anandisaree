@@ -33,10 +33,16 @@ export function ProductDetail() {
     );
   }
 
-  const size = product.sizes?.length ? (selectedSize ?? product.sizes[0]) : undefined;
-  const discountPct = Math.round(((product.mrp - product.price) / product.mrp) * 100);
-  const isOutOfStock = (product.stockQuantity ?? 0) <= 0;
-  const isLowStock = !isOutOfStock && (product.stockQuantity ?? 0) <= LOW_STOCK_THRESHOLD;
+  const hasVariants = product.variants.length > 0;
+  const activeVariant = hasVariants
+    ? product.variants.find((v) => v.size === selectedSize) ?? product.variants[0]
+    : undefined;
+  const size = activeVariant?.size ?? undefined;
+  const price = activeVariant?.price ?? product.price;
+  const stockQuantity = activeVariant ? activeVariant.stockQuantity : product.stockQuantity ?? 0;
+  const discountPct = Math.round(((product.mrp - price) / product.mrp) * 100);
+  const isOutOfStock = (stockQuantity ?? 0) <= 0;
+  const isLowStock = !isOutOfStock && (stockQuantity ?? 0) <= LOW_STOCK_THRESHOLD;
   const images = product.images.length ? product.images : [product.image];
   const relatedProducts = related.filter((p) => p.id !== product.id).slice(0, 4);
 
@@ -48,7 +54,7 @@ export function ProductDetail() {
         size,
         name: product.name,
         imageUrl: product.image,
-        price: product.price,
+        price,
         quantity,
       })
     );
@@ -87,9 +93,9 @@ export function ProductDetail() {
 
           <div className="mt-ds-4 flex items-center gap-ds-3">
             <span className="font-heading text-ds-2xl font-semibold text-royal-700">
-              ₹{product.price.toLocaleString("en-IN")}
+              ₹{price.toLocaleString("en-IN")}
             </span>
-            {product.mrp > product.price && (
+            {product.mrp > price && (
               <>
                 <span className="text-ds-md text-charcoal/40 line-through">
                   ₹{product.mrp.toLocaleString("en-IN")}
@@ -106,24 +112,30 @@ export function ProductDetail() {
             <p className="mt-ds-4 text-ds-sm text-charcoal/80">{product.shortDescription}</p>
           )}
 
-          {product.sizes && product.sizes.length > 0 && (
+          {hasVariants && (
             <div className="mt-ds-6">
               <p className="mb-ds-2 text-ds-sm font-medium text-charcoal">Size</p>
               <div className="flex flex-wrap gap-ds-2">
-                {product.sizes.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSelectedSize(s)}
-                    aria-pressed={size === s}
-                    className={`rounded-md border px-ds-4 py-ds-2 text-ds-sm font-medium transition-colors ${
-                      size === s
-                        ? "border-royal-600 bg-royal-600 text-white"
-                        : "border-charcoal/20 text-charcoal hover:border-royal-400"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {product.variants.map((v) => {
+                  const variantOutOfStock = v.stockQuantity <= 0;
+                  return (
+                    <button
+                      key={v.id}
+                      onClick={() => !variantOutOfStock && setSelectedSize(v.size ?? undefined)}
+                      disabled={variantOutOfStock}
+                      aria-pressed={size === v.size}
+                      className={`rounded-md border px-ds-4 py-ds-2 text-ds-sm font-medium transition-colors ${
+                        size === v.size
+                          ? "border-royal-600 bg-royal-600 text-white"
+                          : variantOutOfStock
+                          ? "cursor-not-allowed border-charcoal/10 text-charcoal/30 line-through"
+                          : "border-charcoal/20 text-charcoal hover:border-royal-400"
+                      }`}
+                    >
+                      {v.size}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -168,7 +180,7 @@ export function ProductDetail() {
 
           {isLowStock && (
             <p className="mt-ds-2 text-ds-xs font-semibold text-royal-600">
-              Only {product.stockQuantity} left in stock
+              Only {stockQuantity} left in stock
             </p>
           )}
 
