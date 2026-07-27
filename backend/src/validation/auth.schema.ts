@@ -1,18 +1,22 @@
 import { z } from "zod";
 
-export const registerSchema = z.object({
+export const registerRequestOtpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().email("Invalid email address"),
   phone: z
     .string()
     .regex(/^[6-9]\d{9}$/, "Invalid Indian phone number")
     .optional(),
-  password: z
+});
+
+export const registerVerifyOtpSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(100),
+  email: z.string().email("Invalid email address"),
+  phone: z
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain an uppercase letter")
-    .regex(/[a-z]/, "Password must contain a lowercase letter")
-    .regex(/[0-9]/, "Password must contain a number"),
+    .regex(/^[6-9]\d{9}$/, "Invalid Indian phone number")
+    .optional(),
+  code: z.string().length(6, "OTP must be 6 digits"),
 });
 
 export const loginSchema = z.object({
@@ -46,5 +50,6 @@ export const resetPasswordSchema = z.object({
     .regex(/[0-9]/, "Password must contain a number"),
 });
 
-export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegisterRequestOtpInput = z.infer<typeof registerRequestOtpSchema>;
+export type RegisterVerifyOtpInput = z.infer<typeof registerVerifyOtpSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

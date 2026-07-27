@@ -8,10 +8,8 @@ import {
   refreshTokenExpiryDate,
   signAccessToken,
 } from "../utils/tokens";
-import type { LoginInput, RegisterInput } from "../validation/auth.schema";
+import type { LoginInput, RegisterRequestOtpInput, RegisterVerifyOtpInput } from "../validation/auth.schema";
 import { sendOtpEmail } from "./mailer.service";
-
-const SALT_ROUNDS = 12;
 
 interface UserRow {
   id: string;
@@ -45,17 +43,27 @@ async function issueTokenPair(user: { id: string; email: string; role: string })
   return { accessToken, refreshToken };
 }
 
-export async function register(input: RegisterInput) {
+export async function requestRegisterOtp(input: RegisterRequestOtpInput) {
   const existing = await queryOne<UserRow>("SELECT * FROM `User` WHERE email = ? LIMIT 1", [input.email]);
   if (existing) {
     throw ApiError.conflict("An account with this email already exists");
   }
 
-  const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
+  await requestOtp(input.email, "REGISTER");
+}
+
+export async function verifyRegisterOtp(input: RegisterVerifyOtpInput) {
+  const existing = await queryOne<UserRow>("SELECT * FROM `User` WHERE email = ? LIMIT 1", [input.email]);
+  if (existing) {
+    throw ApiError.conflict("An account with this email already exists");
+  }
+
+  await verifyOtp(input.email, input.code, "REGISTER");
+
   const userId = createId();
   await execute(
-    "INSERT INTO `User` (id, name, email, phone, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, 'CUSTOMER', NOW(3), NOW(3))",
-    [userId, input.name, input.email, input.phone ?? null, passwordHash]
+    "INSERT INTO `User` (id, name, email, phone, role, isEmailVerified, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'CUSTOMER', 1, NOW(3), NOW(3))",
+    [userId, input.name, input.email, input.phone ?? null]
   );
   const user = await queryOne<UserRow>("SELECT * FROM `User` WHERE id = ? LIMIT 1", [userId]);
   if (!user) {

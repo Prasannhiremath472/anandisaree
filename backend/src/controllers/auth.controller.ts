@@ -5,7 +5,8 @@ import * as authService from "../services/auth.service";
 import {
   forgotPasswordSchema,
   loginSchema,
-  registerSchema,
+  registerRequestOtpSchema,
+  registerVerifyOtpSchema,
   requestOtpSchema,
   resetPasswordSchema,
   verifyOtpSchema,
@@ -43,9 +44,15 @@ function setRefreshCookie(res: Response, token: string) {
   });
 }
 
-export const register = asyncHandler(async (req: Request, res: Response) => {
-  const input = registerSchema.parse(req.body);
-  const result = await authService.register(input);
+export const requestRegisterOtp = asyncHandler(async (req: Request, res: Response) => {
+  const input = registerRequestOtpSchema.parse(req.body);
+  await authService.requestRegisterOtp(input);
+  res.json({ success: true, data: null, message: "OTP sent" });
+});
+
+export const verifyRegisterOtp = asyncHandler(async (req: Request, res: Response) => {
+  const input = registerVerifyOtpSchema.parse(req.body);
+  const result = await authService.verifyRegisterOtp(input);
   setRefreshCookie(res, result.refreshToken);
   res.status(201).json({ success: true, data: { user: result.user, accessToken: result.accessToken } });
 });

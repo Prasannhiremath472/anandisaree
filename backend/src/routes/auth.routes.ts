@@ -5,7 +5,8 @@ import { authLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
 
-router.post("/register", authLimiter, authController.register);
+router.post("/register/otp/request", authLimiter, authController.requestRegisterOtp);
+router.post("/register/otp/verify", authLimiter, authController.verifyRegisterOtp);
 router.post("/login", authLimiter, authController.login);
 router.post("/refresh", authController.refresh);
 router.post("/logout", authController.logout);
