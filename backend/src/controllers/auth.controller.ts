@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
-import { isProd } from "../config/env";
+import { env, isProd } from "../config/env";
 import * as authService from "../services/auth.service";
 import {
   forgotPasswordSchema,
@@ -28,12 +28,17 @@ interface UserRow {
 
 const REFRESH_COOKIE = "refreshToken";
 
+function refreshCookieMaxAgeMs(): number {
+  const days = parseInt(env.JWT_REFRESH_EXPIRES_IN.replace(/[^\d]/g, ""), 10) || 30;
+  return days * 24 * 60 * 60 * 1000;
+}
+
 function setRefreshCookie(res: Response, token: string) {
   res.cookie(REFRESH_COOKIE, token, {
     httpOnly: true,
     secure: isProd,
     sameSite: "lax",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
+    maxAge: refreshCookieMaxAgeMs(),
     path: "/api/auth",
   });
 }
