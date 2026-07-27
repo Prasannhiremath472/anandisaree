@@ -9,6 +9,7 @@ import {
   signAccessToken,
 } from "../utils/tokens";
 import type { LoginInput, RegisterInput } from "../validation/auth.schema";
+import { sendOtpEmail } from "./mailer.service";
 
 const SALT_ROUNDS = 12;
 
@@ -125,13 +126,20 @@ export async function requestOtp(identifier: string, purpose: string) {
     identifier,
   ]);
 
+  if (purpose === "LOGIN" && !user) {
+    throw ApiError.notFound("No account found for this email");
+  }
+
   await execute(
     "INSERT INTO `OtpCode` (id, userId, identifier, code, purpose, expiresAt, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW(3))",
     [createId(), user?.id ?? null, identifier, code, purpose, expiresAt]
   );
 
-  // NOTE: actual SMS/email dispatch happens in notification.service (Nodemailer wired in Phase 2/3).
-  return { code, expiresAt };
+  if (identifier.includes("@")) {
+    await sendOtpEmail(identifier, code, purpose);
+  }
+
+  return { expiresAt };
 }
 
 export async function verifyOtp(identifier: string, code: string, purpose: string) {
