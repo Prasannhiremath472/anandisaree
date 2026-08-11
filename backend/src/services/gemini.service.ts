@@ -1,7 +1,7 @@
 import { env } from "../config/env";
 import { ApiError } from "../utils/ApiError";
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 interface GenerateDescriptionInput {
@@ -36,7 +36,11 @@ Write 2-3 short paragraphs (80-120 words total) in a warm, premium retail tone s
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.7, maxOutputTokens: 400 },
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 500,
+        thinkingConfig: { thinkingBudget: 0 },
+      },
     }),
   });
 
