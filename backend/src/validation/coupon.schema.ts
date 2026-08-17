@@ -14,8 +14,8 @@ export const couponCreateSchema = z.object({
   minOrderAmount: z.coerce.number().nonnegative().optional(),
   maxDiscount: z.coerce.number().positive().optional(),
   usageLimit: z.coerce.number().int().positive().optional(),
-  isFestival: z.boolean().optional(),
-  isActive: z.boolean().optional(),
+  isFestival: z.coerce.boolean().optional(),
+  isActive: z.coerce.boolean().optional(),
   startsAt: z.coerce.date().optional(),
   expiresAt: z.coerce.date().optional(),
 });

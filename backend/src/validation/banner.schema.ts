@@ -6,7 +6,7 @@ export const bannerCreateSchema = z.object({
   linkUrl: z.string().optional(),
   placement: z.enum(["HOMEPAGE_SLIDER", "FESTIVAL_BANNER", "OFFER_BANNER", "COLLECTION_BANNER", "POPUP_BANNER"]),
   sortOrder: z.coerce.number().int().optional(),
-  isActive: z.boolean().optional(),
+  isActive: z.coerce.boolean().optional(),
   startsAt: z.coerce.date().optional(),
   endsAt: z.coerce.date().optional(),
 });

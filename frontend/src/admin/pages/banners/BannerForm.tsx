@@ -10,6 +10,14 @@ import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 
 const emptyForm = { title: "", imageUrl: "", linkUrl: "", placement: "HOMEPAGE_SLIDER" as BannerPlacement, sortOrder: "0", isActive: true };
 
+const PLACEMENT_GUIDANCE: Record<BannerPlacement, string> = {
+  HOMEPAGE_SLIDER: "Recommended 1600 × 600px (wide banner), landscape orientation, under 1 MB.",
+  FESTIVAL_BANNER: "Recommended 1600 × 500px (wide banner), landscape orientation, under 1 MB.",
+  OFFER_BANNER: "Recommended 1200 × 400px (wide banner), landscape orientation, under 1 MB.",
+  COLLECTION_BANNER: "Recommended 1200 × 900px (portrait or square), under 1 MB.",
+  POPUP_BANNER: "Recommended 800 × 800px (square), under 1 MB.",
+};
+
 export function BannerForm() {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
@@ -96,6 +104,9 @@ export function BannerForm() {
           <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputClass} />
         </Field>
         <Field label="Banner Image" required>
+          <p className="mb-2 text-xs text-neutral-500">
+            {PLACEMENT_GUIDANCE[form.placement]} Max file size 3 MB. JPG, PNG or WebP.
+          </p>
           <input
             ref={fileInputRef}
             type="file"

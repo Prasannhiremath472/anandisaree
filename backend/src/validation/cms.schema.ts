@@ -17,7 +17,7 @@ export const blogPostCreateSchema = z.object({
   tags: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
-  isPublished: z.boolean().optional(),
+  isPublished: z.coerce.boolean().optional(),
 });
 
 export const blogPostUpdateSchema = blogPostCreateSchema.partial();

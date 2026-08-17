@@ -8,5 +8,5 @@ export const customerListQuerySchema = z.object({
 });
 
 export const customerStatusUpdateSchema = z.object({
-  isActive: z.boolean(),
+  isActive: z.coerce.boolean(),
 });
