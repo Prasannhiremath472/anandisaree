@@ -6,6 +6,7 @@ import { productCreateSchema, productListQuerySchema, productUpdateSchema } from
 import { z } from "zod";
 import { query } from "../config/db";
 import { generateProductDescription } from "../services/gemini.service";
+import { importProductsFromExcel } from "../services/productImport.service";
 
 export const listProducts = asyncHandler(async (req: Request, res: Response) => {
   const query = productListQuerySchema.parse(req.query);
@@ -94,4 +95,12 @@ export const listCategoriesLookup = asyncHandler(async (_req: Request, res: Resp
 export const listBrandsLookup = asyncHandler(async (_req: Request, res: Response) => {
   const brands = await query("SELECT id, name FROM `Brand` WHERE isActive = 1");
   res.json({ success: true, data: brands });
+});
+
+export const importProducts = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "No Excel file provided" });
+  }
+  const result = await importProductsFromExcel(req.file.buffer);
+  res.json({ success: true, data: result });
 });

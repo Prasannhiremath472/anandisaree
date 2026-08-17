@@ -41,7 +41,7 @@ const COLUMNS = [
   { header: "Wash Care", key: "washCare", width: 28, note: "e.g. Dry clean only" },
   { header: "Blouse Included", key: "blouseIncluded", width: 14, note: "YES or NO" },
   { header: "Handloom", key: "isHandloom", width: 12, note: "YES or NO" },
-  { header: "Image File Name", key: "imageFileName", width: 24, note: "Exact file name of the photo in the images folder, e.g. paithani-001.jpg" },
+  { header: "Product Photo", key: "photo", width: 22, note: "Insert a picture directly into this cell (Insert > Pictures > Place in Cell). First photo becomes the main image." },
   { header: "Featured", key: "isFeatured", width: 12, note: "YES or NO - shows in Featured section" },
   { header: "New Arrival", key: "isNewArrival", width: 12, note: "YES or NO" },
   { header: "Best Seller", key: "isBestSeller", width: 12, note: "YES or NO" },
@@ -116,7 +116,7 @@ async function main() {
     washCare: "Dry clean only",
     blouseIncluded: "YES",
     isHandloom: "YES",
-    imageFileName: "paithani-001.jpg",
+    photo: "",
     isFeatured: "NO",
     isNewArrival: "YES",
     isBestSeller: "NO",
@@ -128,6 +128,12 @@ async function main() {
   sheet.getRow(2).eachCell((cell) => {
     cell.note = "Example row - replace with your real product, or delete this row";
   });
+
+  // Give every data row enough height that an inserted photo is visible in the cell.
+  const PHOTO_ROW_HEIGHT = 90;
+  for (let r = 2; r <= ROW_COUNT + 1; r++) {
+    sheet.getRow(r).height = PHOTO_ROW_HEIGHT;
+  }
 
   sheet.views = [{ state: "frozen", ySplit: 1 }];
 
@@ -157,17 +163,20 @@ async function main() {
     "1. Fill in the 'Products' sheet - one row per product. Columns marked with * are required.",
     "2. Category and Fabric have dropdowns - click the cell and choose from the list.",
     "3. For Blouse Included, Handloom, and all the Featured/New Arrival/etc columns, type YES or NO.",
-    "4. Put product photos in a folder named 'images' next to this Excel file.",
-    "   In the 'Image File Name' column, type the exact file name (e.g. paithani-001.jpg).",
-    "   You can list multiple images for one product separated by a comma, e.g. paithani-001.jpg, paithani-001-b.jpg",
+    "4. To add a photo: click the 'Product Photo' cell for that row, then in Excel go to",
+    "   Insert > Pictures > This Device, pick the photo, and Excel will place it in that cell.",
+    "   (If it doesn't land inside the cell, right-click the picture > Size and Properties >",
+    "   set 'Move and size with cells'.) One photo per row becomes that product's main image.",
     "5. Delete the example row (row 2) once you understand the format, or overwrite it with a real product.",
     "6. SKU must be unique for every product - use your own numbering, e.g. AS-PAITHANI-001, AS-PAITHANI-002...",
-    "7. Save the file and send it back along with the images folder - it will be uploaded directly.",
+    "7. Save the file and upload it directly from the admin panel: Products > Import from Excel.",
     "",
     "Notes:",
     "- MRP and Selling Price should be plain numbers (no currency symbol or commas), e.g. 4999",
     "- Saree Length is in meters, e.g. 6.3",
     "- Description can be left blank - it can be generated later from the admin panel using 'Generate with AI'",
+    "- A product photo is optional but recommended - rows without one are still created, just with no image",
+    "  until you add one later from the admin panel.",
   ];
   lines.forEach((l) => infoSheet.addRow([l]));
   infoSheet.getRow(1).font = { bold: true, size: 14 };

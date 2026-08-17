@@ -73,6 +73,36 @@ export function useGenerateDescription() {
   });
 }
 
+export interface ImportRowResult {
+  row: number;
+  sku: string;
+  name: string;
+  status: "created" | "skipped" | "failed";
+  message?: string;
+}
+
+export interface ImportProductsResult {
+  created: number;
+  skipped: number;
+  failed: number;
+  results: ImportRowResult[];
+}
+
+export function useImportProducts() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await apiClient.post<{ data: ImportProductsResult }>("/admin/products/import", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data.data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
+  });
+}
+
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -12,31 +12,19 @@ Open `Anandi_Sarees_Product_Upload_Template.xlsx`:
 
 Row 2 is a filled-in example — replace it or delete it.
 
-## 2. Add photos
+## 2. Add a photo per product
 
-Put product photos in the `images/` folder next to the Excel file. In the
-**Image File Name** column, type the exact file name (e.g. `paithani-001.jpg`).
-Multiple images for one product: separate file names with a comma.
+Click the **Product Photo** cell for a row, then in Excel: **Insert → Pictures → This
+Device**, pick the photo. Excel places it into that cell — one photo per row becomes
+that product's main image. A photo is optional; rows without one are still created,
+just with no image until you add one later from the admin panel.
 
-## 3. Run the import
+## 3. Upload it
 
-```
-cd product_import
-npm install --no-save exceljs axios
-node import_products.js Anandi_Sarees_Product_Upload_Template.xlsx images http://localhost:5000/api
-```
+In the admin panel: **Products → Import from Excel**, choose the filled-in file, and
+upload. Every row is created as a real product, and you'll see what was created,
+skipped, or failed (with reasons) once it finishes. A bad row doesn't stop the rest
+of the file from importing.
 
-For the live site, use the production API URL instead of localhost, e.g.:
-
-```
-node import_products.js Anandi_Sarees_Product_Upload_Template.xlsx images https://anandisarees.com/api
-```
-
-It will ask for an admin email, send a one-time code to that inbox, then ask you
-to type the code — same login as the admin panel. It then creates every row as
-a real product and reports what was created, skipped, or failed (with reasons)
-at the end. Rows that fail don't stop the rest of the file from importing.
-
-Re-running the same file is safe for rows that already succeeded — a duplicate
-SKU is reported as a failure for that row only, nothing gets overwritten or
-duplicated.
+Re-running the same file is safe for rows that already succeeded — a duplicate SKU
+is reported as a failure for that row only, nothing gets overwritten or duplicated.
