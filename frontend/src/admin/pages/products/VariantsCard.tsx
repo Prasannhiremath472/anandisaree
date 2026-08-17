@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { ImagePlus, Loader2, Plus, Trash2, X } from "lucide-react";
 import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
 import { TagInput } from "@/admin/components/ui/TagInput";
+import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 
 export interface VariantOption {
   id: string;
@@ -17,6 +19,7 @@ export interface VariantRow {
   sku: string;
   priceDelta: string;
   stockQuantity: string;
+  imageUrl?: string;
 }
 
 interface VariantsCardProps {
@@ -97,8 +100,28 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
     setEditingOptionId(null);
   }
 
-  function updateVariantField(key: string, field: "sku" | "priceDelta" | "stockQuantity", value: string) {
+  function updateVariantField(key: string, field: "sku" | "priceDelta" | "stockQuantity" | "imageUrl", value: string) {
     onVariantsChange(variants.map((v) => (v.key === key ? { ...v, [field]: value } : v)));
+  }
+
+  const uploadMutation = useImageUpload();
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+
+  async function handleVariantImageSelect(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setUploadingKey(key);
+    try {
+      const { dataUri } = await uploadMutation.mutateAsync(file);
+      updateVariantField(key, "imageUrl", dataUri);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? "Failed to upload image");
+    } finally {
+      setUploadingKey(null);
+    }
   }
 
   return (
@@ -182,6 +205,7 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
             <thead className="bg-neutral-50">
               <tr>
                 <th className="px-3 py-2 font-medium text-neutral-600">Variant</th>
+                <th className="px-3 py-2 font-medium text-neutral-600">Image</th>
                 <th className="px-3 py-2 font-medium text-neutral-600">SKU</th>
                 <th className="px-3 py-2 font-medium text-neutral-600">Price Adjustment (₹)</th>
                 <th className="px-3 py-2 font-medium text-neutral-600">Stock</th>
@@ -191,6 +215,44 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
               {variants.map((v) => (
                 <tr key={v.key} className="border-t border-neutral-100">
                   <td className="px-3 py-2 text-neutral-700">{v.key}</td>
+                  <td className="px-3 py-2">
+                    <input
+                      ref={(el) => {
+                        fileInputRefs.current[v.key] = el;
+                      }}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleVariantImageSelect(v.key, e)}
+                      className="hidden"
+                    />
+                    {v.imageUrl ? (
+                      <div className="relative h-12 w-10">
+                        <img src={v.imageUrl} alt={v.key} className="h-full w-full rounded object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => updateVariantField(v.key, "imageUrl", "")}
+                          aria-label="Remove variant image"
+                          className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-neutral-500 shadow"
+                        >
+                          <X className="h-2.5 w-2.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRefs.current[v.key]?.click()}
+                        disabled={uploadingKey === v.key}
+                        className="flex h-12 w-10 items-center justify-center rounded border border-dashed border-neutral-300 text-neutral-400 hover:border-royal-300 hover:text-royal-500 disabled:opacity-60"
+                        aria-label="Upload variant image"
+                      >
+                        {uploadingKey === v.key ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <ImagePlus className="h-4 w-4" />
+                        )}
+                      </button>
+                    )}
+                  </td>
                   <td className="px-3 py-2">
                     <input
                       value={v.sku}

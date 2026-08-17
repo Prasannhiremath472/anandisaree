@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Truck, ShieldCheck, RotateCcw } from "lucide-react";
 import { ProductCard } from "@/components/home/ProductCard";
@@ -13,6 +13,7 @@ export function ProductDetail() {
   const { data: product, isLoading } = useStorefrontProductDetail(slug);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | undefined>();
+  const [selectedColor, setSelectedColor] = useState<string | undefined>();
   const [quantity, setQuantity] = useState(1);
   const dispatch = useAppDispatch();
 
@@ -34,8 +35,16 @@ export function ProductDetail() {
   }
 
   const hasVariants = product.variants.length > 0;
+  const availableSizes = [...new Set(product.variants.map((v) => v.size).filter((s): s is string => Boolean(s)))];
+  const availableColors = [...new Set(product.variants.map((v) => v.color).filter((c): c is string => Boolean(c)))];
+
   const activeVariant = hasVariants
-    ? product.variants.find((v) => v.size === selectedSize) ?? product.variants[0]
+    ? product.variants.find(
+        (v) => (!selectedSize || v.size === selectedSize) && (!selectedColor || v.color === selectedColor)
+      ) ??
+      product.variants.find((v) => v.size === selectedSize) ??
+      product.variants.find((v) => v.color === selectedColor) ??
+      product.variants[0]
     : undefined;
   const size = activeVariant?.size ?? undefined;
   const price = activeVariant?.price ?? product.price;
@@ -43,8 +52,17 @@ export function ProductDetail() {
   const discountPct = Math.round(((product.mrp - price) / product.mrp) * 100);
   const isOutOfStock = (stockQuantity ?? 0) <= 0;
   const isLowStock = !isOutOfStock && (stockQuantity ?? 0) <= LOW_STOCK_THRESHOLD;
-  const images = product.images.length ? product.images : [product.image];
+  const images =
+    activeVariant?.imageUrl
+      ? [activeVariant.imageUrl, ...product.images.filter((img) => img !== activeVariant.imageUrl)]
+      : product.images.length
+      ? product.images
+      : [product.image];
   const relatedProducts = related.filter((p) => p.id !== product.id).slice(0, 4);
+
+  useEffect(() => {
+    setActiveImage(0);
+  }, [activeVariant?.imageUrl]);
 
   function addToCart() {
     if (!product) return;
@@ -54,7 +72,7 @@ export function ProductDetail() {
         variantId: activeVariant?.id,
         size,
         name: product.name,
-        imageUrl: product.image,
+        imageUrl: activeVariant?.imageUrl ?? product.image,
         price,
         quantity,
       })
@@ -113,27 +131,61 @@ export function ProductDetail() {
             <p className="mt-ds-4 text-ds-sm text-charcoal/80">{product.shortDescription}</p>
           )}
 
-          {hasVariants && (
+          {availableColors.length > 0 && (
             <div className="mt-ds-6">
-              <p className="mb-ds-2 text-ds-sm font-medium text-charcoal">Size</p>
+              <p className="mb-ds-2 text-ds-sm font-medium text-charcoal">
+                Color{activeVariant?.color ? `: ${activeVariant.color}` : ""}
+              </p>
               <div className="flex flex-wrap gap-ds-2">
-                {product.variants.map((v) => {
-                  const variantOutOfStock = v.stockQuantity <= 0;
+                {availableColors.map((c) => {
+                  const variantForColor = product.variants.find((v) => v.color === c);
+                  const colorOutOfStock = variantForColor ? variantForColor.stockQuantity <= 0 : false;
                   return (
                     <button
-                      key={v.id}
-                      onClick={() => !variantOutOfStock && setSelectedSize(v.size ?? undefined)}
-                      disabled={variantOutOfStock}
-                      aria-pressed={size === v.size}
+                      key={c}
+                      onClick={() => !colorOutOfStock && setSelectedColor(c)}
+                      disabled={colorOutOfStock}
+                      aria-pressed={activeVariant?.color === c}
                       className={`rounded-md border px-ds-4 py-ds-2 text-ds-sm font-medium transition-colors ${
-                        size === v.size
+                        activeVariant?.color === c
                           ? "border-royal-600 bg-royal-600 text-white"
-                          : variantOutOfStock
+                          : colorOutOfStock
                           ? "cursor-not-allowed border-charcoal/10 text-charcoal/30 line-through"
                           : "border-charcoal/20 text-charcoal hover:border-royal-400"
                       }`}
                     >
-                      {v.size}
+                      {c}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {availableSizes.length > 0 && (
+            <div className="mt-ds-6">
+              <p className="mb-ds-2 text-ds-sm font-medium text-charcoal">Size</p>
+              <div className="flex flex-wrap gap-ds-2">
+                {availableSizes.map((s) => {
+                  const variantForSize = product.variants.find(
+                    (v) => v.size === s && (!selectedColor || v.color === selectedColor)
+                  );
+                  const sizeOutOfStock = variantForSize ? variantForSize.stockQuantity <= 0 : false;
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => !sizeOutOfStock && setSelectedSize(s)}
+                      disabled={sizeOutOfStock}
+                      aria-pressed={size === s}
+                      className={`rounded-md border px-ds-4 py-ds-2 text-ds-sm font-medium transition-colors ${
+                        size === s
+                          ? "border-royal-600 bg-royal-600 text-white"
+                          : sizeOutOfStock
+                          ? "cursor-not-allowed border-charcoal/10 text-charcoal/30 line-through"
+                          : "border-charcoal/20 text-charcoal hover:border-royal-400"
+                      }`}
+                    >
+                      {s}
                     </button>
                   );
                 })}

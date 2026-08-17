@@ -18,6 +18,7 @@ export interface ProductVariant {
   priceDelta: string;
   stockQuantity: number;
   isActive: boolean;
+  imageUrl?: string | null;
 }
 
 export interface Product {

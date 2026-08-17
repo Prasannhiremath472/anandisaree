@@ -192,6 +192,7 @@ export function ProductForm() {
             sku: v.sku,
             priceDelta: v.priceDelta,
             stockQuantity: String(v.stockQuantity),
+            imageUrl: v.imageUrl ?? undefined,
           }))
         );
       }
@@ -255,6 +256,7 @@ export function ProductForm() {
             size: v.size,
             priceDelta: Number(v.priceDelta || 0),
             stockQuantity: Number(v.stockQuantity || 0),
+            imageUrl: v.imageUrl || undefined,
           }))
         : undefined,
     };

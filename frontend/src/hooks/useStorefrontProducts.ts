@@ -17,6 +17,7 @@ interface ApiVariant {
   priceDelta: string | number;
   stockQuantity: number;
   isActive: number | boolean;
+  imageUrl: string | null;
 }
 
 interface ApiProduct {
@@ -108,6 +109,7 @@ export interface ProductVariant {
   color: string | null;
   price: number;
   stockQuantity: number;
+  imageUrl: string | null;
 }
 
 export interface ProductDetail extends ProductCardData {
@@ -132,6 +134,7 @@ function mapProductDetail(p: ApiProduct): ProductDetail {
       color: v.color,
       price: basePrice + Number(v.priceDelta),
       stockQuantity: v.stockQuantity,
+      imageUrl: v.imageUrl,
     }));
 
   return {
