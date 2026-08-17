@@ -17,7 +17,7 @@ const emptyForm = {
   sku: "",
   shortDescription: "",
   description: "",
-  imageUrl: "",
+  images: [] as string[],
   categoryId: "",
 
   // Pricing & inventory
@@ -110,16 +110,31 @@ export function ProductForm() {
   }
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files ?? []);
     e.target.value = "";
-    if (!file) return;
+    if (!files.length) return;
 
-    try {
-      const { dataUri } = await uploadMutation.mutateAsync(file);
-      setForm((f) => ({ ...f, imageUrl: dataUri }));
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Failed to upload image");
+    for (const file of files) {
+      try {
+        const { dataUri } = await uploadMutation.mutateAsync(file);
+        setForm((f) => ({ ...f, images: [...f.images, dataUri] }));
+      } catch (err: any) {
+        toast.error(err?.response?.data?.message ?? `Failed to upload ${file.name}`);
+      }
     }
+  }
+
+  function removeImage(index: number) {
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+  }
+
+  function makeImagePrimary(index: number) {
+    setForm((f) => {
+      const images = [...f.images];
+      const [selected] = images.splice(index, 1);
+      images.unshift(selected);
+      return { ...f, images };
+    });
   }
 
   useEffect(() => {
@@ -130,7 +145,7 @@ export function ProductForm() {
         sku: existing.sku,
         shortDescription: existing.shortDescription ?? "",
         description: existing.description ?? "",
-        imageUrl: existing.images[0]?.url ?? "",
+        images: existing.images.map((img) => img.url),
         categoryId: existing.categories[0]?.category.id ?? "",
         mrp: existing.mrp,
         sellingPrice: existing.sellingPrice,
@@ -232,7 +247,7 @@ export function ProductForm() {
       metaTitle: form.metaTitle || undefined,
       metaDescription: form.metaDescription || undefined,
       categoryIds: form.categoryId ? [form.categoryId] : [],
-      images: form.imageUrl ? [{ url: form.imageUrl, isPrimary: true }] : [],
+      images: form.images.map((url, i) => ({ url, isPrimary: i === 0 })),
       variants: variants.length
         ? variants.map((v) => ({
             sku: v.sku,
@@ -328,42 +343,70 @@ export function ProductForm() {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              {form.imageUrl ? (
-                <div className="relative w-40">
-                  <img src={form.imageUrl} alt="Product preview" className="aspect-[3/4] w-full rounded-lg object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, imageUrl: "" })}
-                    aria-label="Remove image"
-                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
+
+              {form.images.length > 0 && (
+                <div className="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+                  {form.images.map((url, index) => (
+                    <div key={url.slice(0, 60) + index} className="group relative">
+                      <img
+                        src={url}
+                        alt={`Product ${index + 1}`}
+                        className={`aspect-[3/4] w-full rounded-lg object-cover ${
+                          index === 0 ? "ring-2 ring-royal-500" : ""
+                        }`}
+                      />
+                      {index === 0 && (
+                        <span className="absolute left-1 top-1 rounded bg-royal-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                          Primary
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        aria-label="Remove image"
+                        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                      {index !== 0 && (
+                        <button
+                          type="button"
+                          onClick={() => makeImagePrimary(index)}
+                          className="absolute inset-x-1 bottom-1 rounded bg-black/60 py-1 text-[10px] font-medium text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          Make primary
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadMutation.isPending}
-                  className="flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 py-10 text-center hover:border-royal-300 hover:bg-royal-50/30 disabled:opacity-60"
-                >
-                  {uploadMutation.isPending ? (
-                    <>
-                      <Loader2 className="h-6 w-6 animate-spin text-royal-500" />
-                      <p className="text-xs text-neutral-400">Uploading...</p>
-                    </>
-                  ) : (
-                    <>
-                      <ImagePlus className="h-6 w-6 text-neutral-300" />
-                      <p className="text-xs font-medium text-royal-600">Click to upload an image</p>
-                      <p className="text-[11px] text-neutral-400">JPG, PNG or WebP</p>
-                    </>
-                  )}
-                </button>
               )}
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadMutation.isPending}
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-neutral-200 py-10 text-center hover:border-royal-300 hover:bg-royal-50/30 disabled:opacity-60"
+              >
+                {uploadMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-6 w-6 animate-spin text-royal-500" />
+                    <p className="text-xs text-neutral-400">Uploading...</p>
+                  </>
+                ) : (
+                  <>
+                    <ImagePlus className="h-6 w-6 text-neutral-300" />
+                    <p className="text-xs font-medium text-royal-600">
+                      {form.images.length > 0 ? "Click to add more photos" : "Click to upload photos"}
+                    </p>
+                    <p className="text-[11px] text-neutral-400">JPG, PNG or WebP — select multiple at once</p>
+                  </>
+                )}
+              </button>
             </Card>
 
             <Card title="Pricing">
