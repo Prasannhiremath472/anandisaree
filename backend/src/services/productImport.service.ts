@@ -50,7 +50,7 @@ export async function importProductsFromExcel(buffer: Buffer) {
 
   const headerRow = sheet.getRow(1);
   const colIndex: Record<string, number> = {};
-  headerRow.eachCell((cell, colNumber) => {
+  headerRow.eachCell((cell: ExcelJS.Cell, colNumber: number) => {
     const key = cellText(cell.value).replace("*", "").trim();
     if (key) colIndex[key] = colNumber;
   });
