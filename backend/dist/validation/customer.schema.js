@@ -9,6 +9,6 @@ exports.customerListQuerySchema = zod_1.z.object({
     isActive: zod_1.z.coerce.boolean().optional(),
 });
 exports.customerStatusUpdateSchema = zod_1.z.object({
-    isActive: zod_1.z.boolean(),
+    isActive: zod_1.z.coerce.boolean(),
 });
 //# sourceMappingURL=customer.schema.js.map

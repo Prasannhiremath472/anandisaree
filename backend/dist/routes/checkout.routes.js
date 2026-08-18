@@ -34,19 +34,18 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const authController = __importStar(require("../controllers/auth.controller"));
+const checkoutController = __importStar(require("../controllers/checkout.controller"));
 const auth_1 = require("../middleware/auth");
-const rateLimiter_1 = require("../middleware/rateLimiter");
+const env_1 = require("../config/env");
 const router = (0, express_1.Router)();
-router.post("/register/otp/request", rateLimiter_1.authLimiter, authController.requestRegisterOtp);
-router.post("/register/otp/verify", rateLimiter_1.authLimiter, authController.verifyRegisterOtp);
-router.post("/login", rateLimiter_1.authLimiter, authController.login);
-router.post("/refresh", authController.refresh);
-router.post("/logout", authController.logout);
-router.post("/otp/request", rateLimiter_1.authLimiter, authController.requestOtp);
-router.post("/otp/verify", rateLimiter_1.authLimiter, authController.verifyOtpAndLogin);
-router.post("/forgot-password", rateLimiter_1.authLimiter, authController.forgotPassword);
-router.post("/reset-password", rateLimiter_1.authLimiter, authController.resetPassword);
-router.get("/me", auth_1.authenticate, authController.me);
+router.get("/razorpay-key", (_req, res) => {
+    res.json({ success: true, data: { keyId: env_1.env.RAZORPAY_KEY_ID } });
+});
+router.use(auth_1.authenticate);
+router.get("/addresses", checkoutController.listAddresses);
+router.post("/addresses", checkoutController.createAddress);
+router.post("/orders", checkoutController.createOrder);
+router.post("/orders/verify-payment", checkoutController.verifyPayment);
+router.get("/orders/mine", checkoutController.listMyOrders);
 exports.default = router;
-//# sourceMappingURL=auth.routes.js.map
+//# sourceMappingURL=checkout.routes.js.map

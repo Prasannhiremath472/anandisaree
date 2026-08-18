@@ -51,6 +51,7 @@ const settings_routes_1 = __importDefault(require("./settings.routes"));
 const couponClaim_routes_1 = __importDefault(require("./couponClaim.routes"));
 const upload_routes_1 = __importDefault(require("./upload.routes"));
 const storefront_routes_1 = __importDefault(require("./storefront.routes"));
+const checkout_routes_1 = __importDefault(require("./checkout.routes"));
 const auth_1 = require("../middleware/auth");
 const roles_1 = require("../utils/roles");
 const asyncHandler_1 = require("../utils/asyncHandler");
@@ -77,5 +78,6 @@ router.use("/admin/settings", settings_routes_1.default);
 router.use("/admin/upload", upload_routes_1.default);
 router.use("/coupons", couponClaim_routes_1.default);
 router.use("/storefront", storefront_routes_1.default);
+router.use("/checkout", checkout_routes_1.default);
 exports.default = router;
 //# sourceMappingURL=index.js.map

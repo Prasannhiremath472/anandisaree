@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.me = exports.resetPassword = exports.forgotPassword = exports.verifyOtpAndLogin = exports.requestOtp = exports.logout = exports.refresh = exports.login = exports.register = void 0;
+exports.me = exports.resetPassword = exports.forgotPassword = exports.verifyOtpAndLogin = exports.requestOtp = exports.logout = exports.refresh = exports.login = exports.verifyRegisterOtp = exports.requestRegisterOtp = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const env_1 = require("../config/env");
 const authService = __importStar(require("../services/auth.service"));
@@ -47,18 +47,27 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const ApiError_1 = require("../utils/ApiError");
 const tokens_1 = require("../utils/tokens");
 const REFRESH_COOKIE = "refreshToken";
+function refreshCookieMaxAgeMs() {
+    const days = parseInt(env_1.env.JWT_REFRESH_EXPIRES_IN.replace(/[^\d]/g, ""), 10) || 30;
+    return days * 24 * 60 * 60 * 1000;
+}
 function setRefreshCookie(res, token) {
     res.cookie(REFRESH_COOKIE, token, {
         httpOnly: true,
         secure: env_1.isProd,
         sameSite: "lax",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
+        maxAge: refreshCookieMaxAgeMs(),
         path: "/api/auth",
     });
 }
-exports.register = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
-    const input = auth_schema_1.registerSchema.parse(req.body);
-    const result = await authService.register(input);
+exports.requestRegisterOtp = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const input = auth_schema_1.registerRequestOtpSchema.parse(req.body);
+    await authService.requestRegisterOtp(input);
+    res.json({ success: true, data: null, message: "OTP sent" });
+});
+exports.verifyRegisterOtp = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const input = auth_schema_1.registerVerifyOtpSchema.parse(req.body);
+    const result = await authService.verifyRegisterOtp(input);
     setRefreshCookie(res, result.refreshToken);
     res.status(201).json({ success: true, data: { user: result.user, accessToken: result.accessToken } });
 });

@@ -33,13 +33,15 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listBrandsLookup = exports.listCategoriesLookup = exports.bulkDeleteProducts = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getPublicProductBySlug = exports.listPublicProducts = exports.getProduct = exports.listProducts = void 0;
+exports.importProducts = exports.listBrandsLookup = exports.listCategoriesLookup = exports.bulkDeleteProducts = exports.generateDescription = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getPublicProductBySlug = exports.listPublicProducts = exports.getProduct = exports.listProducts = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const pagination_1 = require("../utils/pagination");
 const productService = __importStar(require("../services/product.service"));
 const product_schema_1 = require("../validation/product.schema");
 const zod_1 = require("zod");
 const db_1 = require("../config/db");
+const gemini_service_1 = require("../services/gemini.service");
+const productImport_service_1 = require("../services/productImport.service");
 exports.listProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const query = product_schema_1.productListQuerySchema.parse(req.query);
     const pagination = (0, pagination_1.getPagination)(req);
@@ -87,6 +89,18 @@ exports.deleteProduct = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     await productService.softDeleteProduct(req.params.id);
     res.json({ success: true, data: null, message: "Product deleted" });
 });
+const generateDescriptionSchema = zod_1.z.object({
+    name: zod_1.z.string().min(1),
+    fabric: zod_1.z.string().min(1),
+    color: zod_1.z.string().min(1),
+    category: zod_1.z.string().optional(),
+    shortDescription: zod_1.z.string().optional(),
+});
+exports.generateDescription = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const input = generateDescriptionSchema.parse(req.body);
+    const description = await (0, gemini_service_1.generateProductDescription)(input);
+    res.json({ success: true, data: { description } });
+});
 const bulkDeleteSchema = zod_1.z.object({ ids: zod_1.z.array(zod_1.z.string()).min(1) });
 exports.bulkDeleteProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const { ids } = bulkDeleteSchema.parse(req.body);
@@ -100,5 +114,12 @@ exports.listCategoriesLookup = (0, asyncHandler_1.asyncHandler)(async (_req, res
 exports.listBrandsLookup = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
     const brands = await (0, db_1.query)("SELECT id, name FROM `Brand` WHERE isActive = 1");
     res.json({ success: true, data: brands });
+});
+exports.importProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: "No Excel file provided" });
+    }
+    const result = await (0, productImport_service_1.importProductsFromExcel)(req.file.buffer);
+    res.json({ success: true, data: result });
 });
 //# sourceMappingURL=product.controller.js.map

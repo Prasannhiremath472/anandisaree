@@ -32,16 +32,35 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const multer_1 = __importDefault(require("multer"));
 const productController = __importStar(require("../controllers/product.controller"));
 const auth_1 = require("../middleware/auth");
 const roles_1 = require("../utils/roles");
+const ApiError_1 = require("../utils/ApiError");
+const excelUpload = (0, multer_1.default)({
+    storage: multer_1.default.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+        const isExcel = file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+            file.originalname.toLowerCase().endsWith(".xlsx");
+        if (!isExcel) {
+            return cb(ApiError_1.ApiError.badRequest("Please upload a .xlsx file"));
+        }
+        cb(null, true);
+    },
+});
 const router = (0, express_1.Router)();
 router.use(auth_1.authenticate, (0, auth_1.authorize)(...roles_1.INVENTORY_ROLES));
 router.get("/", productController.listProducts);
 router.get("/lookups/categories", productController.listCategoriesLookup);
 router.get("/lookups/brands", productController.listBrandsLookup);
+router.post("/generate-description", productController.generateDescription);
+router.post("/import", excelUpload.single("file"), productController.importProducts);
 router.get("/:id", productController.getProduct);
 router.post("/", productController.createProduct);
 router.post("/bulk-delete", productController.bulkDeleteProducts);

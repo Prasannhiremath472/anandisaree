@@ -15,8 +15,8 @@ exports.couponCreateSchema = zod_1.z.object({
     minOrderAmount: zod_1.z.coerce.number().nonnegative().optional(),
     maxDiscount: zod_1.z.coerce.number().positive().optional(),
     usageLimit: zod_1.z.coerce.number().int().positive().optional(),
-    isFestival: zod_1.z.boolean().optional(),
-    isActive: zod_1.z.boolean().optional(),
+    isFestival: zod_1.z.coerce.boolean().optional(),
+    isActive: zod_1.z.coerce.boolean().optional(),
     startsAt: zod_1.z.coerce.date().optional(),
     expiresAt: zod_1.z.coerce.date().optional(),
 });

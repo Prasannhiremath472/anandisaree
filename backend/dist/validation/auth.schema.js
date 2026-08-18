@@ -1,20 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetPasswordSchema = exports.forgotPasswordSchema = exports.verifyOtpSchema = exports.requestOtpSchema = exports.loginSchema = exports.registerSchema = void 0;
+exports.resetPasswordSchema = exports.forgotPasswordSchema = exports.verifyOtpSchema = exports.requestOtpSchema = exports.loginSchema = exports.registerVerifyOtpSchema = exports.registerRequestOtpSchema = void 0;
 const zod_1 = require("zod");
-exports.registerSchema = zod_1.z.object({
+exports.registerRequestOtpSchema = zod_1.z.object({
     name: zod_1.z.string().min(2, "Name must be at least 2 characters").max(100),
     email: zod_1.z.string().email("Invalid email address"),
     phone: zod_1.z
         .string()
         .regex(/^[6-9]\d{9}$/, "Invalid Indian phone number")
         .optional(),
-    password: zod_1.z
+});
+exports.registerVerifyOtpSchema = zod_1.z.object({
+    name: zod_1.z.string().min(2, "Name must be at least 2 characters").max(100),
+    email: zod_1.z.string().email("Invalid email address"),
+    phone: zod_1.z
         .string()
-        .min(8, "Password must be at least 8 characters")
-        .regex(/[A-Z]/, "Password must contain an uppercase letter")
-        .regex(/[a-z]/, "Password must contain a lowercase letter")
-        .regex(/[0-9]/, "Password must contain a number"),
+        .regex(/^[6-9]\d{9}$/, "Invalid Indian phone number")
+        .optional(),
+    code: zod_1.z.string().length(6, "OTP must be 6 digits"),
 });
 exports.loginSchema = zod_1.z.object({
     email: zod_1.z.string().email("Invalid email address"),

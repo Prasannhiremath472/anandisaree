@@ -8,7 +8,7 @@ exports.bannerCreateSchema = zod_1.z.object({
     linkUrl: zod_1.z.string().optional(),
     placement: zod_1.z.enum(["HOMEPAGE_SLIDER", "FESTIVAL_BANNER", "OFFER_BANNER", "COLLECTION_BANNER", "POPUP_BANNER"]),
     sortOrder: zod_1.z.coerce.number().int().optional(),
-    isActive: zod_1.z.boolean().optional(),
+    isActive: zod_1.z.coerce.boolean().optional(),
     startsAt: zod_1.z.coerce.date().optional(),
     endsAt: zod_1.z.coerce.date().optional(),
 });

@@ -1,8 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.notFoundHandler = notFoundHandler;
 exports.errorHandler = errorHandler;
 const zod_1 = require("zod");
+const multer_1 = __importDefault(require("multer"));
 const ApiError_1 = require("../utils/ApiError");
 const logger_1 = require("../config/logger");
 function notFoundHandler(req, res) {
@@ -16,6 +20,10 @@ function errorHandler(err, req, res, _next) {
             errors[key] = errors[key] ? [...errors[key], issue.message] : [issue.message];
         }
         return res.status(400).json({ success: false, message: "Validation failed", errors });
+    }
+    if (err instanceof multer_1.default.MulterError) {
+        const message = err.code === "LIMIT_FILE_SIZE" ? "Image is too large — please upload a file under 3 MB" : err.message;
+        return res.status(400).json({ success: false, message });
     }
     if (err instanceof ApiError_1.ApiError) {
         if (err.statusCode >= 500) {

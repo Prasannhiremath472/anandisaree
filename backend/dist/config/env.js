@@ -46,6 +46,7 @@ exports.env = {
     RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID ?? "",
     RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET ?? "",
     COOKIE_SECRET: process.env.COOKIE_SECRET ?? "dev_cookie_secret_change_me",
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? "",
 };
 exports.isProd = exports.env.NODE_ENV === "production";
 //# sourceMappingURL=env.js.map

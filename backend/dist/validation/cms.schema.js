@@ -18,7 +18,7 @@ exports.blogPostCreateSchema = zod_1.z.object({
     tags: zod_1.z.string().optional(),
     metaTitle: zod_1.z.string().optional(),
     metaDescription: zod_1.z.string().optional(),
-    isPublished: zod_1.z.boolean().optional(),
+    isPublished: zod_1.z.coerce.boolean().optional(),
 });
 exports.blogPostUpdateSchema = exports.blogPostCreateSchema.partial();
 //# sourceMappingURL=cms.schema.js.map

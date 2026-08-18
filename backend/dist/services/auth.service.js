@@ -3,7 +3,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.register = register;
+exports.requestRegisterOtp = requestRegisterOtp;
+exports.verifyRegisterOtp = verifyRegisterOtp;
 exports.login = login;
 exports.refreshAccessToken = refreshAccessToken;
 exports.revokeRefreshToken = revokeRefreshToken;
@@ -15,7 +16,7 @@ const db_1 = require("../config/db");
 const id_1 = require("../utils/id");
 const ApiError_1 = require("../utils/ApiError");
 const tokens_1 = require("../utils/tokens");
-const SALT_ROUNDS = 12;
+const mailer_service_1 = require("./mailer.service");
 async function issueTokenPair(user) {
     const accessToken = (0, tokens_1.signAccessToken)({ userId: user.id, email: user.email, role: user.role });
     const refreshToken = (0, tokens_1.generateRefreshTokenValue)();
@@ -27,14 +28,21 @@ async function issueTokenPair(user) {
     ]);
     return { accessToken, refreshToken };
 }
-async function register(input) {
+async function requestRegisterOtp(input) {
     const existing = await (0, db_1.queryOne)("SELECT * FROM `User` WHERE email = ? LIMIT 1", [input.email]);
     if (existing) {
         throw ApiError_1.ApiError.conflict("An account with this email already exists");
     }
-    const passwordHash = await bcryptjs_1.default.hash(input.password, SALT_ROUNDS);
+    await requestOtp(input.email, "REGISTER");
+}
+async function verifyRegisterOtp(input) {
+    const existing = await (0, db_1.queryOne)("SELECT * FROM `User` WHERE email = ? LIMIT 1", [input.email]);
+    if (existing) {
+        throw ApiError_1.ApiError.conflict("An account with this email already exists");
+    }
+    await verifyOtp(input.email, input.code, "REGISTER");
     const userId = (0, id_1.createId)();
-    await (0, db_1.execute)("INSERT INTO `User` (id, name, email, phone, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, 'CUSTOMER', NOW(3), NOW(3))", [userId, input.name, input.email, input.phone ?? null, passwordHash]);
+    await (0, db_1.execute)("INSERT INTO `User` (id, name, email, phone, role, isEmailVerified, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'CUSTOMER', 1, NOW(3), NOW(3))", [userId, input.name, input.email, input.phone ?? null]);
     const user = await (0, db_1.queryOne)("SELECT * FROM `User` WHERE id = ? LIMIT 1", [userId]);
     if (!user) {
         throw ApiError_1.ApiError.internal("Failed to create user");
@@ -84,9 +92,14 @@ async function requestOtp(identifier, purpose) {
         identifier,
         identifier,
     ]);
+    if (purpose === "LOGIN" && !user) {
+        throw ApiError_1.ApiError.notFound("No account found for this email");
+    }
     await (0, db_1.execute)("INSERT INTO `OtpCode` (id, userId, identifier, code, purpose, expiresAt, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW(3))", [(0, id_1.createId)(), user?.id ?? null, identifier, code, purpose, expiresAt]);
-    // NOTE: actual SMS/email dispatch happens in notification.service (Nodemailer wired in Phase 2/3).
-    return { code, expiresAt };
+    if (identifier.includes("@")) {
+        await (0, mailer_service_1.sendOtpEmail)(identifier, code, purpose);
+    }
+    return { expiresAt };
 }
 async function verifyOtp(identifier, code, purpose) {
     const otp = await (0, db_1.queryOne)("SELECT id FROM `OtpCode` WHERE identifier = ? AND code = ? AND purpose = ? AND consumed = 0 AND expiresAt > NOW(3) ORDER BY createdAt DESC LIMIT 1", [identifier, code, purpose]);
