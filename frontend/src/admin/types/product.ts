@@ -35,7 +35,12 @@ export interface Product {
   palluDesign?: string | null;
   designPattern?: string | null;
   color: string;
-  sareeLength: string;
+  sareeLength?: string | null;
+  craftOrigin?: string | null;
+  district?: string | null;
+  blouseLength?: string | null;
+  weightGrams?: number | null;
+  washCare?: string | null;
   blouseIncluded: boolean;
   mrp: string;
   sellingPrice: string;

@@ -290,7 +290,7 @@ model Product {
   secondaryColors     String?  // comma separated
 
   // Physical specs
-  sareeLength        Decimal   @db.Decimal(5, 2) // in meters
+  sareeLength        Decimal?  @db.Decimal(5, 2) // in meters
   blouseIncluded      Boolean   @default(false)
   blouseLength        Decimal?  @db.Decimal(5, 2)
   weightGrams          Int?

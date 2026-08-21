@@ -25,7 +25,7 @@ export const productCreateSchema = z.object({
   designPattern: z.string().optional(),
   color: z.string().min(1),
   secondaryColors: z.string().optional(),
-  sareeLength: z.coerce.number().positive(),
+  sareeLength: z.coerce.number().positive().optional(),
   blouseIncluded: z.coerce.boolean().optional(),
   blouseLength: z.coerce.number().positive().optional(),
   weightGrams: z.coerce.number().int().positive().optional(),

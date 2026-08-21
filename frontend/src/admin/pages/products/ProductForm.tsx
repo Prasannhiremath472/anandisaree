@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { ImagePlus, Loader2, X, Minus, Plus } from "lucide-react";
 import { BackLink } from "@/admin/components/ui/BackLink";
 import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
@@ -9,6 +9,38 @@ import { useCategoriesLookup, useCreateProduct, useGenerateDescription, useProdu
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 import { VariantsCard, type VariantOption, type VariantRow } from "./VariantsCard";
 import { FABRIC_OPTIONS, WASH_CARE_BY_FABRIC } from "./fabricOptions";
+
+// Optional fields the admin can remove per-product when they don't apply
+// (e.g. Saree Length / Blouse Included for a Kurti). Required fields like
+// Title, Fabric, Color, MRP, Selling Price, SKU, Slug are never removable.
+const REMOVABLE_FIELDS = {
+  sareeLength: "Saree Length",
+  weavingTechnique: "Weaving Technique",
+  borderType: "Border Type",
+  palluDesign: "Pallu Design",
+  designPattern: "Design Pattern",
+  craftOrigin: "Craft Origin",
+  district: "District",
+  blouseIncluded: "Blouse Included",
+  blouseLength: "Blouse Length",
+  weightGrams: "Weight",
+  washCare: "Wash Care Instructions",
+} as const;
+
+type RemovableField = keyof typeof REMOVABLE_FIELDS;
+
+function RemoveFieldButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Remove this field"
+      className="flex items-center gap-1 text-xs text-neutral-400 hover:text-red-600"
+    >
+      <Minus className="h-3 w-3" /> Not needed
+    </button>
+  );
+}
 
 const emptyForm = {
   // Core
@@ -73,6 +105,19 @@ export function ProductForm() {
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<VariantRow[]>([]);
   const [isCustomFabric, setIsCustomFabric] = useState(false);
+  const [removedFields, setRemovedFields] = useState<Set<RemovableField>>(new Set());
+
+  function removeField(field: RemovableField) {
+    setRemovedFields((prev) => new Set(prev).add(field));
+  }
+
+  function restoreField(field: RemovableField) {
+    setRemovedFields((prev) => {
+      const next = new Set(prev);
+      next.delete(field);
+      return next;
+    });
+  }
 
   async function handleGenerateDescription() {
     if (!form.name || !form.fabric || !form.color) {
@@ -154,16 +199,16 @@ export function ProductForm() {
         lowStockThreshold: String(existing.lowStockThreshold),
         fabric: existing.fabric,
         color: existing.color,
-        sareeLength: existing.sareeLength,
+        sareeLength: existing.sareeLength ?? "",
         weavingTechnique: existing.weavingTechnique ?? "",
         borderType: existing.borderType ?? "",
         palluDesign: existing.palluDesign ?? "",
         designPattern: existing.designPattern ?? "",
-        craftOrigin: "",
-        district: "",
-        blouseLength: "0.8",
-        weightGrams: "",
-        washCare: "",
+        craftOrigin: existing.craftOrigin ?? "",
+        district: existing.district ?? "",
+        blouseLength: existing.blouseLength ?? "",
+        weightGrams: existing.weightGrams ? String(existing.weightGrams) : "",
+        washCare: existing.washCare ?? "",
         isActive: existing.isActive,
         isFeatured: existing.isFeatured,
         isNewArrival: existing.isNewArrival,
@@ -176,6 +221,21 @@ export function ProductForm() {
         metaTitle: "",
         metaDescription: "",
       });
+
+      // Fields that were never set on this product start out removed from
+      // view, rather than showing a wall of blank optional inputs.
+      const emptyOnLoad: RemovableField[] = [];
+      if (!existing.sareeLength) emptyOnLoad.push("sareeLength");
+      if (!existing.weavingTechnique) emptyOnLoad.push("weavingTechnique");
+      if (!existing.borderType) emptyOnLoad.push("borderType");
+      if (!existing.palluDesign) emptyOnLoad.push("palluDesign");
+      if (!existing.designPattern) emptyOnLoad.push("designPattern");
+      if (!existing.craftOrigin) emptyOnLoad.push("craftOrigin");
+      if (!existing.district) emptyOnLoad.push("district");
+      if (!existing.blouseLength) emptyOnLoad.push("blouseLength");
+      if (!existing.weightGrams) emptyOnLoad.push("weightGrams");
+      if (!existing.washCare) emptyOnLoad.push("washCare");
+      setRemovedFields(new Set(emptyOnLoad));
 
       if (existing.variants?.length) {
         const colors = [...new Set(existing.variants.map((v) => v.color).filter(Boolean))] as string[];
@@ -221,16 +281,17 @@ export function ProductForm() {
       description: form.description || undefined,
       fabric: form.fabric,
       color: form.color,
-      sareeLength: Number(form.sareeLength),
-      weavingTechnique: form.weavingTechnique || undefined,
-      borderType: form.borderType || undefined,
-      palluDesign: form.palluDesign || undefined,
-      designPattern: form.designPattern || undefined,
-      craftOrigin: form.craftOrigin || undefined,
-      district: form.district || undefined,
-      blouseLength: form.blouseLength ? Number(form.blouseLength) : undefined,
-      weightGrams: form.weightGrams ? Number(form.weightGrams) : undefined,
-      washCare: form.washCare || undefined,
+      sareeLength: removedFields.has("sareeLength") || !form.sareeLength ? undefined : Number(form.sareeLength),
+      weavingTechnique: removedFields.has("weavingTechnique") ? undefined : form.weavingTechnique || undefined,
+      borderType: removedFields.has("borderType") ? undefined : form.borderType || undefined,
+      palluDesign: removedFields.has("palluDesign") ? undefined : form.palluDesign || undefined,
+      designPattern: removedFields.has("designPattern") ? undefined : form.designPattern || undefined,
+      craftOrigin: removedFields.has("craftOrigin") ? undefined : form.craftOrigin || undefined,
+      district: removedFields.has("district") ? undefined : form.district || undefined,
+      blouseLength:
+        removedFields.has("blouseLength") || !form.blouseLength ? undefined : Number(form.blouseLength),
+      weightGrams: removedFields.has("weightGrams") || !form.weightGrams ? undefined : Number(form.weightGrams),
+      washCare: removedFields.has("washCare") ? undefined : form.washCare || undefined,
       mrp: Number(form.mrp),
       sellingPrice: Number(form.sellingPrice),
       gstPercent: Number(form.gstPercent),
@@ -243,7 +304,7 @@ export function ProductForm() {
       isTodaysDeal: form.isTodaysDeal,
       isLiveSpecial: form.isLiveSpecial,
       isTopSelection: form.isTopSelection,
-      blouseIncluded: form.blouseIncluded,
+      blouseIncluded: removedFields.has("blouseIncluded") ? undefined : form.blouseIncluded,
       isHandloom: form.isHandloom,
       metaTitle: form.metaTitle || undefined,
       metaDescription: form.metaDescription || undefined,
@@ -496,55 +557,94 @@ export function ProductForm() {
                 <Field label="Color" required>
                   <input required value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} className={inputClass} />
                 </Field>
-                <Field label="Saree Length (m)" required>
-                  <input
-                    required
-                    type="number"
-                    step="0.1"
-                    value={form.sareeLength}
-                    onChange={(e) => setForm({ ...form, sareeLength: e.target.value })}
-                    className={inputClass}
-                  />
-                </Field>
-                <Field label="Weaving Technique">
-                  <input
-                    placeholder="Handloom / Machine Made"
-                    value={form.weavingTechnique}
-                    onChange={(e) => setForm({ ...form, weavingTechnique: e.target.value })}
-                    className={inputClass}
-                  />
-                </Field>
-                <Field label="Border Type">
-                  <input value={form.borderType} onChange={(e) => setForm({ ...form, borderType: e.target.value })} className={inputClass} />
-                </Field>
-                <Field label="Pallu Design">
-                  <input value={form.palluDesign} onChange={(e) => setForm({ ...form, palluDesign: e.target.value })} className={inputClass} />
-                </Field>
-                <Field label="Design Pattern">
-                  <input value={form.designPattern} onChange={(e) => setForm({ ...form, designPattern: e.target.value })} className={inputClass} />
-                </Field>
-                <Field label="Craft Origin">
-                  <input placeholder="e.g. Yeola" value={form.craftOrigin} onChange={(e) => setForm({ ...form, craftOrigin: e.target.value })} className={inputClass} />
-                </Field>
-                <Field label="District">
-                  <input placeholder="e.g. Nashik" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} className={inputClass} />
-                </Field>
-                <Field label="Blouse Length (m)">
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={form.blouseLength}
-                    onChange={(e) => setForm({ ...form, blouseLength: e.target.value })}
-                    className={inputClass}
-                  />
-                </Field>
-                <Field label="Weight (grams)">
-                  <input type="number" value={form.weightGrams} onChange={(e) => setForm({ ...form, weightGrams: e.target.value })} className={inputClass} />
-                </Field>
+                {!removedFields.has("sareeLength") && (
+                  <Field label="Saree Length (m)" hint={<RemoveFieldButton onClick={() => removeField("sareeLength")} />}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={form.sareeLength}
+                      onChange={(e) => setForm({ ...form, sareeLength: e.target.value })}
+                      className={inputClass}
+                    />
+                  </Field>
+                )}
+                {!removedFields.has("weavingTechnique") && (
+                  <Field label="Weaving Technique" hint={<RemoveFieldButton onClick={() => removeField("weavingTechnique")} />}>
+                    <input
+                      placeholder="Handloom / Machine Made"
+                      value={form.weavingTechnique}
+                      onChange={(e) => setForm({ ...form, weavingTechnique: e.target.value })}
+                      className={inputClass}
+                    />
+                  </Field>
+                )}
+                {!removedFields.has("borderType") && (
+                  <Field label="Border Type" hint={<RemoveFieldButton onClick={() => removeField("borderType")} />}>
+                    <input value={form.borderType} onChange={(e) => setForm({ ...form, borderType: e.target.value })} className={inputClass} />
+                  </Field>
+                )}
+                {!removedFields.has("palluDesign") && (
+                  <Field label="Pallu Design" hint={<RemoveFieldButton onClick={() => removeField("palluDesign")} />}>
+                    <input value={form.palluDesign} onChange={(e) => setForm({ ...form, palluDesign: e.target.value })} className={inputClass} />
+                  </Field>
+                )}
+                {!removedFields.has("designPattern") && (
+                  <Field label="Design Pattern" hint={<RemoveFieldButton onClick={() => removeField("designPattern")} />}>
+                    <input value={form.designPattern} onChange={(e) => setForm({ ...form, designPattern: e.target.value })} className={inputClass} />
+                  </Field>
+                )}
+                {!removedFields.has("craftOrigin") && (
+                  <Field label="Craft Origin" hint={<RemoveFieldButton onClick={() => removeField("craftOrigin")} />}>
+                    <input placeholder="e.g. Yeola" value={form.craftOrigin} onChange={(e) => setForm({ ...form, craftOrigin: e.target.value })} className={inputClass} />
+                  </Field>
+                )}
+                {!removedFields.has("district") && (
+                  <Field label="District" hint={<RemoveFieldButton onClick={() => removeField("district")} />}>
+                    <input placeholder="e.g. Nashik" value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} className={inputClass} />
+                  </Field>
+                )}
+                {!removedFields.has("blouseLength") && (
+                  <Field label="Blouse Length (m)" hint={<RemoveFieldButton onClick={() => removeField("blouseLength")} />}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={form.blouseLength}
+                      onChange={(e) => setForm({ ...form, blouseLength: e.target.value })}
+                      className={inputClass}
+                    />
+                  </Field>
+                )}
+                {!removedFields.has("weightGrams") && (
+                  <Field label="Weight (grams)" hint={<RemoveFieldButton onClick={() => removeField("weightGrams")} />}>
+                    <input type="number" value={form.weightGrams} onChange={(e) => setForm({ ...form, weightGrams: e.target.value })} className={inputClass} />
+                  </Field>
+                )}
               </div>
-              <Field label="Wash Care Instructions" className="mt-4">
-                <textarea rows={2} value={form.washCare} onChange={(e) => setForm({ ...form, washCare: e.target.value })} className={inputClass} />
-              </Field>
+              {!removedFields.has("washCare") && (
+                <Field
+                  label="Wash Care Instructions"
+                  className="mt-4"
+                  hint={<RemoveFieldButton onClick={() => removeField("washCare")} />}
+                >
+                  <textarea rows={2} value={form.washCare} onChange={(e) => setForm({ ...form, washCare: e.target.value })} className={inputClass} />
+                </Field>
+              )}
+
+              {removedFields.size > 0 && (
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-neutral-100 pt-4">
+                  <span className="text-xs text-neutral-400">Removed:</span>
+                  {[...removedFields].map((field) => (
+                    <button
+                      key={field}
+                      type="button"
+                      onClick={() => restoreField(field)}
+                      className="flex items-center gap-1 rounded-full border border-dashed border-neutral-300 px-2.5 py-1 text-xs text-neutral-500 hover:border-royal-400 hover:text-royal-600"
+                    >
+                      <Plus className="h-3 w-3" /> {REMOVABLE_FIELDS[field]}
+                    </button>
+                  ))}
+                </div>
+              )}
             </Card>
 
             <VariantsCard
@@ -610,7 +710,6 @@ export function ProductForm() {
                     ["isTodaysDeal", "Today's Deal"],
                     ["isLiveSpecial", "Live Special Today"],
                     ["isTopSelection", "Top Selection"],
-                    ["blouseIncluded", "Blouse Included"],
                     ["isHandloom", "Handloom"],
                   ] as const
                 ).map(([key, label]) => (
@@ -624,6 +723,20 @@ export function ProductForm() {
                     {label}
                   </label>
                 ))}
+                {!removedFields.has("blouseIncluded") && (
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm text-neutral-700">
+                      <input
+                        type="checkbox"
+                        checked={form.blouseIncluded}
+                        onChange={(e) => setForm({ ...form, blouseIncluded: e.target.checked })}
+                        className="h-4 w-4 rounded border-neutral-300 text-royal-600 focus:ring-royal-500"
+                      />
+                      Blouse Included
+                    </label>
+                    <RemoveFieldButton onClick={() => removeField("blouseIncluded")} />
+                  </div>
+                )}
               </div>
             </Card>
           </div>
