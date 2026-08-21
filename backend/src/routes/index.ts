@@ -14,6 +14,7 @@ import couponClaimRoutes from "./couponClaim.routes";
 import uploadRoutes from "./upload.routes";
 import storefrontRoutes from "./storefront.routes";
 import checkoutRoutes from "./checkout.routes";
+import categoryRoutes from "./category.routes";
 import { authenticate, authorize } from "../middleware/auth";
 import { ADMIN_ROLES } from "../utils/roles";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -48,6 +49,7 @@ router.use("/admin/newsletter", newsletterRoutes);
 router.use("/admin/reports", reportRoutes);
 router.use("/admin/settings", settingsRoutes);
 router.use("/admin/upload", uploadRoutes);
+router.use("/admin/categories", categoryRoutes);
 
 router.use("/coupons", couponClaimRoutes);
 

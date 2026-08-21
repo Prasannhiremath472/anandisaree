@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -10,6 +10,7 @@ import { Pagination } from "@/admin/components/ui/Pagination";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { ConfirmDialog } from "@/admin/components/ui/ConfirmDialog";
 import { useDeleteProduct, useImportProducts, useProducts, type ImportProductsResult } from "@/admin/hooks/api/useProducts";
+import { useAppSelector } from "@/admin/hooks/redux";
 import type { Product } from "@/admin/types/product";
 
 export function Products() {
@@ -19,8 +20,18 @@ export function Products() {
   const [importResult, setImportResult] = useState<ImportProductsResult | null>(null);
   const navigate = useNavigate();
   const importFileRef = useRef<HTMLInputElement>(null);
+  const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
 
-  const { data, isLoading } = useProducts({ page, pageSize: 10, search: search || undefined });
+  const { data, isLoading } = useProducts({
+    page,
+    pageSize: 10,
+    search: search || undefined,
+    categoryId: selectedCategoryId ?? undefined,
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedCategoryId]);
   const deleteMutation = useDeleteProduct();
   const importMutation = useImportProducts();
 

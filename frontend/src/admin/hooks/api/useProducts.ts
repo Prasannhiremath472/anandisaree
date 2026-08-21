@@ -8,6 +8,7 @@ interface ListParams {
   pageSize: number;
   search?: string;
   isActive?: boolean;
+  categoryId?: string;
 }
 
 export function useProducts(params: ListParams) {
