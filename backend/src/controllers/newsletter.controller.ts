@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { query, queryOne, execute } from "../config/db";
 import { getPagination, buildPaginatedResult } from "../utils/pagination";
+import { ApiError } from "../utils/ApiError";
 
 export const listSubscribers = asyncHandler(async (req: Request, res: Response) => {
   const pagination = getPagination(req);
@@ -36,6 +37,9 @@ export const exportSubscribers = asyncHandler(async (_req: Request, res: Respons
 });
 
 export const deleteSubscriber = asyncHandler(async (req: Request, res: Response) => {
-  await execute("DELETE FROM `NewsletterSubscriber` WHERE id = ?", [req.params.id]).catch(() => null);
+  const result = await execute("DELETE FROM `NewsletterSubscriber` WHERE id = ?", [req.params.id]);
+  if (result.affectedRows === 0) {
+    throw ApiError.notFound("Subscriber not found");
+  }
   res.json({ success: true, data: null, message: "Subscriber removed" });
 });

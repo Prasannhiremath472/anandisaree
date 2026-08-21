@@ -57,7 +57,13 @@ export const customersReport = asyncHandler(async (_req: Request, res: Response)
     "SELECT COUNT(*) as count FROM `User` WHERE role = 'CUSTOMER'"
   );
   const repeatCustomersRow = await queryOne<{ count: number }>(
-    "SELECT COUNT(DISTINCT u.id) as count FROM `User` u JOIN `Order` o ON o.userId = u.id WHERE u.role = 'CUSTOMER'"
+    `SELECT COUNT(*) as count FROM (
+       SELECT o.userId FROM \`Order\` o
+       JOIN \`User\` u ON u.id = o.userId
+       WHERE u.role = 'CUSTOMER'
+       GROUP BY o.userId
+       HAVING COUNT(*) >= 2
+     ) as repeat_customers`
   );
   res.json({
     success: true,

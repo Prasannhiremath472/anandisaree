@@ -92,6 +92,13 @@ export const listCategoriesLookup = asyncHandler(async (_req: Request, res: Resp
   res.json({ success: true, data: categories });
 });
 
+export const listPublicCategoriesLookup = asyncHandler(async (_req: Request, res: Response) => {
+  const categories = await query(
+    "SELECT id, name, slug, `group`, parentId FROM `Category` WHERE deletedAt IS NULL AND isActive = 1 ORDER BY `group` ASC, sortOrder ASC"
+  );
+  res.json({ success: true, data: categories });
+});
+
 export const listBrandsLookup = asyncHandler(async (_req: Request, res: Response) => {
   const brands = await query("SELECT id, name FROM `Brand` WHERE isActive = 1");
   res.json({ success: true, data: brands });

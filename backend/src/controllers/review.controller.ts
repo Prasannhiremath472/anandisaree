@@ -74,7 +74,7 @@ export const updateReviewStatus = asyncHandler(async (req: Request, res: Respons
   res.json({ success: true, data: review });
 });
 
-const featuredUpdateSchema = z.object({ isFeatured: z.boolean() });
+const featuredUpdateSchema = z.object({ isFeatured: z.coerce.boolean() });
 
 export const setReviewFeatured = asyncHandler(async (req: Request, res: Response) => {
   const { isFeatured } = featuredUpdateSchema.parse(req.body);
