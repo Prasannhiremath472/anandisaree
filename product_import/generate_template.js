@@ -53,6 +53,29 @@ const COLUMNS = [
 async function main() {
   const workbook = new ExcelJS.Workbook();
 
+  // Reference sheet is created first so the dropdowns below can point at real
+  // cell ranges on it. Excel's inline list validation ("a,b,c,...") is capped
+  // at 255 characters — the full category list is far longer than that, so an
+  // inline formula silently produces a file real Excel treats as corrupted.
+  const refSheet = workbook.addWorksheet("Reference (do not edit)");
+  refSheet.columns = [
+    { header: "All Categories", key: "category", width: 32 },
+    { header: "Fabrics", key: "fabric", width: 18 },
+    { header: "Yes/No", key: "yesno", width: 10 },
+  ];
+  refSheet.getRow(1).font = { bold: true };
+  const refMaxLen = Math.max(ALL_CATEGORIES.length, FABRICS.length, YES_NO.length);
+  for (let i = 0; i < refMaxLen; i++) {
+    refSheet.addRow({
+      category: ALL_CATEGORIES[i] ?? "",
+      fabric: FABRICS[i] ?? "",
+      yesno: YES_NO[i] ?? "",
+    });
+  }
+  const categoryRange = `'Reference (do not edit)'!$A$2:$A$${ALL_CATEGORIES.length + 1}`;
+  const fabricRange = `'Reference (do not edit)'!$B$2:$B$${FABRICS.length + 1}`;
+  const yesNoRange = `'Reference (do not edit)'!$C$2:$C$${YES_NO.length + 1}`;
+
   const sheet = workbook.addWorksheet("Products");
   sheet.columns = COLUMNS.map((c) => ({ header: c.header, key: c.key, width: c.width }));
 
@@ -61,11 +84,6 @@ async function main() {
   headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF54208C" } };
   headerRow.alignment = { vertical: "middle", wrapText: true };
   headerRow.height = 34;
-
-  COLUMNS.forEach((c, i) => {
-    const cell = headerRow.getCell(i + 1);
-    cell.note = c.note;
-  });
 
   // Add 200 blank data rows with dropdown validation.
   const ROW_COUNT = 200;
@@ -79,7 +97,7 @@ async function main() {
     sheet.getCell(r, categoryColIdx).dataValidation = {
       type: "list",
       allowBlank: true,
-      formulae: [`"${ALL_CATEGORIES.join(",")}"`],
+      formulae: [categoryRange],
       showErrorMessage: true,
       errorTitle: "Invalid category",
       error: "Please pick a category from the dropdown list.",
@@ -87,7 +105,7 @@ async function main() {
     sheet.getCell(r, fabricColIdx).dataValidation = {
       type: "list",
       allowBlank: true,
-      formulae: [`"${FABRICS.join(",")}"`],
+      formulae: [fabricRange],
       showErrorMessage: true,
       errorTitle: "Invalid fabric",
       error: "Please pick a fabric from the dropdown list.",
@@ -96,7 +114,7 @@ async function main() {
       sheet.getCell(r, colIdx).dataValidation = {
         type: "list",
         allowBlank: true,
-        formulae: [`"${YES_NO.join(",")}"`],
+        formulae: [yesNoRange],
       };
     }
   }
@@ -125,9 +143,6 @@ async function main() {
     isTopSelection: "NO",
   };
   sheet.getRow(2).font = { italic: true, color: { argb: "FF999999" } };
-  sheet.getRow(2).eachCell((cell) => {
-    cell.note = "Example row - replace with your real product, or delete this row";
-  });
 
   // Give every data row enough height that an inserted photo is visible in the cell.
   const PHOTO_ROW_HEIGHT = 90;
@@ -136,23 +151,6 @@ async function main() {
   }
 
   sheet.views = [{ state: "frozen", ySplit: 1 }];
-
-  // Reference sheet listing valid values.
-  const refSheet = workbook.addWorksheet("Reference (do not edit)");
-  refSheet.columns = [
-    { header: "Maharashtrian Categories", key: "a", width: 32 },
-    { header: "Pan-Indian Categories", key: "b", width: 26 },
-    { header: "Fabrics", key: "c", width: 18 },
-  ];
-  refSheet.getRow(1).font = { bold: true };
-  const maxLen = Math.max(MAHARASHTRIAN_CATEGORIES.length, PAN_INDIAN_CATEGORIES.length, FABRICS.length);
-  for (let i = 0; i < maxLen; i++) {
-    refSheet.addRow({
-      a: MAHARASHTRIAN_CATEGORIES[i] ?? "",
-      b: PAN_INDIAN_CATEGORIES[i] ?? "",
-      c: FABRICS[i] ?? "",
-    });
-  }
 
   // Instructions sheet.
   const infoSheet = workbook.addWorksheet("Instructions");
