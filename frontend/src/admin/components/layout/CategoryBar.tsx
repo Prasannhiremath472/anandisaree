@@ -82,66 +82,69 @@ export function CategoryBar() {
   }
 
   const saving = createMutation.isPending || updateMutation.isPending;
+  const selectedCategory = categories?.find((c) => c.id === selectedCategoryId);
+  const currentLabel = selectedCategory?.name ?? "All Categories";
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto border-b border-black/5 bg-white px-6 py-2.5">
-      <button
-        type="button"
-        onClick={() => dispatch(setSelectedCategory(null))}
-        className={cn(
-          "shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-          selectedCategoryId === null
-            ? "bg-royal-gradient text-white shadow-sm"
-            : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-        )}
-      >
-        All Categories
-      </button>
+    <div className="shrink-0 border-b border-black/5 bg-white px-6 pt-3">
+      <p className="mb-2 text-xs text-neutral-400">
+        Currently viewing: <span className="font-semibold text-royal-700">{currentLabel}</span>
+      </p>
 
-      {isLoading ? (
-        <span className="text-xs text-neutral-400">Loading categories...</span>
-      ) : (
-        categories?.map((category) => (
-          <div
-            key={category.id}
-            className={cn(
-              "group flex shrink-0 items-center gap-1.5 rounded-full py-1.5 pl-3 pr-1.5 text-xs font-medium transition-colors",
-              selectedCategoryId === category.id
-                ? "bg-royal-gradient text-white shadow-sm"
-                : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-            )}
-          >
-            <button type="button" onClick={() => dispatch(setSelectedCategory(category.id))}>
-              {category.name}
-              {category.productCount > 0 && (
-                <span className={cn("ml-1", selectedCategoryId === category.id ? "text-white/70" : "text-neutral-400")}>
-                  ({category.productCount})
-                </span>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={(e) => openEdit(category, e)}
-              aria-label={`Edit ${category.name}`}
+      <div className="flex items-center gap-1 overflow-x-auto">
+        <button
+          type="button"
+          onClick={() => dispatch(setSelectedCategory(null))}
+          className={cn(
+            "shrink-0 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors",
+            selectedCategoryId === null
+              ? "border-royal-600 text-royal-700"
+              : "border-transparent text-neutral-500 hover:text-neutral-700"
+          )}
+        >
+          All Categories
+        </button>
+
+        {isLoading ? (
+          <span className="px-4 py-2.5 text-xs text-neutral-400">Loading categories...</span>
+        ) : (
+          categories?.map((category) => (
+            <div
+              key={category.id}
               className={cn(
-                "rounded-full p-1 opacity-0 transition-opacity group-hover:opacity-100",
-                selectedCategoryId === category.id ? "hover:bg-white/20" : "hover:bg-neutral-300"
+                "group flex shrink-0 items-center gap-1 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors",
+                selectedCategoryId === category.id
+                  ? "border-royal-600 text-royal-700"
+                  : "border-transparent text-neutral-500 hover:text-neutral-700"
               )}
             >
-              <Pencil className="h-3 w-3" />
-            </button>
-          </div>
-        ))
-      )}
+              <button type="button" onClick={() => dispatch(setSelectedCategory(category.id))}>
+                {category.name}
+                {category.productCount > 0 && (
+                  <span className="ml-1 text-xs text-neutral-400">({category.productCount})</span>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => openEdit(category, e)}
+                aria-label={`Edit ${category.name}`}
+                className="rounded p-0.5 text-neutral-300 opacity-0 transition-opacity hover:text-royal-600 group-hover:opacity-100"
+              >
+                <Pencil className="h-3 w-3" />
+              </button>
+            </div>
+          ))
+        )}
 
-      <button
-        type="button"
-        onClick={openAdd}
-        aria-label="Add category"
-        className="ml-1 flex shrink-0 items-center gap-1 rounded-full border border-dashed border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-500 hover:border-royal-400 hover:text-royal-600"
-      >
-        <Plus className="h-3.5 w-3.5" /> Add Category
-      </button>
+        <button
+          type="button"
+          onClick={openAdd}
+          aria-label="Add category"
+          className="ml-1 flex shrink-0 items-center justify-center rounded-full p-1.5 text-neutral-400 hover:bg-royal-50 hover:text-royal-600"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
 
       <Dialog.Root open={showForm} onOpenChange={setShowForm}>
         <Dialog.Portal>

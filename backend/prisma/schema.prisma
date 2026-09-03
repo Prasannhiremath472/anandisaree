@@ -746,6 +746,24 @@ model Banner {
   @@index([isActive])
 }
 
+model Reel {
+  id          String    @id @default(cuid())
+  caption     String
+  videoUrl    String
+  thumbnailUrl String?
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  linkUrl     String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
 model CmsPage {
   id              String   @id @default(cuid())
   slug            String   @unique // home, about, contact, privacy, terms, faq

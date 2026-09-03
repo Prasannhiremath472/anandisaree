@@ -11,7 +11,8 @@ const TITLES: Record<string, string> = {
   "/coupons": "Coupons",
   "/banners": "Banners",
   "/cms": "CMS & Blog",
-  "/reviews": "Reviews",
+  "/reviews": "Feedback",
+  "/reels": "Reels",
   "/newsletter": "Newsletter",
   "/marketing": "Marketing",
   "/reports": "Reports",
@@ -30,7 +31,7 @@ export function Topbar() {
   }
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-black/5 bg-white px-6">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-black/5 bg-white px-6">
       <h1 className="font-heading text-base font-semibold text-neutral-800">{TITLES[location.pathname] ?? "Admin"}</h1>
       <div className="flex items-center gap-5">
         <button aria-label="Notifications" className="text-neutral-500 hover:text-royal-600">

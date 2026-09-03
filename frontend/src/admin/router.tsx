@@ -16,6 +16,8 @@ import { BannerForm } from "@/admin/pages/banners/BannerForm";
 import { CmsAndBlog } from "@/admin/pages/cms/CmsAndBlog";
 import { BlogForm } from "@/admin/pages/cms/BlogForm";
 import { Reviews } from "@/admin/pages/reviews/Reviews";
+import { Reels } from "@/admin/pages/reels/Reels";
+import { ReelForm } from "@/admin/pages/reels/ReelForm";
 import { Newsletter } from "@/admin/pages/newsletter/Newsletter";
 import { Marketing } from "@/admin/pages/marketing/Marketing";
 import { Reports } from "@/admin/pages/reports/Reports";
@@ -55,6 +57,9 @@ export const adminRouter = createBrowserRouter(
             { path: "cms/blog/:id/edit", element: <BlogForm /> },
 
             { path: "reviews", element: <Reviews /> },
+            { path: "reels", element: <Reels /> },
+            { path: "reels/new", element: <ReelForm /> },
+            { path: "reels/:id/edit", element: <ReelForm /> },
             { path: "newsletter", element: <Newsletter /> },
             { path: "marketing", element: <Marketing /> },
             { path: "reports", element: <Reports /> },
