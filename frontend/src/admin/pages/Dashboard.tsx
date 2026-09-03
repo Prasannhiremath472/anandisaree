@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { useDashboard } from "@/admin/hooks/api/useDashboard";
+import { useAppSelector } from "@/admin/hooks/redux";
 
 export function Dashboard() {
-  const { data, isLoading } = useDashboard();
+  const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
+  const { data, isLoading } = useDashboard(selectedCategoryId);
 
   const statCards = [
     { label: "Revenue (30d)", value: `₹${Number(data?.revenue30d ?? 0).toLocaleString("en-IN")}` },

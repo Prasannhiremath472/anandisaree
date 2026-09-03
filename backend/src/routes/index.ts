@@ -15,10 +15,10 @@ import uploadRoutes from "./upload.routes";
 import storefrontRoutes from "./storefront.routes";
 import checkoutRoutes from "./checkout.routes";
 import categoryRoutes from "./category.routes";
+import reelRoutes from "./reel.routes";
 import { authenticate, authorize } from "../middleware/auth";
 import { ADMIN_ROLES } from "../utils/roles";
-import { asyncHandler } from "../utils/asyncHandler";
-import * as orderService from "../services/order.service";
+import * as orderController from "../controllers/order.controller";
 
 const router = Router();
 
@@ -28,15 +28,7 @@ router.get("/health", (_req, res) => {
 
 router.use("/auth", authRoutes);
 
-router.get(
-  "/admin/dashboard",
-  authenticate,
-  authorize(...ADMIN_ROLES),
-  asyncHandler(async (_req, res) => {
-    const summary = await orderService.getDashboardSummary();
-    res.json({ success: true, data: summary });
-  })
-);
+router.get("/admin/dashboard", authenticate, authorize(...ADMIN_ROLES), orderController.getDashboardSummary);
 
 router.use("/admin/products", productRoutes);
 router.use("/admin/orders", orderRoutes);
@@ -50,6 +42,7 @@ router.use("/admin/reports", reportRoutes);
 router.use("/admin/settings", settingsRoutes);
 router.use("/admin/upload", uploadRoutes);
 router.use("/admin/categories", categoryRoutes);
+router.use("/admin/reels", reelRoutes);
 
 router.use("/coupons", couponClaimRoutes);
 

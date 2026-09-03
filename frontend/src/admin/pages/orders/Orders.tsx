@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { SearchInput } from "@/admin/components/ui/SearchInput";
@@ -6,6 +6,7 @@ import { DataTable, type Column } from "@/admin/components/ui/DataTable";
 import { Pagination } from "@/admin/components/ui/Pagination";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { useOrders } from "@/admin/hooks/api/useOrders";
+import { useAppSelector } from "@/admin/hooks/redux";
 import type { OrderListItem, OrderStatus } from "@/admin/types/order";
 
 const STATUS_FILTERS: (OrderStatus | "ALL")[] = ["ALL", "PENDING", "CONFIRMED", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
@@ -15,13 +16,19 @@ export function Orders() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<OrderStatus | "ALL">("ALL");
   const navigate = useNavigate();
+  const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
 
   const { data, isLoading } = useOrders({
     page,
     pageSize: 10,
     search: search || undefined,
     status: status === "ALL" ? undefined : status,
+    categoryId: selectedCategoryId ?? undefined,
   });
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedCategoryId]);
 
   const columns: Column<OrderListItem>[] = [
     {

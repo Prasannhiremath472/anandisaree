@@ -2,12 +2,14 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianG
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { useInventoryReport, useOrderStatusReport, useSalesReport, useTopProductsReport } from "@/admin/hooks/api/useReports";
+import { useAppSelector } from "@/admin/hooks/redux";
 
 export function Reports() {
-  const { data: sales } = useSalesReport(30);
+  const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
+  const { data: sales } = useSalesReport(30, selectedCategoryId);
   const { data: orderStatus } = useOrderStatusReport();
-  const { data: topProducts } = useTopProductsReport();
-  const { data: inventory } = useInventoryReport();
+  const { data: topProducts } = useTopProductsReport(selectedCategoryId);
+  const { data: inventory } = useInventoryReport(selectedCategoryId);
 
   return (
     <div className="space-y-6">

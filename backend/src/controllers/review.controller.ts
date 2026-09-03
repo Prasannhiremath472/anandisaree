@@ -8,9 +8,19 @@ import { getPagination, buildPaginatedResult } from "../utils/pagination";
 export const listReviews = asyncHandler(async (req: Request, res: Response) => {
   const pagination = getPagination(req);
   const status = req.query.status as string | undefined;
+  const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId : undefined;
 
-  const whereClause = status ? "r.status = ?" : "1=1";
-  const params = status ? [status] : [];
+  const conditions: string[] = ["1=1"];
+  const params: string[] = [];
+  if (status) {
+    conditions.push("r.status = ?");
+    params.push(status);
+  }
+  if (categoryId) {
+    conditions.push("EXISTS (SELECT 1 FROM `ProductCategory` pc WHERE pc.productId = r.productId AND pc.categoryId = ?)");
+    params.push(categoryId);
+  }
+  const whereClause = conditions.join(" AND ");
 
   const rows = await query<Record<string, unknown>>(
     `SELECT r.*, u.name as user_name, u.email as user_email, p.name as product_name

@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/admin/api/client";
 
-export function useSalesReport(days = 30) {
+export function useSalesReport(days = 30, categoryId?: string | null) {
   return useQuery({
-    queryKey: ["report-sales", days],
+    queryKey: ["report-sales", days, categoryId],
     queryFn: async () => {
       const res = await apiClient.get<{ data: { series: { date: string; revenue: number }[]; totalRevenue: number } }>(
         "/admin/reports/sales",
-        { params: { days } }
+        { params: categoryId ? { days, categoryId } : { days } }
       );
       return res.data.data;
     },
@@ -24,25 +24,25 @@ export function useOrderStatusReport() {
   });
 }
 
-export function useTopProductsReport() {
+export function useTopProductsReport(categoryId?: string | null) {
   return useQuery({
-    queryKey: ["report-top-products"],
+    queryKey: ["report-top-products", categoryId],
     queryFn: async () => {
       const res = await apiClient.get<{
         data: { id: string; name: string; sku: string; soldCount: number; sellingPrice: string; stockQuantity: number }[];
-      }>("/admin/reports/top-products");
+      }>("/admin/reports/top-products", { params: categoryId ? { categoryId } : {} });
       return res.data.data;
     },
   });
 }
 
-export function useInventoryReport() {
+export function useInventoryReport(categoryId?: string | null) {
   return useQuery({
-    queryKey: ["report-inventory"],
+    queryKey: ["report-inventory", categoryId],
     queryFn: async () => {
       const res = await apiClient.get<{
         data: { id: string; name: string; sku: string; stockQuantity: number; lowStockThreshold: number }[];
-      }>("/admin/reports/inventory");
+      }>("/admin/reports/inventory", { params: categoryId ? { categoryId } : {} });
       return res.data.data;
     },
   });

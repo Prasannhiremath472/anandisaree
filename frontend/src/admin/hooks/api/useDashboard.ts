@@ -17,11 +17,13 @@ export interface DashboardSummary {
   topProducts: { id: string; name: string; soldCount: number; sellingPrice: string }[];
 }
 
-export function useDashboard() {
+export function useDashboard(categoryId?: string | null) {
   return useQuery({
-    queryKey: ["dashboard"],
+    queryKey: ["dashboard", categoryId],
     queryFn: async () => {
-      const res = await apiClient.get<{ data: DashboardSummary }>("/admin/dashboard");
+      const res = await apiClient.get<{ data: DashboardSummary }>("/admin/dashboard", {
+        params: categoryId ? { categoryId } : {},
+      });
       return res.data.data;
     },
   });

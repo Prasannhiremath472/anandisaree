@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Check, Star, Trash2, X } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
@@ -6,14 +6,25 @@ import { DataTable, type Column } from "@/admin/components/ui/DataTable";
 import { Pagination } from "@/admin/components/ui/Pagination";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { useDeleteReview, useReviews, useSetReviewFeatured, useUpdateReviewStatus, type Review } from "@/admin/hooks/api/useReviews";
+import { useAppSelector } from "@/admin/hooks/redux";
 
 const STATUS_FILTERS = ["ALL", "PENDING", "APPROVED", "REJECTED", "SPAM"] as const;
 
 export function Reviews() {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<(typeof STATUS_FILTERS)[number]>("PENDING");
+  const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
 
-  const { data, isLoading } = useReviews({ page, pageSize: 10, status: status === "ALL" ? undefined : status });
+  const { data, isLoading } = useReviews({
+    page,
+    pageSize: 10,
+    status: status === "ALL" ? undefined : status,
+    categoryId: selectedCategoryId ?? undefined,
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [selectedCategoryId]);
   const statusMutation = useUpdateReviewStatus();
   const featuredMutation = useSetReviewFeatured();
   const deleteMutation = useDeleteReview();

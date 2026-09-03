@@ -6,6 +6,7 @@ export const orderListQuerySchema = z.object({
   search: z.string().optional(),
   status: z.enum(["PENDING", "CONFIRMED", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED", "REFUNDED"]).optional(),
   paymentStatus: z.enum(["PENDING", "PAID", "FAILED", "REFUNDED"]).optional(),
+  categoryId: z.string().optional(),
 });
 
 export const orderStatusUpdateSchema = z.object({

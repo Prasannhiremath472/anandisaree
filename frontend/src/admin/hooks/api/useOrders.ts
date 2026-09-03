@@ -8,6 +8,7 @@ interface ListParams {
   pageSize: number;
   search?: string;
   status?: OrderStatus;
+  categoryId?: string;
 }
 
 export function useOrders(params: ListParams) {

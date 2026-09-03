@@ -22,7 +22,8 @@ export const updateOrderStatus = asyncHandler(async (req: Request, res: Response
   res.json({ success: true, data: order });
 });
 
-export const getDashboardSummary = asyncHandler(async (_req: Request, res: Response) => {
-  const summary = await orderService.getDashboardSummary();
+export const getDashboardSummary = asyncHandler(async (req: Request, res: Response) => {
+  const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId : undefined;
+  const summary = await orderService.getDashboardSummary(categoryId);
   res.json({ success: true, data: summary });
 });
