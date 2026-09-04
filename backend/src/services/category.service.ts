@@ -33,8 +33,8 @@ export async function createCategory(input: CategoryCreateInput) {
   const id = createId();
   await execute(
     `INSERT INTO \`Category\`
-      (id, name, slug, description, \`group\`, imageUrl, parentId, isActive, sortOrder, metaTitle, metaDescription, createdAt, updatedAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(3), NOW(3))`,
+      (id, name, slug, description, \`group\`, imageUrl, parentId, isActive, sortOrder, metaTitle, metaDescription, enabledFields, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(3), NOW(3))`,
     [
       id,
       input.name,
@@ -47,6 +47,7 @@ export async function createCategory(input: CategoryCreateInput) {
       input.sortOrder ?? 0,
       input.metaTitle ?? null,
       input.metaDescription ?? null,
+      input.enabledFields ? JSON.stringify(input.enabledFields) : null,
     ]
   );
 
@@ -70,7 +71,7 @@ export async function updateCategory(id: string, input: CategoryUpdateInput) {
   for (const [key, value] of Object.entries(input)) {
     if (value === undefined) continue;
     fields.push(`\`${key}\` = ?`);
-    values.push(value as string | number | boolean | null);
+    values.push(key === "enabledFields" ? (value ? JSON.stringify(value) : null) : (value as string | number | boolean | null));
   }
 
   if (fields.length === 0) {

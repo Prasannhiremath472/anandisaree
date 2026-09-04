@@ -11,6 +11,8 @@ export const categoryCreateSchema = z.object({
   sortOrder: z.coerce.number().int().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
+  // Null/omitted means "no restriction" — the product form shows every field.
+  enabledFields: z.array(z.string()).nullable().optional(),
 });
 
 export const categoryUpdateSchema = categoryCreateSchema.partial();

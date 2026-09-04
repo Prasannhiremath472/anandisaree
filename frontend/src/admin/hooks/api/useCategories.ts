@@ -12,6 +12,8 @@ export interface Category {
   isActive: boolean;
   sortOrder: number;
   productCount: number;
+  /** Which optional product fields apply to this category. Null/empty = show all fields (no restriction set). */
+  enabledFields: string[] | null;
 }
 
 export interface CategoryFormInput {
@@ -23,6 +25,7 @@ export interface CategoryFormInput {
   parentId?: string;
   isActive?: boolean;
   sortOrder?: number;
+  enabledFields?: string[] | null;
 }
 
 export function useCategories() {

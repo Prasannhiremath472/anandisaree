@@ -1,33 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { ImagePlus, Loader2, X, Minus, Plus } from "lucide-react";
 import { BackLink } from "@/admin/components/ui/BackLink";
 import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
-import { useCategoriesLookup, useCreateProduct, useGenerateDescription, useProduct, useUpdateProduct } from "@/admin/hooks/api/useProducts";
+import { useCreateProduct, useGenerateDescription, useProduct, useUpdateProduct } from "@/admin/hooks/api/useProducts";
+import { useCategories } from "@/admin/hooks/api/useCategories";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
+import { useAppSelector } from "@/admin/hooks/redux";
 import { VariantsCard, type VariantOption, type VariantRow } from "./VariantsCard";
 import { FABRIC_OPTIONS, WASH_CARE_BY_FABRIC } from "./fabricOptions";
+import { PRODUCT_OPTIONAL_FIELDS, ALL_PRODUCT_OPTIONAL_FIELDS, type ProductOptionalField } from "./productFields";
 
-// Optional fields the admin can remove per-product when they don't apply
-// (e.g. Saree Length / Blouse Included for a Kurti). Required fields like
-// Title, Fabric, Color, MRP, Selling Price, SKU, Slug are never removable.
-const REMOVABLE_FIELDS = {
-  sareeLength: "Saree Length",
-  weavingTechnique: "Weaving Technique",
-  borderType: "Border Type",
-  palluDesign: "Pallu Design",
-  designPattern: "Design Pattern",
-  craftOrigin: "Craft Origin",
-  district: "District",
-  blouseIncluded: "Blouse Included",
-  blouseLength: "Blouse Length",
-  weightGrams: "Weight",
-  washCare: "Wash Care Instructions",
-} as const;
-
-type RemovableField = keyof typeof REMOVABLE_FIELDS;
+type RemovableField = ProductOptionalField;
+const REMOVABLE_FIELDS = PRODUCT_OPTIONAL_FIELDS;
 
 function RemoveFieldButton({ onClick }: { onClick: () => void }) {
   return (
@@ -93,22 +80,38 @@ export function ProductForm() {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
 
   const { data: existing, isLoading } = useProduct(id ?? null);
-  const { data: categories } = useCategoriesLookup();
+  const { data: categories } = useCategories();
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const uploadMutation = useImageUpload();
   const generateDescriptionMutation = useGenerateDescription();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(() => ({
+    ...emptyForm,
+    // Pre-fill from whichever category tab was active when "Add Product" was
+    // clicked (or a ?categoryId= override), so a brand-new product starts
+    // scoped to that category's field set instead of showing everything.
+    categoryId: isEdit ? "" : searchParams.get("categoryId") || selectedCategoryId || "",
+  }));
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<VariantRow[]>([]);
   const [isCustomFabric, setIsCustomFabric] = useState(false);
   const [removedFields, setRemovedFields] = useState<Set<RemovableField>>(new Set());
+  const [manuallyRestored, setManuallyRestored] = useState<Set<RemovableField>>(new Set());
+  const [manuallyRemoved, setManuallyRemoved] = useState<Set<RemovableField>>(new Set());
 
   function removeField(field: RemovableField) {
     setRemovedFields((prev) => new Set(prev).add(field));
+    setManuallyRemoved((prev) => new Set(prev).add(field));
+    setManuallyRestored((prev) => {
+      const next = new Set(prev);
+      next.delete(field);
+      return next;
+    });
   }
 
   function restoreField(field: RemovableField) {
@@ -117,7 +120,29 @@ export function ProductForm() {
       next.delete(field);
       return next;
     });
+    setManuallyRestored((prev) => new Set(prev).add(field));
+    setManuallyRemoved((prev) => {
+      const next = new Set(prev);
+      next.delete(field);
+      return next;
+    });
   }
+
+  // Recompute the default visible-field set whenever the selected category
+  // changes, based on that category's enabledFields — but keep any field the
+  // admin has manually removed/restored on this product so switching the
+  // category dropdown back and forth doesn't discard a deliberate override.
+  useEffect(() => {
+    if (isEdit) return; // existing products load their own removed-field state from saved data instead
+    const category = categories?.find((c) => c.id === form.categoryId);
+    const enabled = category?.enabledFields?.length ? category.enabledFields : ALL_PRODUCT_OPTIONAL_FIELDS;
+    const nextRemoved = new Set<RemovableField>(
+      ALL_PRODUCT_OPTIONAL_FIELDS.filter((f) => !enabled.includes(f) && !manuallyRestored.has(f))
+    );
+    for (const f of manuallyRemoved) nextRemoved.add(f);
+    setRemovedFields(nextRemoved);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.categoryId, categories, isEdit]);
 
   async function handleGenerateDescription() {
     if (!form.name || !form.fabric || !form.color) {

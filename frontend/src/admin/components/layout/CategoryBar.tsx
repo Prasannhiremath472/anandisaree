@@ -12,12 +12,18 @@ import {
   type Category,
   type CategoryFormInput,
 } from "@/admin/hooks/api/useCategories";
+import { PRODUCT_OPTIONAL_FIELDS, ALL_PRODUCT_OPTIONAL_FIELDS, type ProductOptionalField } from "@/admin/pages/products/productFields";
 import { cn } from "@/admin/utils";
 
 const inputClass =
   "w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500";
 
-const emptyForm: CategoryFormInput = { name: "", group: "PAN_INDIAN", isActive: true };
+const emptyForm: CategoryFormInput = {
+  name: "",
+  group: "PAN_INDIAN",
+  isActive: true,
+  enabledFields: [...ALL_PRODUCT_OPTIONAL_FIELDS],
+};
 
 export function CategoryBar() {
   const { data: categories, isLoading } = useCategories();
@@ -47,8 +53,17 @@ export function CategoryBar() {
       slug: category.slug,
       group: category.group,
       isActive: category.isActive,
+      enabledFields: category.enabledFields?.length ? category.enabledFields : [...ALL_PRODUCT_OPTIONAL_FIELDS],
     });
     setShowForm(true);
+  }
+
+  function toggleField(field: ProductOptionalField) {
+    setForm((f) => {
+      const current = f.enabledFields ?? [];
+      const next = current.includes(field) ? current.filter((x) => x !== field) : [...current, field];
+      return { ...f, enabledFields: next };
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -183,6 +198,27 @@ export function CategoryBar() {
                   <option value="PAN_INDIAN">Pan-Indian</option>
                 </select>
               </div>
+              <div>
+                <label className="text-sm font-medium text-neutral-700">Product fields for this category</label>
+                <p className="mt-0.5 text-xs text-neutral-400">
+                  Only checked fields show by default when adding a product in this category. Admins can still add an
+                  unchecked field to one specific product if needed.
+                </p>
+                <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg border border-neutral-200 p-3">
+                  {ALL_PRODUCT_OPTIONAL_FIELDS.map((field) => (
+                    <label key={field} className="flex items-center gap-1.5 text-xs text-neutral-700">
+                      <input
+                        type="checkbox"
+                        checked={(form.enabledFields ?? []).includes(field)}
+                        onChange={() => toggleField(field)}
+                        className="h-3.5 w-3.5 rounded border-neutral-300 text-royal-600"
+                      />
+                      {PRODUCT_OPTIONAL_FIELDS[field]}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               <label className="flex items-center gap-2 text-sm text-neutral-700">
                 <input
                   type="checkbox"

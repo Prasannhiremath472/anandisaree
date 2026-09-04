@@ -205,6 +205,11 @@ model Category {
   sortOrder   Int           @default(0)
   metaTitle       String?
   metaDescription String?   @db.Text
+  // Which optional Product fields apply to items in this category (e.g.
+  // Saree Length for sarees, but not for Nightwear). JSON array of field
+  // keys from the fixed set the admin product form knows how to render;
+  // null/empty means "show all fields" (no restriction configured yet).
+  enabledFields Json?
   deletedAt   DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
