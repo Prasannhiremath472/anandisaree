@@ -90,12 +90,15 @@ export function ProductForm() {
   const uploadMutation = useImageUpload();
   const generateDescriptionMutation = useGenerateDescription();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // When adding a product from a specific category tab (not "All
+  // Categories"), the Category field is locked to that category — the
+  // dropdown only offers it, matching the field-set the form is already
+  // scoped to. Editing an existing product, or adding one from "All
+  // Categories", still allows picking any category.
+  const lockedCategoryId = isEdit ? null : searchParams.get("categoryId") || selectedCategoryId || null;
   const [form, setForm] = useState(() => ({
     ...emptyForm,
-    // Pre-fill from whichever category tab was active when "Add Product" was
-    // clicked (or a ?categoryId= override), so a brand-new product starts
-    // scoped to that category's field set instead of showing everything.
-    categoryId: isEdit ? "" : searchParams.get("categoryId") || selectedCategoryId || "",
+    categoryId: lockedCategoryId ?? "",
   }));
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<VariantRow[]>([]);
@@ -707,15 +710,33 @@ export function ProductForm() {
 
             <Card title="Product Organization">
               <Field label="Category">
-                <select value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} className={inputClass}>
-                  <option value="">Select category</option>
-                  {categories?.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.group === "MAHARASHTRIAN" ? "🪷 " : ""}
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                {lockedCategoryId ? (
+                  <>
+                    <select value={form.categoryId} disabled className={`${inputClass} bg-neutral-50 text-neutral-500`}>
+                      {(() => {
+                        const c = categories?.find((cat) => cat.id === lockedCategoryId);
+                        return (
+                          <option value={lockedCategoryId}>
+                            {c ? `${c.group === "MAHARASHTRIAN" ? "🪷 " : ""}${c.name}` : "Loading…"}
+                          </option>
+                        );
+                      })()}
+                    </select>
+                    <p className="mt-1 text-xs text-neutral-400">
+                      Adding to this category. Switch tabs and click "Add Product" again to add to a different one.
+                    </p>
+                  </>
+                ) : (
+                  <select value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} className={inputClass}>
+                    <option value="">Select category</option>
+                    {categories?.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.group === "MAHARASHTRIAN" ? "🪷 " : ""}
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </Field>
               <Field label="SKU" required className="mt-4">
                 <input required value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} className={inputClass} />
