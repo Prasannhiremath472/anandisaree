@@ -10,6 +10,8 @@ import {
 } from "../utils/tokens";
 import type { LoginInput, RegisterRequestOtpInput, RegisterVerifyOtpInput } from "../validation/auth.schema";
 import { sendOtpEmail } from "./mailer.service";
+import { isProd } from "../config/env";
+import { logger } from "../config/logger";
 
 interface UserRow {
   id: string;
@@ -145,6 +147,11 @@ export async function requestOtp(identifier: string, purpose: string) {
 
   if (identifier.includes("@")) {
     await sendOtpEmail(identifier, code, purpose);
+  }
+
+  // Dev/test convenience only — never log real OTP codes in production.
+  if (!isProd) {
+    logger.info(`[DEV] OTP for ${identifier} (${purpose}): ${code}`);
   }
 
   return { expiresAt };
