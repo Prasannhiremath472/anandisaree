@@ -94,12 +94,24 @@ export function ProductForm() {
   // Categories"), the Category field is locked to that category — the
   // dropdown only offers it, matching the field-set the form is already
   // scoped to. Editing an existing product, or adding one from "All
-  // Categories", still allows picking any category.
-  const lockedCategoryId = isEdit ? null : searchParams.get("categoryId") || selectedCategoryId || null;
+  // Categories", still allows picking any category. The URL param is only
+  // meaningful on first load; once on this screen, the active tab (Redux)
+  // is the live source of truth.
+  const urlCategoryId = searchParams.get("categoryId");
+  const lockedCategoryId = isEdit ? null : selectedCategoryId ?? urlCategoryId ?? null;
   const [form, setForm] = useState(() => ({
     ...emptyForm,
     categoryId: lockedCategoryId ?? "",
   }));
+
+  // Keep the form's category (and therefore the locked dropdown + visible
+  // field set) in sync when the admin switches the category tab while
+  // already sitting on this screen, instead of only picking it up on mount.
+  useEffect(() => {
+    if (isEdit) return;
+    setForm((f) => (f.categoryId === (lockedCategoryId ?? "") ? f : { ...f, categoryId: lockedCategoryId ?? "" }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lockedCategoryId, isEdit]);
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<VariantRow[]>([]);
   const [isCustomFabric, setIsCustomFabric] = useState(false);
