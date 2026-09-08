@@ -1,10 +1,12 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { useInventoryReport, useOrderStatusReport, useSalesReport, useTopProductsReport } from "@/admin/hooks/api/useReports";
 import { useAppSelector } from "@/admin/hooks/redux";
 
 export function Reports() {
+  const { t } = useTranslation();
   const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
   const { data: sales } = useSalesReport(30, selectedCategoryId);
   const { data: orderStatus } = useOrderStatusReport();
@@ -13,10 +15,10 @@ export function Reports() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Reports" description="Sales, inventory and performance insights." />
+      <PageHeader title={t("reports.title")} description={t("reports.description")} />
 
       <div className="rounded-xl border border-black/5 bg-white p-6">
-        <h3 className="font-heading text-sm font-semibold text-neutral-800">Revenue (Last 30 Days)</h3>
+        <h3 className="font-heading text-sm font-semibold text-neutral-800">{t("reports.revenueLast30Days")}</h3>
         <p className="mt-1 text-2xl font-semibold text-royal-700">
           ₹{(sales?.totalRevenue ?? 0).toLocaleString("en-IN")}
         </p>
@@ -35,7 +37,7 @@ export function Reports() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-black/5 bg-white p-6">
-          <h3 className="font-heading text-sm font-semibold text-neutral-800">Orders by Status</h3>
+          <h3 className="font-heading text-sm font-semibold text-neutral-800">{t("reports.ordersByStatus")}</h3>
           <ul className="mt-4 space-y-2">
             {orderStatus?.map((s) => (
               <li key={s.status} className="flex items-center justify-between text-sm">
@@ -47,7 +49,7 @@ export function Reports() {
         </div>
 
         <div className="rounded-xl border border-black/5 bg-white p-6">
-          <h3 className="font-heading text-sm font-semibold text-neutral-800">Top Selling Products</h3>
+          <h3 className="font-heading text-sm font-semibold text-neutral-800">{t("reports.topSellingProducts")}</h3>
           <ul className="mt-4 space-y-3">
             {topProducts?.map((p) => (
               <li key={p.id} className="flex items-center justify-between text-sm">
@@ -55,7 +57,7 @@ export function Reports() {
                   <p className="font-medium text-neutral-800">{p.name}</p>
                   <p className="text-xs text-neutral-400">{p.sku}</p>
                 </div>
-                <span className="font-medium text-royal-700">{p.soldCount} sold</span>
+                <span className="font-medium text-royal-700">{t("reports.soldCount", { count: p.soldCount })}</span>
               </li>
             ))}
           </ul>
@@ -63,9 +65,9 @@ export function Reports() {
       </div>
 
       <div className="rounded-xl border border-black/5 bg-white p-6">
-        <h3 className="font-heading text-sm font-semibold text-neutral-800">Low Stock Alert</h3>
+        <h3 className="font-heading text-sm font-semibold text-neutral-800">{t("reports.lowStockAlert")}</h3>
         {!inventory?.length ? (
-          <p className="mt-3 text-sm text-neutral-400">All products are sufficiently stocked.</p>
+          <p className="mt-3 text-sm text-neutral-400">{t("reports.allProductsSufficientlyStocked")}</p>
         ) : (
           <ul className="mt-3 divide-y divide-neutral-100">
             {inventory.map((p) => (
@@ -74,7 +76,7 @@ export function Reports() {
                   <p className="font-medium text-neutral-800">{p.name}</p>
                   <p className="text-xs text-neutral-400">{p.sku}</p>
                 </div>
-                <span className="font-medium text-red-600">{p.stockQuantity} left</span>
+                <span className="font-medium text-red-600">{t("reports.leftCount", { count: p.stockQuantity })}</span>
               </li>
             ))}
           </ul>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { apiClient } from "@/admin/api/client";
 import { useAppDispatch } from "@/admin/hooks/redux";
 import { setCredentials } from "@/admin/store/authSlice";
@@ -19,6 +20,7 @@ const inputClass =
   "mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-royal-500 focus:outline-none";
 
 export function Login() {
+  const { t } = useTranslation();
   const [step, setStep] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -31,10 +33,10 @@ export function Login() {
     setLoading(true);
     try {
       await apiClient.post("/auth/otp/request", { identifier: email, purpose: "LOGIN" });
-      toast.success("We've emailed you a 6-digit code.");
+      toast.success(t("login.otpSent"));
       setStep("otp");
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Could not send code. Please try again.");
+      toast.error(err?.response?.data?.message ?? t("login.couldNotSendCode"));
     } finally {
       setLoading(false);
     }
@@ -47,13 +49,13 @@ export function Login() {
       const res = await apiClient.post("/auth/otp/verify", { identifier: email, code, purpose: "LOGIN" });
       const { user, accessToken } = res.data.data;
       if (!ADMIN_ROLES.includes(user.role)) {
-        toast.error("This account does not have admin access");
+        toast.error(t("login.noAdminAccess"));
         return;
       }
       dispatch(setCredentials({ user, accessToken }));
       navigate("/");
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Invalid or expired code.");
+      toast.error(err?.response?.data?.message ?? t("login.invalidCode"));
     } finally {
       setLoading(false);
     }
@@ -62,18 +64,18 @@ export function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-royal-gradient px-4">
       <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-2xl">
-        <img src="/images/anandi-sarees-logo-crop.png" alt="Anandi Sarees" className="h-16 rounded-lg" />
+        <img src="/images/anandi-sarees-logo-crop.png" alt={t("login.logoAlt")} className="h-16 rounded-lg" />
         <p className="mt-4 text-sm text-neutral-500">
           {step === "email"
-            ? "Sign in to manage your store"
-            : `Enter the 6-digit code sent to ${email}.`}
+            ? t("login.signInToManageStore")
+            : t("login.enterCodeSentTo", { email })}
         </p>
 
         {step === "email" ? (
           <form onSubmit={handleRequestOtp}>
             <div className="mt-6 space-y-4">
               <div>
-                <label className="text-sm font-medium text-neutral-700">Email</label>
+                <label className="text-sm font-medium text-neutral-700">{t("login.email")}</label>
                 <input
                   type="email"
                   required
@@ -90,14 +92,14 @@ export function Login() {
               disabled={loading}
               className="mt-6 w-full rounded-lg bg-royal-gradient py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {loading ? "Sending code..." : "Send OTP"}
+              {loading ? t("login.sendingCode") : t("login.sendOtp")}
             </button>
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp}>
             <div className="mt-6 space-y-4">
               <div>
-                <label className="text-sm font-medium text-neutral-700">6-digit code</label>
+                <label className="text-sm font-medium text-neutral-700">{t("login.sixDigitCode")}</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -116,7 +118,7 @@ export function Login() {
               disabled={loading || code.length !== 6}
               className="mt-6 w-full rounded-lg bg-royal-gradient py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {loading ? "Verifying..." : "Verify & Sign In"}
+              {loading ? t("login.verifying") : t("login.verifyAndSignIn")}
             </button>
 
             <button
@@ -127,7 +129,7 @@ export function Login() {
               }}
               className="mt-3 w-full text-center text-sm font-medium text-royal-600 hover:text-royal-500"
             >
-              Use a different email
+              {t("login.useDifferentEmail")}
             </button>
           </form>
         )}

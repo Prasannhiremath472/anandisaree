@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { BackLink } from "@/admin/components/ui/BackLink";
 import { Field, inputClass } from "@/admin/components/ui/Field";
@@ -18,6 +19,7 @@ const emptyForm = {
 };
 
 export function CouponForm() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
@@ -59,83 +61,83 @@ export function CouponForm() {
     try {
       if (isEdit && id) {
         await updateMutation.mutateAsync({ id, input: payload });
-        toast.success("Coupon updated");
+        toast.success(t("couponForm.couponUpdated"));
       } else {
         await createMutation.mutateAsync(payload);
-        toast.success("Coupon created");
+        toast.success(t("couponForm.couponCreated"));
       }
       navigate("/coupons");
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Failed to save coupon");
+      toast.error(err?.response?.data?.message ?? t("couponForm.failedToSaveCoupon"));
     }
   }
 
   const saving = createMutation.isPending || updateMutation.isPending;
 
   if (isEdit && isLoading) {
-    return <p className="text-neutral-400">Loading coupon...</p>;
+    return <p className="text-neutral-400">{t("couponForm.loadingCoupon")}</p>;
   }
 
   return (
     <div>
-      <BackLink to="/coupons" label="Back to Coupons" />
-      <PageHeader title={isEdit ? "Edit Coupon" : "Create Coupon"} description={isEdit ? form.code : "Set up a new discount code."} />
+      <BackLink to="/coupons" label={t("couponForm.backToCoupons")} />
+      <PageHeader title={isEdit ? t("couponForm.editCoupon") : t("couponForm.createCoupon")} description={isEdit ? form.code : t("couponForm.setUpNewDiscountCode")} />
 
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-xl border border-black/5 bg-white p-6">
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Coupon Code" required>
+          <Field label={t("couponForm.couponCode")} required>
             <input
               required
               value={form.code}
               onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
-              placeholder="FESTIVE20"
+              placeholder={t("couponForm.couponCodePlaceholder")}
               className={inputClass}
             />
           </Field>
-          <Field label="Type" required>
+          <Field label={t("couponForm.type")} required>
             <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as never })} className={inputClass}>
-              <option value="PERCENTAGE">Percentage Off</option>
-              <option value="FLAT">Flat Amount Off</option>
-              <option value="BOGO">Buy One Get One</option>
+              <option value="PERCENTAGE">{t("couponForm.typePercentage")}</option>
+              <option value="FLAT">{t("couponForm.typeFlat")}</option>
+              <option value="BOGO">{t("couponForm.typeBogo")}</option>
             </select>
           </Field>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label={form.type === "PERCENTAGE" ? "Discount (%)" : "Discount (₹)"} required>
+          <Field label={form.type === "PERCENTAGE" ? t("couponForm.discountPercent") : t("couponForm.discountAmount")} required>
             <input required type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} className={inputClass} />
           </Field>
-          <Field label="Max Discount (₹)">
+          <Field label={t("couponForm.maxDiscount")}>
             <input type="number" value={form.maxDiscount} onChange={(e) => setForm({ ...form, maxDiscount: e.target.value })} className={inputClass} />
           </Field>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Minimum Order (₹)">
+          <Field label={t("couponForm.minOrderAmount")}>
             <input type="number" value={form.minOrderAmount} onChange={(e) => setForm({ ...form, minOrderAmount: e.target.value })} className={inputClass} />
           </Field>
-          <Field label="Usage Limit">
-            <input type="number" value={form.usageLimit} onChange={(e) => setForm({ ...form, usageLimit: e.target.value })} className={inputClass} placeholder="Unlimited" />
+          <Field label={t("couponForm.usageLimit")}>
+            <input type="number" value={form.usageLimit} onChange={(e) => setForm({ ...form, usageLimit: e.target.value })} className={inputClass} placeholder={t("couponForm.unlimitedPlaceholder")} />
           </Field>
         </div>
 
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-sm text-neutral-700">
             <input type="checkbox" checked={form.isFestival} onChange={(e) => setForm({ ...form, isFestival: e.target.checked })} className="h-4 w-4 rounded border-neutral-300 text-royal-600" />
-            Festival Offer
+            {t("couponForm.festivalOffer")}
           </label>
           <label className="flex items-center gap-2 text-sm text-neutral-700">
             <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="h-4 w-4 rounded border-neutral-300 text-royal-600" />
-            Active
+            {t("common.active")}
           </label>
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
           <button type="button" onClick={() => navigate("/coupons")} className="rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100">
-            Cancel
+            {t("common.cancel")}
           </button>
           <button type="submit" disabled={saving} className="rounded-lg bg-royal-gradient px-5 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
-            {saving ? "Saving..." : isEdit ? "Save Changes" : "Create Coupon"}
+            {saving ? t("common.saving") : isEdit ? t("common.saveChanges") : t("couponForm.addCoupon")}
           </button>
         </div>
       </form>

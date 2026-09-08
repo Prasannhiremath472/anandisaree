@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { Field, inputClass } from "@/admin/components/ui/Field";
 import { useSettings, useUpsertSettings } from "@/admin/hooks/api/useSettings";
@@ -7,54 +8,55 @@ import { useSettings, useUpsertSettings } from "@/admin/hooks/api/useSettings";
 const GROUPS = [
   {
     key: "website",
-    label: "Website",
+    labelKey: "settings.website",
     fields: [
-      { key: "site_name", label: "Site Name" },
-      { key: "site_tagline", label: "Tagline" },
-      { key: "support_email", label: "Support Email" },
-      { key: "support_phone", label: "Support Phone" },
+      { key: "site_name", labelKey: "settings.siteName" },
+      { key: "site_tagline", labelKey: "settings.tagline" },
+      { key: "support_email", labelKey: "settings.supportEmail" },
+      { key: "support_phone", labelKey: "settings.supportPhone" },
     ],
   },
   {
     key: "seo",
-    label: "SEO",
+    labelKey: "settings.seo",
     fields: [
-      { key: "meta_title", label: "Default Meta Title" },
-      { key: "meta_description", label: "Default Meta Description" },
-      { key: "google_analytics_id", label: "Google Analytics ID" },
-      { key: "meta_pixel_id", label: "Meta Pixel ID" },
+      { key: "meta_title", labelKey: "settings.defaultMetaTitle" },
+      { key: "meta_description", labelKey: "settings.defaultMetaDescription" },
+      { key: "google_analytics_id", labelKey: "settings.googleAnalyticsId" },
+      { key: "meta_pixel_id", labelKey: "settings.metaPixelId" },
     ],
   },
   {
     key: "shipping",
-    label: "Shipping",
+    labelKey: "settings.shipping",
     fields: [
-      { key: "free_shipping_threshold", label: "Free Shipping Above (₹)" },
-      { key: "standard_shipping_fee", label: "Standard Shipping Fee (₹)" },
-      { key: "delivery_estimate_days", label: "Delivery Estimate (days)" },
+      { key: "free_shipping_threshold", labelKey: "settings.freeShippingAbove" },
+      { key: "standard_shipping_fee", labelKey: "settings.standardShippingFee" },
+      { key: "delivery_estimate_days", labelKey: "settings.deliveryEstimateDays" },
     ],
   },
   {
     key: "payment",
-    label: "Payment",
+    labelKey: "settings.payment",
     fields: [
-      { key: "razorpay_key_id", label: "Razorpay Key ID" },
-      { key: "cod_enabled", label: "COD Enabled (true/false)" },
+      { key: "razorpay_key_id", labelKey: "settings.razorpayKeyId" },
+      { key: "cod_enabled", labelKey: "settings.codEnabled" },
     ],
   },
   {
     key: "social",
-    label: "Social Links",
+    labelKey: "settings.socialLinks",
     fields: [
-      { key: "facebook_url", label: "Facebook URL" },
-      { key: "instagram_url", label: "Instagram URL" },
-      { key: "youtube_url", label: "YouTube URL" },
-      { key: "whatsapp_number", label: "WhatsApp Number" },
+      { key: "facebook_url", labelKey: "settings.facebookUrl" },
+      { key: "instagram_url", labelKey: "settings.instagramUrl" },
+      { key: "youtube_url", labelKey: "settings.youtubeUrl" },
+      { key: "whatsapp_number", labelKey: "settings.whatsappNumber" },
     ],
   },
 ];
 
 export function Settings() {
+  const { t } = useTranslation();
   const [activeGroup, setActiveGroup] = useState(GROUPS[0].key);
   const { data: settings } = useSettings(activeGroup);
   const upsertMutation = useUpsertSettings();
@@ -75,15 +77,15 @@ export function Settings() {
       await upsertMutation.mutateAsync(
         currentGroup.fields.map((f) => ({ key: f.key, value: values[f.key] ?? "", group: activeGroup }))
       );
-      toast.success("Settings saved");
+      toast.success(t("settings.settingsSaved"));
     } catch {
-      toast.error("Failed to save settings");
+      toast.error(t("settings.failedToSaveSettings"));
     }
   }
 
   return (
     <div>
-      <PageHeader title="Settings" description="Configure your store's website, SEO, shipping and payment options." />
+      <PageHeader title={t("settings.title")} description={t("settings.description")} />
 
       <div className="grid grid-cols-4 gap-6">
         <div className="col-span-1 space-y-1">
@@ -95,14 +97,14 @@ export function Settings() {
                 activeGroup === g.key ? "bg-royal-gradient text-white" : "text-neutral-600 hover:bg-neutral-100"
               }`}
             >
-              {g.label}
+              {t(g.labelKey)}
             </button>
           ))}
         </div>
 
         <div className="col-span-3 space-y-4 rounded-xl border border-black/5 bg-white p-6">
           {currentGroup.fields.map((f) => (
-            <Field key={f.key} label={f.label}>
+            <Field key={f.key} label={t(f.labelKey)}>
               <input
                 value={values[f.key] ?? ""}
                 onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
@@ -116,7 +118,7 @@ export function Settings() {
             disabled={upsertMutation.isPending}
             className="rounded-lg bg-royal-gradient px-5 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60"
           >
-            {upsertMutation.isPending ? "Saving..." : "Save Settings"}
+            {upsertMutation.isPending ? t("common.saving") : t("settings.saveSettings")}
           </button>
         </div>
       </div>

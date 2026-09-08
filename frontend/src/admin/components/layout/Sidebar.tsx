@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   Package,
@@ -16,25 +17,25 @@ import {
 import { cn } from "@/admin/utils";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", to: "/", icon: LayoutDashboard },
-  { label: "Products", to: "/products", icon: Package },
-  { label: "Orders", to: "/orders", icon: ShoppingCart },
-  { label: "Customers", to: "/customers", icon: Users },
-  { label: "Feedback", to: "/reviews", icon: MessageSquare },
-  { label: "Reports", to: "/reports", icon: BarChart3 },
-  { label: "Coupons", to: "/coupons", icon: Tag },
-  { label: "Reels", to: "/reels", icon: Clapperboard },
-];
+  { key: "nav.dashboard", to: "/", icon: LayoutDashboard },
+  { key: "nav.products", to: "/products", icon: Package },
+  { key: "nav.orders", to: "/orders", icon: ShoppingCart },
+  { key: "nav.customers", to: "/customers", icon: Users },
+  { key: "nav.feedback", to: "/reviews", icon: MessageSquare },
+  { key: "nav.reports", to: "/reports", icon: BarChart3 },
+  { key: "nav.coupons", to: "/coupons", icon: Tag },
+  { key: "nav.reels", to: "/reels", icon: Clapperboard },
+] as const;
 
 const MARKETING_ITEMS = [
-  { label: "Banners", to: "/banners", icon: Image },
-  { label: "Newsletter", to: "/newsletter", icon: Mail },
-];
+  { key: "nav.banners", to: "/banners", icon: Image },
+  { key: "nav.newsletter", to: "/newsletter", icon: Mail },
+] as const;
 
 const TAIL_ITEMS = [
-  { label: "CMS & Blog", to: "/cms", icon: FileText },
-  { label: "Settings", to: "/settings", icon: Settings },
-];
+  { key: "nav.cmsBlog", to: "/cms", icon: FileText },
+  { key: "nav.settings", to: "/settings", icon: Settings },
+] as const;
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -43,32 +44,33 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
   );
 
 export function Sidebar() {
+  const { t } = useTranslation();
   return (
     <aside className="hidden w-64 shrink-0 flex-col overflow-hidden border-r border-black/5 bg-sidebar-gradient lg:flex">
       <div className="flex h-16 shrink-0 items-center gap-2 border-b border-black/5 px-6">
         <img src="/images/anandi-sarees-logo-crop.png" alt="Anandi Sarees" className="h-10 rounded" />
       </div>
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
-        {NAV_ITEMS.map(({ label, to, icon: Icon }) => (
+        {NAV_ITEMS.map(({ key, to, icon: Icon }) => (
           <NavLink key={to} to={to} end={to === "/"} className={linkClass}>
             <Icon className="h-4 w-4" />
-            {label}
+            {t(key)}
           </NavLink>
         ))}
 
-        <p className="mt-3 px-3 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Marketing</p>
-        {MARKETING_ITEMS.map(({ label, to, icon: Icon }) => (
+        <p className="mt-3 px-3 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">{t("nav.marketing")}</p>
+        {MARKETING_ITEMS.map(({ key, to, icon: Icon }) => (
           <NavLink key={to} to={to} className={linkClass}>
             <Icon className="h-4 w-4" />
-            {label}
+            {t(key)}
           </NavLink>
         ))}
 
         <div className="my-2 border-t border-black/5" />
-        {TAIL_ITEMS.map(({ label, to, icon: Icon }) => (
+        {TAIL_ITEMS.map(({ key, to, icon: Icon }) => (
           <NavLink key={to} to={to} className={linkClass}>
             <Icon className="h-4 w-4" />
-            {label}
+            {t(key)}
           </NavLink>
         ))}
       </nav>

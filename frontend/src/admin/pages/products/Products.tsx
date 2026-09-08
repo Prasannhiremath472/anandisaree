@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Plus, Pencil, Trash2, Upload, Loader2, X, CheckCircle2, AlertCircle, MinusCircle } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
@@ -14,6 +15,7 @@ import { useAppSelector } from "@/admin/hooks/redux";
 import type { Product } from "@/admin/types/product";
 
 export function Products() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -39,10 +41,10 @@ export function Products() {
     if (!deletingId) return;
     try {
       await deleteMutation.mutateAsync(deletingId);
-      toast.success("Product deleted");
+      toast.success(t("products.productDeleted"));
       setDeletingId(null);
     } catch {
-      toast.error("Failed to delete product");
+      toast.error(t("products.failedToDeleteProduct"));
     }
   }
 
@@ -55,13 +57,13 @@ export function Products() {
       const result = await importMutation.mutateAsync(file);
       setImportResult(result);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Failed to import products");
+      toast.error(err?.response?.data?.message ?? t("products.failedToImportProducts"));
     }
   }
 
   const columns: Column<Product>[] = [
     {
-      header: "Product",
+      header: t("products.columnProduct"),
       key: "name",
       render: (p) => (
         <div className="flex items-center gap-3">
@@ -77,9 +79,9 @@ export function Products() {
         </div>
       ),
     },
-    { header: "Fabric", key: "fabric" },
+    { header: t("products.columnFabric"), key: "fabric" },
     {
-      header: "Price",
+      header: t("products.columnPrice"),
       key: "sellingPrice",
       render: (p) => (
         <div>
@@ -91,7 +93,7 @@ export function Products() {
       ),
     },
     {
-      header: "Stock",
+      header: t("products.columnStock"),
       key: "stockQuantity",
       render: (p) => (
         <span className={p.stockQuantity <= p.lowStockThreshold ? "font-medium text-red-600" : ""}>
@@ -100,19 +102,19 @@ export function Products() {
       ),
     },
     {
-      header: "Status",
+      header: t("common.status"),
       key: "isActive",
       render: (p) => <StatusBadge status={p.isActive ? "ACTIVE" : "INACTIVE"} />,
     },
     {
-      header: "Actions",
+      header: t("common.actions"),
       key: "actions",
       render: (p) => (
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(`/products/${p.id}/edit`)} aria-label="Edit" className="text-neutral-500 hover:text-royal-600">
+          <button onClick={() => navigate(`/products/${p.id}/edit`)} aria-label={t("common.edit")} className="text-neutral-500 hover:text-royal-600">
             <Pencil className="h-4 w-4" />
           </button>
-          <button onClick={() => setDeletingId(p.id)} aria-label="Delete" className="text-neutral-500 hover:text-red-600">
+          <button onClick={() => setDeletingId(p.id)} aria-label={t("common.delete")} className="text-neutral-500 hover:text-red-600">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
@@ -123,8 +125,8 @@ export function Products() {
   return (
     <div>
       <PageHeader
-        title="Products"
-        description="Manage your saree catalog, pricing and inventory."
+        title={t("products.title")}
+        description={t("products.description")}
         actions={
           <div className="flex items-center gap-3">
             <input
@@ -145,20 +147,20 @@ export function Products() {
               ) : (
                 <Upload className="h-4 w-4" />
               )}
-              {importMutation.isPending ? "Importing..." : "Import from Excel"}
+              {importMutation.isPending ? t("products.importing") : t("products.importFromExcel")}
             </button>
             <Link
               to="/products/new"
               className="flex items-center gap-2 rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm"
             >
-              <Plus className="h-4 w-4" /> Add Product
+              <Plus className="h-4 w-4" /> {t("products.addProduct")}
             </Link>
           </div>
         }
       />
 
       <div className="mb-4">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search by name, SKU or fabric..." />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("products.searchPlaceholder")} />
       </div>
 
       <DataTable
@@ -166,7 +168,7 @@ export function Products() {
         rows={data?.items ?? []}
         rowKey={(p) => p.id}
         loading={isLoading}
-        emptyMessage="No products yet. Add your first saree."
+        emptyMessage={t("products.emptyMessage")}
         onRowClick={(p) => navigate(`/products/${p.id}/edit`)}
       />
 
@@ -177,9 +179,9 @@ export function Products() {
       <ConfirmDialog
         open={Boolean(deletingId)}
         onOpenChange={(open) => !open && setDeletingId(null)}
-        title="Delete product?"
-        description="This product will be hidden from the storefront. This action can be reversed by an administrator."
-        confirmLabel="Delete"
+        title={t("products.deleteConfirmTitle")}
+        description={t("products.deleteConfirmDescription")}
+        confirmLabel={t("common.delete")}
         onConfirm={confirmDelete}
         loading={deleteMutation.isPending}
       />
@@ -190,10 +192,10 @@ export function Products() {
           <Dialog.Content className="fixed left-1/2 top-1/2 z-[90] flex max-h-[80vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col rounded-xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between">
               <Dialog.Title className="font-heading text-base font-semibold text-neutral-800">
-                Import results
+                {t("products.importResults")}
               </Dialog.Title>
               <Dialog.Close asChild>
-                <button aria-label="Close" className="text-neutral-400 hover:text-neutral-600">
+                <button aria-label={t("common.close")} className="text-neutral-400 hover:text-neutral-600">
                   <X className="h-4 w-4" />
                 </button>
               </Dialog.Close>
@@ -203,13 +205,13 @@ export function Products() {
               <>
                 <div className="mt-4 flex gap-4 text-sm">
                   <span className="flex items-center gap-1.5 text-green-700">
-                    <CheckCircle2 className="h-4 w-4" /> {importResult.created} created
+                    <CheckCircle2 className="h-4 w-4" /> {t("products.createdCount", { count: importResult.created })}
                   </span>
                   <span className="flex items-center gap-1.5 text-amber-700">
-                    <MinusCircle className="h-4 w-4" /> {importResult.skipped} skipped
+                    <MinusCircle className="h-4 w-4" /> {t("products.skippedCount", { count: importResult.skipped })}
                   </span>
                   <span className="flex items-center gap-1.5 text-red-700">
-                    <AlertCircle className="h-4 w-4" /> {importResult.failed} failed
+                    <AlertCircle className="h-4 w-4" /> {t("products.failedCount", { count: importResult.failed })}
                   </span>
                 </div>
 
@@ -217,9 +219,9 @@ export function Products() {
                   <table className="w-full text-left text-sm">
                     <thead className="sticky top-0 bg-neutral-50">
                       <tr>
-                        <th className="px-3 py-2 font-medium text-neutral-600">Row</th>
-                        <th className="px-3 py-2 font-medium text-neutral-600">Product</th>
-                        <th className="px-3 py-2 font-medium text-neutral-600">Status</th>
+                        <th className="px-3 py-2 font-medium text-neutral-600">{t("products.columnRow")}</th>
+                        <th className="px-3 py-2 font-medium text-neutral-600">{t("products.columnProduct")}</th>
+                        <th className="px-3 py-2 font-medium text-neutral-600">{t("common.status")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -232,10 +234,10 @@ export function Products() {
                           </td>
                           <td className="px-3 py-2">
                             {r.status === "created" ? (
-                              <span className="text-green-700">Created</span>
+                              <span className="text-green-700">{t("products.created")}</span>
                             ) : (
                               <span className={r.status === "failed" ? "text-red-700" : "text-amber-700"}>
-                                {r.status === "failed" ? "Failed" : "Skipped"}
+                                {r.status === "failed" ? t("products.failed") : t("products.skipped")}
                                 {r.message ? `: ${r.message}` : ""}
                               </span>
                             )}
@@ -251,7 +253,7 @@ export function Products() {
             <div className="mt-4 flex justify-end">
               <Dialog.Close asChild>
                 <button className="rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm">
-                  Done
+                  {t("common.done")}
                 </button>
               </Dialog.Close>
             </div>

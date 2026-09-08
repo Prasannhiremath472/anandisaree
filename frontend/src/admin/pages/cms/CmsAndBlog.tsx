@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { DataTable, type Column } from "@/admin/components/ui/DataTable";
@@ -11,6 +12,7 @@ import { useBlogPosts, useCmsPages, useDeleteBlogPost, type BlogPost } from "@/a
 import { CmsPageEditor } from "./CmsPageEditor";
 
 export function CmsAndBlog() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<"pages" | "blog">("pages");
   const { data: pages } = useCmsPages();
 
@@ -24,27 +26,27 @@ export function CmsAndBlog() {
     if (!deletingId) return;
     try {
       await deleteMutation.mutateAsync(deletingId);
-      toast.success("Blog post deleted");
+      toast.success(t("cmsAndBlog.blogPostDeleted"));
       setDeletingId(null);
     } catch {
-      toast.error("Failed to delete post");
+      toast.error(t("cmsAndBlog.failedToDeletePost"));
     }
   }
 
   const columns: Column<BlogPost>[] = [
-    { header: "Title", key: "title", render: (p) => <span className="font-medium text-neutral-800">{p.title}</span> },
-    { header: "Slug", key: "slug" },
-    { header: "Created", key: "createdAt", render: (p) => new Date(p.createdAt).toLocaleDateString("en-IN") },
-    { header: "Status", key: "isPublished", render: (p) => <StatusBadge status={p.isPublished ? "ACTIVE" : "INACTIVE"} /> },
+    { header: t("common.title"), key: "title", render: (p) => <span className="font-medium text-neutral-800">{p.title}</span> },
+    { header: t("common.slug"), key: "slug" },
+    { header: t("cmsAndBlog.columnCreated"), key: "createdAt", render: (p) => new Date(p.createdAt).toLocaleDateString("en-IN") },
+    { header: t("common.status"), key: "isPublished", render: (p) => <StatusBadge status={p.isPublished ? "ACTIVE" : "INACTIVE"} /> },
     {
-      header: "Actions",
+      header: t("common.actions"),
       key: "actions",
       render: (p) => (
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(`/cms/blog/${p.id}/edit`)} aria-label="Edit" className="text-neutral-500 hover:text-royal-600">
+          <button onClick={() => navigate(`/cms/blog/${p.id}/edit`)} aria-label={t("common.edit")} className="text-neutral-500 hover:text-royal-600">
             <Pencil className="h-4 w-4" />
           </button>
-          <button onClick={() => setDeletingId(p.id)} aria-label="Delete" className="text-neutral-500 hover:text-red-600">
+          <button onClick={() => setDeletingId(p.id)} aria-label={t("common.delete")} className="text-neutral-500 hover:text-red-600">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
@@ -55,30 +57,30 @@ export function CmsAndBlog() {
   return (
     <div>
       <PageHeader
-        title="CMS & Blog"
-        description="Manage static pages and blog content."
+        title={t("cmsAndBlog.title")}
+        description={t("cmsAndBlog.description")}
         actions={
           tab === "blog" ? (
             <Link
               to="/cms/blog/new"
               className="flex items-center gap-2 rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm"
             >
-              <Plus className="h-4 w-4" /> New Post
+              <Plus className="h-4 w-4" /> {t("cmsAndBlog.newPost")}
             </Link>
           ) : undefined
         }
       />
 
       <div className="mb-6 flex gap-2 border-b border-neutral-200">
-        {(["pages", "blog"] as const).map((t) => (
+        {(["pages", "blog"] as const).map((tabKey) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             className={`border-b-2 px-4 py-2 text-sm font-medium ${
-              tab === t ? "border-royal-600 text-royal-600" : "border-transparent text-neutral-500 hover:text-neutral-700"
+              tab === tabKey ? "border-royal-600 text-royal-600" : "border-transparent text-neutral-500 hover:text-neutral-700"
             }`}
           >
-            {t === "pages" ? "Static Pages" : "Blog Posts"}
+            {tabKey === "pages" ? t("cmsAndBlog.staticPages") : t("cmsAndBlog.blogPosts")}
           </button>
         ))}
       </div>
@@ -92,7 +94,7 @@ export function CmsAndBlog() {
             rows={posts?.items ?? []}
             rowKey={(p) => p.id}
             loading={isLoading}
-            emptyMessage="No blog posts yet."
+            emptyMessage={t("cmsAndBlog.emptyMessage")}
             onRowClick={(p) => navigate(`/cms/blog/${p.id}/edit`)}
           />
           {posts && posts.total > 0 && (
@@ -101,9 +103,9 @@ export function CmsAndBlog() {
           <ConfirmDialog
             open={Boolean(deletingId)}
             onOpenChange={(open) => !open && setDeletingId(null)}
-            title="Delete blog post?"
-            description="This post will be permanently removed."
-            confirmLabel="Delete"
+            title={t("cmsAndBlog.deleteConfirmTitle")}
+            description={t("cmsAndBlog.deleteConfirmDescription")}
+            confirmLabel={t("common.delete")}
             onConfirm={confirmDelete}
             loading={deleteMutation.isPending}
           />

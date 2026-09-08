@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { ImagePlus, Loader2, Plus, Trash2, X } from "lucide-react";
 import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
@@ -46,6 +47,7 @@ function cartesian(options: VariantOption[]): Record<string, string>[] {
 }
 
 export function VariantsCard({ options, onOptionsChange, variants, onVariantsChange, baseSku }: VariantsCardProps) {
+  const { t } = useTranslation();
   const [editingOptionId, setEditingOptionId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
   const [draftValues, setDraftValues] = useState<string[]>([]);
@@ -118,14 +120,14 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
       const { dataUri } = await uploadMutation.mutateAsync(file);
       updateVariantField(key, "imageUrl", dataUri);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Failed to upload image");
+      toast.error(err?.response?.data?.message ?? t("variantsCard.failedToUploadImage"));
     } finally {
       setUploadingKey(null);
     }
   }
 
   return (
-    <Card title="Variants">
+    <Card title={t("variantsCard.title")}>
       <div className="space-y-3">
         {options.map((option) =>
           editingOptionId === option.id ? null : (
@@ -144,9 +146,9 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
                   }}
                   className="text-xs font-medium text-royal-600 hover:text-royal-700"
                 >
-                  Edit
+                  {t("common.edit")}
                 </button>
-                <button type="button" onClick={() => deleteOption(option.id)} aria-label="Delete option" className="text-neutral-400 hover:text-red-600">
+                <button type="button" onClick={() => deleteOption(option.id)} aria-label={t("variantsCard.deleteOptionAria")} className="text-neutral-400 hover:text-red-600">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -156,17 +158,17 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
 
         {editingOptionId && (
           <div className="space-y-3 rounded-lg border border-royal-200 bg-royal-50/30 p-4">
-            <Field label="Option name" required>
+            <Field label={t("variantsCard.optionName")} required>
               <input
                 required
                 value={draftName}
                 onChange={(e) => setDraftName(e.target.value)}
-                placeholder="Size, Color, or anything custom"
+                placeholder={t("variantsCard.optionNamePlaceholder")}
                 className={inputClass}
               />
             </Field>
-            <Field label="Option values" required>
-              <TagInput values={draftValues} onChange={setDraftValues} placeholder="Type a value and press Enter" />
+            <Field label={t("variantsCard.optionValues")} required>
+              <TagInput values={draftValues} onChange={setDraftValues} placeholder={t("variantsCard.optionValuesPlaceholder")} />
             </Field>
             <div className="flex gap-2">
               <button
@@ -174,7 +176,7 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
                 onClick={() => setEditingOptionId(null)}
                 className="rounded-lg px-3 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
@@ -182,7 +184,7 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
                 disabled={!draftName.trim() || draftValues.length === 0}
                 className="rounded-lg bg-royal-gradient px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
               >
-                Done
+                {t("common.done")}
               </button>
             </div>
           </div>
@@ -194,7 +196,7 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
             onClick={startAddOption}
             className="flex items-center gap-1.5 text-sm font-medium text-royal-600 hover:text-royal-700"
           >
-            <Plus className="h-4 w-4" /> {options.length === 0 ? "Add options like size or color" : "Add another option"}
+            <Plus className="h-4 w-4" /> {options.length === 0 ? t("variantsCard.addOptionsPrompt") : t("variantsCard.addAnotherOption")}
           </button>
         )}
       </div>
@@ -204,11 +206,11 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
           <table className="w-full text-left text-sm">
             <thead className="bg-neutral-50">
               <tr>
-                <th className="px-3 py-2 font-medium text-neutral-600">Variant</th>
-                <th className="px-3 py-2 font-medium text-neutral-600">Image</th>
-                <th className="px-3 py-2 font-medium text-neutral-600">SKU</th>
-                <th className="px-3 py-2 font-medium text-neutral-600">Price Adjustment (₹)</th>
-                <th className="px-3 py-2 font-medium text-neutral-600">Stock</th>
+                <th className="px-3 py-2 font-medium text-neutral-600">{t("variantsCard.variant")}</th>
+                <th className="px-3 py-2 font-medium text-neutral-600">{t("variantsCard.image")}</th>
+                <th className="px-3 py-2 font-medium text-neutral-600">{t("variantsCard.sku")}</th>
+                <th className="px-3 py-2 font-medium text-neutral-600">{t("variantsCard.priceAdjustment")}</th>
+                <th className="px-3 py-2 font-medium text-neutral-600">{t("variantsCard.stock")}</th>
               </tr>
             </thead>
             <tbody>
@@ -231,7 +233,7 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
                         <button
                           type="button"
                           onClick={() => updateVariantField(v.key, "imageUrl", "")}
-                          aria-label="Remove variant image"
+                          aria-label={t("variantsCard.removeVariantImageAria")}
                           className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-neutral-500 shadow"
                         >
                           <X className="h-2.5 w-2.5" />
@@ -243,7 +245,7 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
                         onClick={() => fileInputRefs.current[v.key]?.click()}
                         disabled={uploadingKey === v.key}
                         className="flex h-12 w-10 items-center justify-center rounded border border-dashed border-neutral-300 text-neutral-400 hover:border-royal-300 hover:text-royal-500 disabled:opacity-60"
-                        aria-label="Upload variant image"
+                        aria-label={t("variantsCard.uploadVariantImageAria")}
                       >
                         {uploadingKey === v.key ? (
                           <Loader2 className="h-4 w-4 animate-spin" />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 
 interface TagInputProps {
@@ -8,6 +9,7 @@ interface TagInputProps {
 }
 
 export function TagInput({ values, onChange, placeholder }: TagInputProps) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState("");
 
   function commitDraft() {
@@ -36,7 +38,7 @@ export function TagInput({ values, onChange, placeholder }: TagInputProps) {
       {values.map((v) => (
         <span key={v} className="flex items-center gap-1 rounded-full bg-royal-50 px-2.5 py-1 text-xs font-medium text-royal-700">
           {v}
-          <button type="button" onClick={() => removeValue(v)} aria-label={`Remove ${v}`} className="hover:text-royal-900">
+          <button type="button" onClick={() => removeValue(v)} aria-label={t("common.removeValue", { value: v })} className="hover:text-royal-900">
             <X className="h-3 w-3" />
           </button>
         </span>

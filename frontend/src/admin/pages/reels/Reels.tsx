@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { Plus, Pencil, Trash2, Play, ExternalLink } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
@@ -13,6 +14,7 @@ function isDirectVideoFile(url: string) {
 }
 
 export function Reels() {
+  const { t } = useTranslation();
   const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
   const { data: reels, isLoading } = useReels(selectedCategoryId ?? undefined);
   const deleteMutation = useDeleteReel();
@@ -22,33 +24,33 @@ export function Reels() {
     if (!deletingId) return;
     try {
       await deleteMutation.mutateAsync(deletingId);
-      toast.success("Reel deleted");
+      toast.success(t("reels.reelDeleted"));
       setDeletingId(null);
     } catch {
-      toast.error("Failed to delete reel");
+      toast.error(t("reels.failedToDeleteReel"));
     }
   }
 
   return (
     <div>
       <PageHeader
-        title="Reels"
-        description="Manage the Style Reels shown on the storefront homepage."
+        title={t("reels.title")}
+        description={t("reels.description")}
         actions={
           <Link
             to="/reels/new"
             className="flex items-center gap-2 rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm"
           >
-            <Plus className="h-4 w-4" /> Add Reel
+            <Plus className="h-4 w-4" /> {t("reels.addReel")}
           </Link>
         }
       />
 
       {isLoading ? (
-        <p className="text-neutral-400">Loading...</p>
+        <p className="text-neutral-400">{t("common.loading")}</p>
       ) : !reels?.length ? (
         <p className="rounded-xl border border-black/5 bg-white py-10 text-center text-neutral-400">
-          No reels yet{selectedCategoryId ? " in this category" : ""}.
+          {selectedCategoryId ? t("reels.emptyMessageInCategory") : t("reels.emptyMessage")}
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -60,7 +62,7 @@ export function Reels() {
                   href={r.videoUrl}
                   target="_blank"
                   rel="noreferrer"
-                  aria-label={`Open reel: ${r.caption}`}
+                  aria-label={t("reels.openReelAria", { caption: r.caption })}
                   className="group relative block aspect-[9/16] w-full overflow-hidden bg-neutral-900"
                 >
                   {isVideoFile ? (
@@ -96,10 +98,10 @@ export function Reels() {
                   </div>
                   <div className="mt-2 flex items-center gap-3">
                     <Link to={`/reels/${r.id}/edit`} className="flex items-center gap-1 text-xs font-medium text-royal-600 hover:text-royal-700">
-                      <Pencil className="h-3.5 w-3.5" /> Edit
+                      <Pencil className="h-3.5 w-3.5" /> {t("common.edit")}
                     </Link>
                     <button onClick={() => setDeletingId(r.id)} className="flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700">
-                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                      <Trash2 className="h-3.5 w-3.5" /> {t("common.delete")}
                     </button>
                   </div>
                 </div>
@@ -112,9 +114,9 @@ export function Reels() {
       <ConfirmDialog
         open={Boolean(deletingId)}
         onOpenChange={(open) => !open && setDeletingId(null)}
-        title="Delete reel?"
-        description="This reel will be removed from the storefront."
-        confirmLabel="Delete"
+        title={t("reels.deleteConfirmTitle")}
+        description={t("reels.deleteConfirmDescription")}
+        confirmLabel={t("common.delete")}
         onConfirm={confirmDelete}
         loading={deleteMutation.isPending}
       />

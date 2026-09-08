@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { Check, Star, Trash2, X } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { DataTable, type Column } from "@/admin/components/ui/DataTable";
@@ -11,6 +12,7 @@ import { useAppSelector } from "@/admin/hooks/redux";
 const STATUS_FILTERS = ["ALL", "PENDING", "APPROVED", "REJECTED", "SPAM"] as const;
 
 export function Reviews() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<(typeof STATUS_FILTERS)[number]>("PENDING");
   const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
@@ -32,33 +34,33 @@ export function Reviews() {
   async function handleStatus(id: string, next: string) {
     try {
       await statusMutation.mutateAsync({ id, status: next });
-      toast.success(`Review ${next.toLowerCase()}`);
+      toast.success(t("reviews.reviewStatusUpdated", { status: next.toLowerCase() }));
     } catch {
-      toast.error("Failed to update review");
+      toast.error(t("reviews.failedToUpdateReview"));
     }
   }
 
   async function handleFeatured(review: Review) {
     try {
       await featuredMutation.mutateAsync({ id: review.id, isFeatured: !review.isFeatured });
-      toast.success(review.isFeatured ? "Removed from featured" : "Marked as featured");
+      toast.success(review.isFeatured ? t("reviews.removedFromFeatured") : t("reviews.markedAsFeatured"));
     } catch {
-      toast.error("Failed to update review");
+      toast.error(t("reviews.failedToUpdateReview"));
     }
   }
 
   async function handleDelete(id: string) {
     try {
       await deleteMutation.mutateAsync(id);
-      toast.success("Review deleted");
+      toast.success(t("reviews.reviewDeleted"));
     } catch {
-      toast.error("Failed to delete review");
+      toast.error(t("reviews.failedToDeleteReview"));
     }
   }
 
   const columns: Column<Review>[] = [
     {
-      header: "Product",
+      header: t("reviews.columnProduct"),
       key: "product",
       render: (r) => (
         <div className="flex items-center gap-2">
@@ -67,9 +69,9 @@ export function Reviews() {
         </div>
       ),
     },
-    { header: "Customer", key: "user", render: (r) => r.user.name },
+    { header: t("reviews.columnCustomer"), key: "user", render: (r) => r.user.name },
     {
-      header: "Rating",
+      header: t("reviews.columnRating"),
       key: "rating",
       render: (r) => (
         <div className="flex items-center gap-1 text-gold-500">
@@ -79,31 +81,31 @@ export function Reviews() {
         </div>
       ),
     },
-    { header: "Comment", key: "comment", render: (r) => <span className="line-clamp-2 max-w-xs text-neutral-600">{r.comment}</span> },
-    { header: "Status", key: "status", render: (r) => <StatusBadge status={r.status} /> },
+    { header: t("reviews.columnComment"), key: "comment", render: (r) => <span className="line-clamp-2 max-w-xs text-neutral-600">{r.comment}</span> },
+    { header: t("common.status"), key: "status", render: (r) => <StatusBadge status={r.status} /> },
     {
-      header: "Actions",
+      header: t("common.actions"),
       key: "actions",
       render: (r) => (
         <div className="flex items-center gap-2">
           {r.status !== "APPROVED" && (
-            <button onClick={() => handleStatus(r.id, "APPROVED")} aria-label="Approve" className="text-green-600 hover:text-green-700">
+            <button onClick={() => handleStatus(r.id, "APPROVED")} aria-label={t("reviews.approveAria")} className="text-green-600 hover:text-green-700">
               <Check className="h-4 w-4" />
             </button>
           )}
           {r.status !== "REJECTED" && (
-            <button onClick={() => handleStatus(r.id, "REJECTED")} aria-label="Reject" className="text-red-600 hover:text-red-700">
+            <button onClick={() => handleStatus(r.id, "REJECTED")} aria-label={t("reviews.rejectAria")} className="text-red-600 hover:text-red-700">
               <X className="h-4 w-4" />
             </button>
           )}
           <button
             onClick={() => handleFeatured(r)}
-            aria-label="Toggle featured"
+            aria-label={t("reviews.toggleFeaturedAria")}
             className={r.isFeatured ? "text-gold-600" : "text-neutral-400 hover:text-gold-600"}
           >
             <Star className={r.isFeatured ? "h-4 w-4 fill-gold-500" : "h-4 w-4"} />
           </button>
-          <button onClick={() => handleDelete(r.id)} aria-label="Delete" className="text-neutral-400 hover:text-red-600">
+          <button onClick={() => handleDelete(r.id)} aria-label={t("common.delete")} className="text-neutral-400 hover:text-red-600">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
@@ -113,7 +115,7 @@ export function Reviews() {
 
   return (
     <div>
-      <PageHeader title="Reviews" description="Moderate customer reviews and manage featured testimonials." />
+      <PageHeader title={t("reviews.title")} description={t("reviews.description")} />
 
       <div className="mb-4 flex gap-2">
         {STATUS_FILTERS.map((s) => (
@@ -124,12 +126,12 @@ export function Reviews() {
               status === s ? "bg-royal-gradient text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
             }`}
           >
-            {s}
+            {t(`status.${s}`)}
           </button>
         ))}
       </div>
 
-      <DataTable columns={columns} rows={data?.items ?? []} rowKey={(r) => r.id} loading={isLoading} emptyMessage="No reviews found." />
+      <DataTable columns={columns} rows={data?.items ?? []} rowKey={(r) => r.id} loading={isLoading} emptyMessage={t("reviews.emptyMessage")} />
 
       {data && data.total > 0 && (
         <Pagination page={data.page} totalPages={data.totalPages} total={data.total} pageSize={data.pageSize} onPageChange={setPage} />

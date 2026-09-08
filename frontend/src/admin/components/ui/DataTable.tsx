@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { cn } from "@/admin/utils";
 
 export interface Column<T> {
@@ -16,7 +17,8 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
 }
 
-export function DataTable<T>({ columns, rows, rowKey, loading, emptyMessage = "No records found.", onRowClick }: DataTableProps<T>) {
+export function DataTable<T>({ columns, rows, rowKey, loading, emptyMessage, onRowClick }: DataTableProps<T>) {
+  const { t } = useTranslation();
   return (
     <div className="overflow-x-auto rounded-xl border border-black/5 bg-white">
       <table className="w-full min-w-[640px] text-left text-sm">
@@ -33,13 +35,13 @@ export function DataTable<T>({ columns, rows, rowKey, loading, emptyMessage = "N
           {loading ? (
             <tr>
               <td colSpan={columns.length} className="px-4 py-10 text-center text-neutral-400">
-                Loading...
+                {t("common.loading")}
               </td>
             </tr>
           ) : rows.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="px-4 py-10 text-center text-neutral-400">
-                {emptyMessage}
+                {emptyMessage ?? t("common.noRecordsFound")}
               </td>
             </tr>
           ) : (

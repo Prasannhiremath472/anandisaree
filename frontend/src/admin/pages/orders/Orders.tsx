@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { SearchInput } from "@/admin/components/ui/SearchInput";
 import { DataTable, type Column } from "@/admin/components/ui/DataTable";
@@ -12,6 +13,7 @@ import type { OrderListItem, OrderStatus } from "@/admin/types/order";
 const STATUS_FILTERS: (OrderStatus | "ALL")[] = ["ALL", "PENDING", "CONFIRMED", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
 
 export function Orders() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<OrderStatus | "ALL">("ALL");
@@ -32,7 +34,7 @@ export function Orders() {
 
   const columns: Column<OrderListItem>[] = [
     {
-      header: "Order",
+      header: t("orders.columnOrder"),
       key: "orderNumber",
       render: (o) => (
         <div>
@@ -42,7 +44,7 @@ export function Orders() {
       ),
     },
     {
-      header: "Customer",
+      header: t("common.customer"),
       key: "user",
       render: (o) => (
         <div>
@@ -51,25 +53,25 @@ export function Orders() {
         </div>
       ),
     },
-    { header: "Items", key: "items", render: (o) => `${o.items.length} item${o.items.length !== 1 ? "s" : ""}` },
-    { header: "Total", key: "totalAmount", render: (o) => `₹${Number(o.totalAmount).toLocaleString("en-IN")}` },
-    { header: "Payment", key: "paymentStatus", render: (o) => <StatusBadge status={o.paymentStatus} /> },
-    { header: "Status", key: "status", render: (o) => <StatusBadge status={o.status} /> },
+    { header: t("orders.columnItems"), key: "items", render: (o) => t("orders.itemCount", { count: o.items.length }) },
+    { header: t("orders.columnTotal"), key: "totalAmount", render: (o) => `₹${Number(o.totalAmount).toLocaleString("en-IN")}` },
+    { header: t("orders.columnPayment"), key: "paymentStatus", render: (o) => <StatusBadge status={o.paymentStatus} /> },
+    { header: t("common.status"), key: "status", render: (o) => <StatusBadge status={o.status} /> },
   ];
 
   return (
     <div>
-      <PageHeader title="Orders" description="Track and manage customer orders." />
+      <PageHeader title={t("orders.title")} description={t("orders.description")} />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search order # or customer..." />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("orders.searchPlaceholder")} />
         <select
           value={status}
           onChange={(e) => { setStatus(e.target.value as OrderStatus | "ALL"); setPage(1); }}
           className="rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-royal-500 focus:outline-none"
         >
           {STATUS_FILTERS.map((s) => (
-            <option key={s} value={s}>{s === "ALL" ? "All Statuses" : s}</option>
+            <option key={s} value={s}>{s === "ALL" ? t("orders.allStatuses") : t(`status.${s}`)}</option>
           ))}
         </select>
       </div>
@@ -79,7 +81,7 @@ export function Orders() {
         rows={data?.items ?? []}
         rowKey={(o) => o.id}
         loading={isLoading}
-        emptyMessage="No orders yet."
+        emptyMessage={t("common.noOrdersYet")}
         onRowClick={(o) => navigate(`/orders/${o.id}`)}
       />
 

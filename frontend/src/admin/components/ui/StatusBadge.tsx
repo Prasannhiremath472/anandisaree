@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { cn } from "@/admin/utils";
 
 const COLOR_MAP: Record<string, string> = {
@@ -23,6 +24,10 @@ const COLOR_MAP: Record<string, string> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
+  const label = t(`status.${status}`, {
+    defaultValue: status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " "),
+  });
   return (
     <span
       className={cn(
@@ -30,7 +35,7 @@ export function StatusBadge({ status }: { status: string }) {
         COLOR_MAP[status] ?? "bg-neutral-200 text-neutral-700"
       )}
     >
-      {status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ")}
+      {label}
     </span>
   );
 }

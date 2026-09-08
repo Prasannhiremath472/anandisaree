@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { BackLink } from "@/admin/components/ui/BackLink";
@@ -12,6 +13,7 @@ import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 const emptyForm = { caption: "", videoUrl: "", thumbnailUrl: "", categoryId: "", linkUrl: "", sortOrder: "0", isActive: true };
 
 export function ReelForm() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
@@ -34,7 +36,7 @@ export function ReelForm() {
       const { dataUri } = await uploadMutation.mutateAsync(file);
       setForm((f) => ({ ...f, thumbnailUrl: dataUri }));
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Failed to upload thumbnail");
+      toast.error(err?.response?.data?.message ?? t("reelForm.failedToUploadThumbnail"));
     }
   }
 
@@ -68,47 +70,47 @@ export function ReelForm() {
     try {
       if (isEdit && id) {
         await updateMutation.mutateAsync({ id, input: payload });
-        toast.success("Reel updated");
+        toast.success(t("reelForm.reelUpdated"));
       } else {
         await createMutation.mutateAsync(payload);
-        toast.success("Reel created");
+        toast.success(t("reelForm.reelCreated"));
       }
       navigate("/reels");
     } catch (err: any) {
-      toast.error(err?.response?.data?.message ?? "Failed to save reel");
+      toast.error(err?.response?.data?.message ?? t("reelForm.failedToSaveReel"));
     }
   }
 
   const saving = createMutation.isPending || updateMutation.isPending;
 
   if (isEdit && isLoading) {
-    return <p className="text-neutral-400">Loading reel...</p>;
+    return <p className="text-neutral-400">{t("reelForm.loadingReel")}</p>;
   }
 
   return (
     <div>
-      <BackLink to="/reels" label="Back to Reels" />
-      <PageHeader title={isEdit ? "Edit Reel" : "Add Reel"} description={isEdit ? form.caption : "Add a new style reel."} />
+      <BackLink to="/reels" label={t("reelForm.backToReels")} />
+      <PageHeader title={isEdit ? t("reelForm.editReel") : t("reelForm.addReel")} description={isEdit ? form.caption : t("reelForm.addNewStyleReel")} />
 
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-xl border border-black/5 bg-white p-6">
-        <Field label="Caption" required>
+        <Field label={t("reelForm.caption")} required>
           <input required value={form.caption} onChange={(e) => setForm({ ...form, caption: e.target.value })} className={inputClass} />
         </Field>
 
-        <Field label="Video URL" required>
+        <Field label={t("reelForm.videoUrl")} required>
           <p className="mb-2 text-xs text-neutral-500">
-            Link to a video already hosted elsewhere — e.g. an Instagram Reel URL, YouTube link, or a direct .mp4 URL.
+            {t("reelForm.videoUrlHint")}
           </p>
           <input
             required
             value={form.videoUrl}
             onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
-            placeholder="https://www.instagram.com/reel/..."
+            placeholder={t("reelForm.videoUrlPlaceholder")}
             className={inputClass}
           />
         </Field>
 
-        <Field label="Thumbnail Image">
+        <Field label={t("reelForm.thumbnailImage")}>
           <input
             ref={fileInputRef}
             type="file"
@@ -118,11 +120,11 @@ export function ReelForm() {
           />
           {form.thumbnailUrl ? (
             <div className="relative w-32">
-              <img src={form.thumbnailUrl} alt="Thumbnail preview" className="aspect-[9/16] w-full rounded-lg object-cover" />
+              <img src={form.thumbnailUrl} alt={t("reelForm.thumbnailPreviewAlt")} className="aspect-[9/16] w-full rounded-lg object-cover" />
               <button
                 type="button"
                 onClick={() => setForm({ ...form, thumbnailUrl: "" })}
-                aria-label="Remove thumbnail"
+                aria-label={t("reelForm.removeThumbnail")}
                 className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
               >
                 <X className="h-3.5 w-3.5" />
@@ -140,16 +142,16 @@ export function ReelForm() {
               ) : (
                 <>
                   <ImagePlus className="h-5 w-5 text-neutral-300" />
-                  <p className="text-[11px] font-medium text-royal-600">Upload</p>
+                  <p className="text-[11px] font-medium text-royal-600">{t("reelForm.upload")}</p>
                 </>
               )}
             </button>
           )}
         </Field>
 
-        <Field label="Category">
+        <Field label={t("reelForm.category")}>
           <select value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} className={inputClass}>
-            <option value="">No category</option>
+            <option value="">{t("reelForm.noCategory")}</option>
             {categories?.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -158,30 +160,30 @@ export function ReelForm() {
           </select>
         </Field>
 
-        <Field label="Link URL">
+        <Field label={t("common.linkUrl")}>
           <input
             value={form.linkUrl}
             onChange={(e) => setForm({ ...form, linkUrl: e.target.value })}
-            placeholder="/category/nightwear"
+            placeholder={t("reelForm.linkUrlPlaceholder")}
             className={inputClass}
           />
         </Field>
 
-        <Field label="Sort Order">
+        <Field label={t("common.sortOrder")}>
           <input type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: e.target.value })} className={inputClass} />
         </Field>
 
         <label className="flex items-center gap-2 text-sm text-neutral-700">
           <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="h-4 w-4 rounded border-neutral-300 text-royal-600" />
-          Active
+          {t("common.active")}
         </label>
 
         <div className="flex justify-end gap-3 pt-2">
           <button type="button" onClick={() => navigate("/reels")} className="rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100">
-            Cancel
+            {t("common.cancel")}
           </button>
           <button type="submit" disabled={saving} className="rounded-lg bg-royal-gradient px-5 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
-            {saving ? "Saving..." : isEdit ? "Save Changes" : "Create Reel"}
+            {saving ? t("common.saving") : isEdit ? t("common.saveChanges") : t("reelForm.createReel")}
           </button>
         </div>
       </form>

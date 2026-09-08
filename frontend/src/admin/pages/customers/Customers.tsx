@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { SearchInput } from "@/admin/components/ui/SearchInput";
 import { DataTable, type Column } from "@/admin/components/ui/DataTable";
@@ -8,6 +9,7 @@ import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { useCustomers, type CustomerListItem } from "@/admin/hooks/api/useCustomers";
 
 export function Customers() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ export function Customers() {
 
   const columns: Column<CustomerListItem>[] = [
     {
-      header: "Customer",
+      header: t("customers.columnCustomer"),
       key: "name",
       render: (c) => (
         <div>
@@ -25,18 +27,18 @@ export function Customers() {
         </div>
       ),
     },
-    { header: "Phone", key: "phone", render: (c) => c.phone ?? "—" },
-    { header: "Orders", key: "orders", render: (c) => c._count.orders },
-    { header: "Joined", key: "createdAt", render: (c) => new Date(c.createdAt).toLocaleDateString("en-IN") },
-    { header: "Status", key: "isActive", render: (c) => <StatusBadge status={c.isActive ? "ACTIVE" : "INACTIVE"} /> },
+    { header: t("customers.columnPhone"), key: "phone", render: (c) => c.phone ?? "—" },
+    { header: t("customers.columnOrders"), key: "orders", render: (c) => c._count.orders },
+    { header: t("customers.columnJoined"), key: "createdAt", render: (c) => new Date(c.createdAt).toLocaleDateString("en-IN") },
+    { header: t("common.status"), key: "isActive", render: (c) => <StatusBadge status={c.isActive ? "ACTIVE" : "INACTIVE"} /> },
   ];
 
   return (
     <div>
-      <PageHeader title="Customers" description="View and manage your customer base." />
+      <PageHeader title={t("customers.title")} description={t("customers.description")} />
 
       <div className="mb-4">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder="Search by name, email or phone..." />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("customers.searchPlaceholder")} />
       </div>
 
       <DataTable
@@ -44,7 +46,7 @@ export function Customers() {
         rows={data?.items ?? []}
         rowKey={(c) => c.id}
         loading={isLoading}
-        emptyMessage="No customers yet."
+        emptyMessage={t("customers.emptyMessage")}
         onRowClick={(c) => navigate(`/customers/${c.id}`)}
       />
 

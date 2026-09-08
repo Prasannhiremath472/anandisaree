@@ -1,4 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import { useTranslation } from "react-i18next";
 import { AlertTriangle } from "lucide-react";
 
 interface ConfirmDialogProps {
@@ -17,11 +18,12 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = "Confirm",
+  confirmLabel,
   onConfirm,
   loading,
   destructive = true,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -39,7 +41,7 @@ export function ConfirmDialog({
           <div className="mt-6 flex justify-end gap-3">
             <Dialog.Close asChild>
               <button className="rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100">
-                Cancel
+                {t("common.cancel")}
               </button>
             </Dialog.Close>
             <button
@@ -49,7 +51,7 @@ export function ConfirmDialog({
                 destructive ? "bg-red-600 hover:bg-red-700" : "bg-royal-600 hover:bg-royal-700"
               }`}
             >
-              {loading ? "Please wait..." : confirmLabel}
+              {loading ? t("common.pleaseWait") : confirmLabel ?? t("common.confirm")}
             </button>
           </div>
         </Dialog.Content>

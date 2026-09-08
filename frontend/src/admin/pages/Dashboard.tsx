@@ -1,17 +1,19 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { useDashboard } from "@/admin/hooks/api/useDashboard";
 import { useAppSelector } from "@/admin/hooks/redux";
 
 export function Dashboard() {
+  const { t } = useTranslation();
   const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
   const { data, isLoading } = useDashboard(selectedCategoryId);
 
   const statCards = [
-    { label: "Revenue (30d)", value: `₹${Number(data?.revenue30d ?? 0).toLocaleString("en-IN")}` },
-    { label: "Orders (30d)", value: String(data?.orders30d ?? 0) },
-    { label: "New Customers (30d)", value: String(data?.newCustomers30d ?? 0) },
-    { label: "Low Stock Items", value: String(data?.lowStockCount ?? 0) },
+    { label: t("dashboard.revenue30d"), value: `₹${Number(data?.revenue30d ?? 0).toLocaleString("en-IN")}` },
+    { label: t("dashboard.orders30d"), value: String(data?.orders30d ?? 0) },
+    { label: t("dashboard.newCustomers30d"), value: String(data?.newCustomers30d ?? 0) },
+    { label: t("dashboard.lowStockItems"), value: String(data?.lowStockCount ?? 0) },
   ];
 
   return (
@@ -30,13 +32,13 @@ export function Dashboard() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-heading text-base font-semibold text-neutral-800">Latest Orders</h2>
+            <h2 className="font-heading text-base font-semibold text-neutral-800">{t("dashboard.latestOrders")}</h2>
             <Link to="/orders" className="text-xs font-medium text-royal-600 hover:text-royal-700">
-              View all
+              {t("dashboard.viewAll")}
             </Link>
           </div>
           {!data?.recentOrders.length ? (
-            <p className="text-sm text-neutral-400">No orders yet.</p>
+            <p className="text-sm text-neutral-400">{t("common.noOrdersYet")}</p>
           ) : (
             <ul className="divide-y divide-neutral-100">
               {data.recentOrders.map((o) => (
@@ -57,19 +59,19 @@ export function Dashboard() {
 
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-heading text-base font-semibold text-neutral-800">Top Products</h2>
+            <h2 className="font-heading text-base font-semibold text-neutral-800">{t("dashboard.topProducts")}</h2>
             <Link to="/reports" className="text-xs font-medium text-royal-600 hover:text-royal-700">
-              View reports
+              {t("dashboard.viewReports")}
             </Link>
           </div>
           {!data?.topProducts.length ? (
-            <p className="text-sm text-neutral-400">No sales data yet.</p>
+            <p className="text-sm text-neutral-400">{t("dashboard.noSalesDataYet")}</p>
           ) : (
             <ul className="divide-y divide-neutral-100">
               {data.topProducts.map((p) => (
                 <li key={p.id} className="flex items-center justify-between py-2.5 text-sm">
                   <p className="font-medium text-neutral-800">{p.name}</p>
-                  <span className="text-neutral-500">{p.soldCount} sold</span>
+                  <span className="text-neutral-500">{t("dashboard.soldCount", { count: p.soldCount })}</span>
                 </li>
               ))}
             </ul>

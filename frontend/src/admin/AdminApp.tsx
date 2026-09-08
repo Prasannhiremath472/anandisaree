@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { adminStore } from "@/admin/store";
 import { adminRouter } from "@/admin/router";
 import { AuthBootstrap } from "@/admin/components/AuthBootstrap";
+import "@/admin/i18n";
 
 const queryClient = new QueryClient({
   defaultOptions: {

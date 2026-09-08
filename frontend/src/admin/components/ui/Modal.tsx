@@ -1,4 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 import { cn } from "@/admin/utils";
 
@@ -18,6 +19,7 @@ const SIZES = {
 };
 
 export function Modal({ open, onOpenChange, title, children, size = "md" }: ModalProps) {
+  const { t } = useTranslation();
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -31,7 +33,7 @@ export function Modal({ open, onOpenChange, title, children, size = "md" }: Moda
           <div className="mb-5 flex items-center justify-between">
             <Dialog.Title className="font-heading text-lg font-semibold text-neutral-800">{title}</Dialog.Title>
             <Dialog.Close asChild>
-              <button aria-label="Close" className="text-neutral-400 hover:text-neutral-700">
+              <button aria-label={t("common.close")} className="text-neutral-400 hover:text-neutral-700">
                 <X className="h-5 w-5" />
               </button>
             </Dialog.Close>

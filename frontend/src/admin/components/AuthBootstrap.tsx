@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 import { useAppDispatch } from "@/admin/hooks/redux";
 import { setCredentials } from "@/admin/store/authSlice";
 
@@ -9,6 +10,7 @@ import { setCredentials } from "@/admin/store/authSlice";
  * ProtectedRoute decides whether to bounce to /admin/login.
  */
 export function AuthBootstrap({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const [ready, setReady] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -35,7 +37,7 @@ export function AuthBootstrap({ children }: { children: React.ReactNode }) {
   }, [dispatch]);
 
   if (!ready) {
-    return <div className="flex min-h-screen items-center justify-center text-neutral-400">Loading...</div>;
+    return <div className="flex min-h-screen items-center justify-center text-neutral-400">{t("common.loading")}</div>;
   }
 
   return <>{children}</>;
