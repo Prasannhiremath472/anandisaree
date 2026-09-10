@@ -20,7 +20,11 @@ interface Slide {
 }
 
 export function HeroSlider() {
-  const { data: banners } = useStorefrontBanners("HOMEPAGE_SLIDER");
+  const { data: banners, isLoading } = useStorefrontBanners("HOMEPAGE_SLIDER");
+
+  if (isLoading) {
+    return <section className="h-[65vh] min-h-[520px] w-full animate-pulse bg-royal-900/10 sm:h-[80vh]" />;
+  }
 
   const slides: Slide[] = banners?.length
     ? banners.map((b) => ({
