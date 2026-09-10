@@ -5,7 +5,7 @@ import { createId } from "../utils/id";
 import { ApiError } from "../utils/ApiError";
 import { bannerCreateSchema, bannerUpdateSchema } from "../validation/banner.schema";
 
-const BANNER_COLUMNS = ["title", "subtitle", "imageUrl", "linkUrl", "ctaLabel", "placement", "sortOrder", "isActive", "startsAt", "endsAt"] as const;
+const BANNER_COLUMNS = ["title", "subtitle", "imageUrl", "mobileImageUrl", "linkUrl", "ctaLabel", "placement", "sortOrder", "isActive", "startsAt", "endsAt"] as const;
 
 export const listBanners = asyncHandler(async (req: Request, res: Response) => {
   const placement = req.query.placement as string | undefined;
@@ -19,7 +19,7 @@ export const listPublicBanners = asyncHandler(async (req: Request, res: Response
   const placement = req.query.placement as string | undefined;
   const params: QueryParams = [];
   let sql =
-    "SELECT id, title, subtitle, imageUrl, linkUrl, ctaLabel, placement, sortOrder FROM `Banner` WHERE isActive = 1 AND (startsAt IS NULL OR startsAt <= NOW()) AND (endsAt IS NULL OR endsAt >= NOW())";
+    "SELECT id, title, subtitle, imageUrl, mobileImageUrl, linkUrl, ctaLabel, placement, sortOrder FROM `Banner` WHERE isActive = 1 AND (startsAt IS NULL OR startsAt <= NOW()) AND (endsAt IS NULL OR endsAt >= NOW())";
   if (placement) {
     sql += " AND placement = ?";
     params.push(placement);

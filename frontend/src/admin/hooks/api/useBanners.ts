@@ -8,6 +8,7 @@ export interface Banner {
   title: string;
   subtitle: string | null;
   imageUrl: string;
+  mobileImageUrl: string | null;
   linkUrl: string | null;
   ctaLabel: string | null;
   placement: BannerPlacement;
@@ -19,6 +20,7 @@ export interface BannerFormValues {
   title: string;
   subtitle?: string;
   imageUrl: string;
+  mobileImageUrl?: string;
   linkUrl?: string;
   ctaLabel?: string;
   placement: BannerPlacement;

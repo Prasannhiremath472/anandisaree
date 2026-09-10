@@ -6,6 +6,7 @@ exports.bannerCreateSchema = zod_1.z.object({
     title: zod_1.z.string().min(1),
     subtitle: zod_1.z.string().optional(),
     imageUrl: zod_1.z.string().min(1),
+    mobileImageUrl: zod_1.z.string().optional(),
     linkUrl: zod_1.z.string().optional(),
     ctaLabel: zod_1.z.string().optional(),
     placement: zod_1.z.enum(["HOMEPAGE_SLIDER", "FESTIVAL_BANNER", "OFFER_BANNER", "COLLECTION_BANNER", "POPUP_BANNER"]),

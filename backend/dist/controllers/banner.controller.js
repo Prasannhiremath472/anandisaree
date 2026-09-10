@@ -6,7 +6,7 @@ const db_1 = require("../config/db");
 const id_1 = require("../utils/id");
 const ApiError_1 = require("../utils/ApiError");
 const banner_schema_1 = require("../validation/banner.schema");
-const BANNER_COLUMNS = ["title", "subtitle", "imageUrl", "linkUrl", "ctaLabel", "placement", "sortOrder", "isActive", "startsAt", "endsAt"];
+const BANNER_COLUMNS = ["title", "subtitle", "imageUrl", "mobileImageUrl", "linkUrl", "ctaLabel", "placement", "sortOrder", "isActive", "startsAt", "endsAt"];
 exports.listBanners = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const placement = req.query.placement;
     const banners = placement
@@ -17,7 +17,7 @@ exports.listBanners = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
 exports.listPublicBanners = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const placement = req.query.placement;
     const params = [];
-    let sql = "SELECT id, title, subtitle, imageUrl, linkUrl, ctaLabel, placement, sortOrder FROM `Banner` WHERE isActive = 1 AND (startsAt IS NULL OR startsAt <= NOW()) AND (endsAt IS NULL OR endsAt >= NOW())";
+    let sql = "SELECT id, title, subtitle, imageUrl, mobileImageUrl, linkUrl, ctaLabel, placement, sortOrder FROM `Banner` WHERE isActive = 1 AND (startsAt IS NULL OR startsAt <= NOW()) AND (endsAt IS NULL OR endsAt >= NOW())";
     if (placement) {
         sql += " AND placement = ?";
         params.push(placement);

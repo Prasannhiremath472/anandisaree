@@ -4,6 +4,7 @@ export const bannerCreateSchema = z.object({
   title: z.string().min(1),
   subtitle: z.string().optional(),
   imageUrl: z.string().min(1),
+  mobileImageUrl: z.string().optional(),
   linkUrl: z.string().optional(),
   ctaLabel: z.string().optional(),
   placement: z.enum(["HOMEPAGE_SLIDER", "FESTIVAL_BANNER", "OFFER_BANNER", "COLLECTION_BANNER", "POPUP_BANNER"]),

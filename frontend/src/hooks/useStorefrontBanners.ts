@@ -8,6 +8,7 @@ export interface StorefrontBanner {
   title: string;
   subtitle: string | null;
   imageUrl: string;
+  mobileImageUrl: string | null;
   linkUrl: string | null;
   ctaLabel: string | null;
   placement: BannerPlacement;

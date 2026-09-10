@@ -9,7 +9,7 @@ import { Field, inputClass } from "@/admin/components/ui/Field";
 import { useBanners, useCreateBanner, useUpdateBanner, type BannerPlacement } from "@/admin/hooks/api/useBanners";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 
-const emptyForm = { title: "", subtitle: "", imageUrl: "", linkUrl: "", ctaLabel: "", placement: "HOMEPAGE_SLIDER" as BannerPlacement, sortOrder: "0", isActive: true };
+const emptyForm = { title: "", subtitle: "", imageUrl: "", mobileImageUrl: "", linkUrl: "", ctaLabel: "", placement: "HOMEPAGE_SLIDER" as BannerPlacement, sortOrder: "0", isActive: true };
 
 export function BannerForm() {
   const { t } = useTranslation();
@@ -23,16 +23,17 @@ export function BannerForm() {
   const updateMutation = useUpdateBanner();
   const uploadMutation = useImageUpload();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mobileFileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState(emptyForm);
 
-  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>, field: "imageUrl" | "mobileImageUrl") {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
 
     try {
       const { dataUri } = await uploadMutation.mutateAsync(file);
-      setForm((f) => ({ ...f, imageUrl: dataUri }));
+      setForm((f) => ({ ...f, [field]: dataUri }));
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? t("bannerForm.failedToUploadImage"));
     }
@@ -44,6 +45,7 @@ export function BannerForm() {
         title: banner.title,
         subtitle: banner.subtitle ?? "",
         imageUrl: banner.imageUrl,
+        mobileImageUrl: banner.mobileImageUrl ?? "",
         linkUrl: banner.linkUrl ?? "",
         ctaLabel: banner.ctaLabel ?? "",
         placement: banner.placement,
@@ -65,6 +67,7 @@ export function BannerForm() {
       title: form.title,
       subtitle: form.subtitle || undefined,
       imageUrl: form.imageUrl,
+      mobileImageUrl: form.mobileImageUrl || undefined,
       linkUrl: form.linkUrl || undefined,
       ctaLabel: form.ctaLabel || undefined,
       placement: form.placement,
@@ -112,7 +115,7 @@ export function BannerForm() {
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            onChange={handleFileSelect}
+            onChange={(e) => handleFileSelect(e, "imageUrl")}
             className="hidden"
           />
           {form.imageUrl ? (
@@ -144,6 +147,45 @@ export function BannerForm() {
                   <ImagePlus className="h-6 w-6 text-neutral-300" />
                   <p className="text-xs font-medium text-royal-600">{t("bannerForm.clickToUploadBannerImage")}</p>
                   <p className="text-[11px] text-neutral-400">{t("bannerForm.photoFormatsHint")}</p>
+                </>
+              )}
+            </button>
+          )}
+        </Field>
+        <Field label={t("bannerForm.mobileBannerImage")}>
+          <p className="mb-2 text-xs text-neutral-500">{t("bannerForm.mobileImageHint")}</p>
+          <input
+            ref={mobileFileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileSelect(e, "mobileImageUrl")}
+            className="hidden"
+          />
+          {form.mobileImageUrl ? (
+            <div className="relative w-32">
+              <img src={form.mobileImageUrl} alt={t("bannerForm.mobileBannerPreviewAlt")} className="aspect-[9/16] w-full rounded-lg object-cover" />
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, mobileImageUrl: "" })}
+                aria-label={t("common.remove")}
+                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => mobileFileInputRef.current?.click()}
+              disabled={uploadMutation.isPending}
+              className="flex w-32 flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-neutral-200 py-6 text-center hover:border-royal-300 hover:bg-royal-50/30 disabled:opacity-60"
+            >
+              {uploadMutation.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin text-royal-500" />
+              ) : (
+                <>
+                  <ImagePlus className="h-5 w-5 text-neutral-300" />
+                  <p className="text-[11px] font-medium text-royal-600">{t("reelForm.upload")}</p>
                 </>
               )}
             </button>

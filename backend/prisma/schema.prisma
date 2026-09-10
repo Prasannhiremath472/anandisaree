@@ -739,7 +739,8 @@ model Banner {
   id        String          @id @default(cuid())
   title     String
   subtitle  String?
-  imageUrl  String
+  imageUrl  String          @db.LongText
+  mobileImageUrl String?    @db.LongText
   linkUrl   String?
   ctaLabel  String?
   placement BannerPlacement
