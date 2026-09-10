@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useAppDispatch } from "@/admin/hooks/redux";
 import { setCredentials } from "@/admin/store/authSlice";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
+
 /**
  * On hard page load/reload, the Redux access token is gone but the httpOnly
  * refresh cookie may still be valid. Attempt a silent refresh before
@@ -18,7 +20,7 @@ export function AuthBootstrap({ children }: { children: React.ReactNode }) {
     let cancelled = false;
 
     axios
-      .post("/api/auth/refresh", {}, { withCredentials: true })
+      .post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true })
       .then((res) => {
         if (cancelled) return;
         const { user, accessToken } = res.data.data;

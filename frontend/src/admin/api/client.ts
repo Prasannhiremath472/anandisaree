@@ -2,8 +2,10 @@ import axios from "axios";
 import { adminStore } from "@/admin/store";
 import { clearAuth, setAccessToken } from "@/admin/store/authSlice";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "/api";
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? "/api",
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
@@ -19,7 +21,7 @@ let refreshPromise: Promise<string | null> | null = null;
 
 async function refreshAccessToken(): Promise<string | null> {
   try {
-    const res = await axios.post("/api/auth/refresh", {}, { withCredentials: true });
+    const res = await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
     const token = res.data?.data?.accessToken as string;
     adminStore.dispatch(setAccessToken(token));
     return token;
