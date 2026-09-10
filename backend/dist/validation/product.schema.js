@@ -26,7 +26,7 @@ exports.productCreateSchema = zod_1.z.object({
     designPattern: zod_1.z.string().optional(),
     color: zod_1.z.string().min(1),
     secondaryColors: zod_1.z.string().optional(),
-    sareeLength: zod_1.z.coerce.number().positive(),
+    sareeLength: zod_1.z.coerce.number().positive().optional(),
     blouseIncluded: zod_1.z.coerce.boolean().optional(),
     blouseLength: zod_1.z.coerce.number().positive().optional(),
     weightGrams: zod_1.z.coerce.number().int().positive().optional(),

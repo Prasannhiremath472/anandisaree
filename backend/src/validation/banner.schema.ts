@@ -2,8 +2,10 @@ import { z } from "zod";
 
 export const bannerCreateSchema = z.object({
   title: z.string().min(1),
+  subtitle: z.string().optional(),
   imageUrl: z.string().min(1),
   linkUrl: z.string().optional(),
+  ctaLabel: z.string().optional(),
   placement: z.enum(["HOMEPAGE_SLIDER", "FESTIVAL_BANNER", "OFFER_BANNER", "COLLECTION_BANNER", "POPUP_BANNER"]),
   sortOrder: z.coerce.number().int().optional(),
   isActive: z.coerce.boolean().optional(),

@@ -24,6 +24,14 @@ async function listOrders(pagination, filters) {
         const like = `%${filters.search}%`;
         params.push(like, like, like);
     }
+    if (filters.categoryId) {
+        conditions.push(`EXISTS (
+        SELECT 1 FROM \`OrderItem\` oi
+        JOIN \`ProductCategory\` pc ON pc.productId = oi.productId
+        WHERE oi.orderId = o.id AND pc.categoryId = ?
+      )`);
+        params.push(filters.categoryId);
+    }
     const whereClause = conditions.join(" AND ");
     const items = await (0, db_1.query)(`SELECT o.*, u.id as user_id, u.name as user_name, u.email as user_email, u.phone as user_phone
      FROM \`Order\` o JOIN \`User\` u ON u.id = o.userId
@@ -104,17 +112,30 @@ async function updateOrderStatus(id, input, changedById) {
     });
     return (0, db_1.queryOne)("SELECT * FROM `Order` WHERE id = ? LIMIT 1", [id]);
 }
-async function getDashboardSummary() {
+async function getDashboardSummary(categoryId) {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const orderCategoryExists = categoryId
+        ? `EXISTS (
+        SELECT 1 FROM \`OrderItem\` oi
+        JOIN \`ProductCategory\` pc ON pc.productId = oi.productId
+        WHERE oi.orderId = o.id AND pc.categoryId = ?
+      )`
+        : null;
+    const productCategoryExists = categoryId
+        ? `EXISTS (SELECT 1 FROM \`ProductCategory\` pc WHERE pc.productId = id AND pc.categoryId = ?)`
+        : null;
     const [revenueRow, orderCountRow, customerCountRow, lowStockProducts, recentOrdersRows, topProducts] = await Promise.all([
-        (0, db_1.queryOne)("SELECT SUM(totalAmount) as total FROM `Order` WHERE createdAt >= ? AND paymentStatus = 'PAID'", [thirtyDaysAgo]),
-        (0, db_1.queryOne)("SELECT COUNT(*) as count FROM `Order` WHERE createdAt >= ?", [thirtyDaysAgo]),
+        (0, db_1.queryOne)(`SELECT SUM(totalAmount) as total FROM \`Order\` o
+         WHERE createdAt >= ? AND paymentStatus = 'PAID' ${orderCategoryExists ? `AND ${orderCategoryExists}` : ""}`, categoryId ? [thirtyDaysAgo, categoryId] : [thirtyDaysAgo]),
+        (0, db_1.queryOne)(`SELECT COUNT(*) as count FROM \`Order\` o WHERE createdAt >= ? ${orderCategoryExists ? `AND ${orderCategoryExists}` : ""}`, categoryId ? [thirtyDaysAgo, categoryId] : [thirtyDaysAgo]),
+        // Not category-scoped: a "new customer" isn't tied to any single category.
         (0, db_1.queryOne)("SELECT COUNT(*) as count FROM `User` WHERE role = 'CUSTOMER' AND createdAt >= ?", [thirtyDaysAgo]),
-        (0, db_1.query)("SELECT id FROM `Product` WHERE deletedAt IS NULL AND stockQuantity <= lowStockThreshold"),
+        (0, db_1.query)(`SELECT id FROM \`Product\` WHERE deletedAt IS NULL AND stockQuantity <= lowStockThreshold ${productCategoryExists ? `AND ${productCategoryExists}` : ""}`, categoryId ? [categoryId] : []),
         (0, db_1.query)(`SELECT o.*, u.name as user_name FROM \`Order\` o JOIN \`User\` u ON u.id = o.userId
-         ORDER BY o.createdAt DESC LIMIT 5`),
-        (0, db_1.query)("SELECT id, name, soldCount, sellingPrice FROM `Product` WHERE deletedAt IS NULL ORDER BY soldCount DESC LIMIT 5"),
+         ${orderCategoryExists ? `WHERE ${orderCategoryExists}` : ""}
+         ORDER BY o.createdAt DESC LIMIT 5`, categoryId ? [categoryId] : []),
+        (0, db_1.query)(`SELECT id, name, soldCount, sellingPrice FROM \`Product\` WHERE deletedAt IS NULL ${productCategoryExists ? `AND ${productCategoryExists}` : ""} ORDER BY soldCount DESC LIMIT 5`, categoryId ? [categoryId] : []),
     ]);
     const recentOrders = recentOrdersRows.map((row) => {
         const { user_name, ...order } = row;

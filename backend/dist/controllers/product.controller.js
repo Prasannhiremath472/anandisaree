@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.importProducts = exports.listBrandsLookup = exports.listCategoriesLookup = exports.bulkDeleteProducts = exports.generateDescription = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getPublicProductBySlug = exports.listPublicProducts = exports.getProduct = exports.listProducts = void 0;
+exports.importProducts = exports.listBrandsLookup = exports.listPublicCategoriesLookup = exports.listCategoriesLookup = exports.bulkDeleteProducts = exports.generateDescription = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getPublicProductBySlug = exports.listPublicProducts = exports.getProduct = exports.listProducts = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const pagination_1 = require("../utils/pagination");
 const productService = __importStar(require("../services/product.service"));
@@ -109,6 +109,10 @@ exports.bulkDeleteProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) =
 });
 exports.listCategoriesLookup = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
     const categories = await (0, db_1.query)("SELECT id, name, slug, `group`, parentId FROM `Category` WHERE deletedAt IS NULL ORDER BY `group` ASC, sortOrder ASC");
+    res.json({ success: true, data: categories });
+});
+exports.listPublicCategoriesLookup = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
+    const categories = await (0, db_1.query)("SELECT id, name, slug, `group`, parentId FROM `Category` WHERE deletedAt IS NULL AND isActive = 1 ORDER BY `group` ASC, sortOrder ASC");
     res.json({ success: true, data: categories });
 });
 exports.listBrandsLookup = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {

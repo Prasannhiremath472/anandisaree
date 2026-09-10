@@ -12,12 +12,18 @@ import { StoreVisit } from "@/components/home/StoreVisit";
 import { Newsletter } from "@/components/home/Newsletter";
 import { GUDI_PADWA_COLLECTION, FESTIVE_COLLECTION } from "@/data/homeContent";
 import { useStorefrontProducts } from "@/hooks/useStorefrontProducts";
+import { useStorefrontBanners } from "@/hooks/useStorefrontBanners";
 
 export function Home() {
   const { data: newArrivals = [] } = useStorefrontProducts({ isNewArrival: true, pageSize: 8 });
   const { data: bestSellers = [] } = useStorefrontProducts({ isBestSeller: true, pageSize: 8 });
   const { data: liveSpecials = [] } = useStorefrontProducts({ isLiveSpecial: true, pageSize: 8 });
   const { data: topSelection = [] } = useStorefrontProducts({ isTopSelection: true, pageSize: 8 });
+  const { data: collectionBanners } = useStorefrontBanners("COLLECTION_BANNER");
+  const { data: festivalBanners } = useStorefrontBanners("FESTIVAL_BANNER");
+
+  const gudiPadwaBanner = collectionBanners?.[0];
+  const festiveBanner = festivalBanners?.[0];
 
   return (
     <>
@@ -35,10 +41,11 @@ export function Home() {
       <FeaturedCategories />
 
       <CollectionBanner
-        title={GUDI_PADWA_COLLECTION.title}
-        subtitle={GUDI_PADWA_COLLECTION.subtitle}
-        image={GUDI_PADWA_COLLECTION.image}
-        ctaHref={GUDI_PADWA_COLLECTION.ctaHref}
+        title={gudiPadwaBanner?.title ?? GUDI_PADWA_COLLECTION.title}
+        subtitle={gudiPadwaBanner?.subtitle ?? GUDI_PADWA_COLLECTION.subtitle}
+        image={gudiPadwaBanner?.imageUrl ?? GUDI_PADWA_COLLECTION.image}
+        ctaHref={gudiPadwaBanner?.linkUrl ?? GUDI_PADWA_COLLECTION.ctaHref}
+        ctaLabel={gudiPadwaBanner?.ctaLabel ?? undefined}
       />
 
       <ProductRail
@@ -67,10 +74,11 @@ export function Home() {
       )}
 
       <CollectionBanner
-        title={FESTIVE_COLLECTION.title}
-        subtitle={FESTIVE_COLLECTION.subtitle}
-        image={FESTIVE_COLLECTION.image}
-        ctaHref={FESTIVE_COLLECTION.ctaHref}
+        title={festiveBanner?.title ?? FESTIVE_COLLECTION.title}
+        subtitle={festiveBanner?.subtitle ?? FESTIVE_COLLECTION.subtitle}
+        image={festiveBanner?.imageUrl ?? FESTIVE_COLLECTION.image}
+        ctaHref={festiveBanner?.linkUrl ?? FESTIVE_COLLECTION.ctaHref}
+        ctaLabel={festiveBanner?.ctaLabel ?? undefined}
         reverse
       />
 

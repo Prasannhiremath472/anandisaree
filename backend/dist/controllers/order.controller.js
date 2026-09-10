@@ -53,8 +53,9 @@ exports.updateOrderStatus = (0, asyncHandler_1.asyncHandler)(async (req, res) =>
     const order = await orderService.updateOrderStatus(req.params.id, input, req.user?.userId);
     res.json({ success: true, data: order });
 });
-exports.getDashboardSummary = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
-    const summary = await orderService.getDashboardSummary();
+exports.getDashboardSummary = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId : undefined;
+    const summary = await orderService.getDashboardSummary(categoryId);
     res.json({ success: true, data: summary });
 });
 //# sourceMappingURL=order.controller.js.map

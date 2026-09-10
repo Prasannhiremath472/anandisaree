@@ -738,8 +738,10 @@ model SupportTicket {
 model Banner {
   id        String          @id @default(cuid())
   title     String
+  subtitle  String?
   imageUrl  String
   linkUrl   String?
+  ctaLabel  String?
   placement BannerPlacement
   sortOrder Int             @default(0)
   isActive  Boolean         @default(true)

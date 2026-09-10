@@ -34,14 +34,15 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const productController = __importStar(require("../controllers/product.controller"));
 const reelController = __importStar(require("../controllers/reel.controller"));
-const bannerController = __importStar(require("../controllers/banner.controller"));
+const auth_1 = require("../middleware/auth");
+const roles_1 = require("../utils/roles");
 const router = (0, express_1.Router)();
-router.get("/products", productController.listPublicProducts);
-router.get("/products/:slug", productController.getPublicProductBySlug);
-router.get("/categories", productController.listPublicCategoriesLookup);
-router.get("/reels", reelController.listPublicReels);
-router.get("/banners", bannerController.listPublicBanners);
+router.use(auth_1.authenticate, (0, auth_1.authorize)(...roles_1.MARKETING_ROLES));
+router.get("/", reelController.listReels);
+router.get("/:id", reelController.getReel);
+router.post("/", reelController.createReel);
+router.put("/:id", reelController.updateReel);
+router.delete("/:id", reelController.deleteReel);
 exports.default = router;
-//# sourceMappingURL=storefront.routes.js.map
+//# sourceMappingURL=reel.routes.js.map

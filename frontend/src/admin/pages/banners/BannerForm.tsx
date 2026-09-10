@@ -9,7 +9,7 @@ import { Field, inputClass } from "@/admin/components/ui/Field";
 import { useBanners, useCreateBanner, useUpdateBanner, type BannerPlacement } from "@/admin/hooks/api/useBanners";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 
-const emptyForm = { title: "", imageUrl: "", linkUrl: "", placement: "HOMEPAGE_SLIDER" as BannerPlacement, sortOrder: "0", isActive: true };
+const emptyForm = { title: "", subtitle: "", imageUrl: "", linkUrl: "", ctaLabel: "", placement: "HOMEPAGE_SLIDER" as BannerPlacement, sortOrder: "0", isActive: true };
 
 export function BannerForm() {
   const { t } = useTranslation();
@@ -42,8 +42,10 @@ export function BannerForm() {
     if (banner) {
       setForm({
         title: banner.title,
+        subtitle: banner.subtitle ?? "",
         imageUrl: banner.imageUrl,
         linkUrl: banner.linkUrl ?? "",
+        ctaLabel: banner.ctaLabel ?? "",
         placement: banner.placement,
         sortOrder: String(banner.sortOrder),
         isActive: banner.isActive,
@@ -61,8 +63,10 @@ export function BannerForm() {
 
     const payload = {
       title: form.title,
+      subtitle: form.subtitle || undefined,
       imageUrl: form.imageUrl,
       linkUrl: form.linkUrl || undefined,
+      ctaLabel: form.ctaLabel || undefined,
       placement: form.placement,
       sortOrder: Number(form.sortOrder),
       isActive: form.isActive,
@@ -96,6 +100,9 @@ export function BannerForm() {
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-4 rounded-xl border border-black/5 bg-white p-6">
         <Field label={t("common.title")} required>
           <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputClass} />
+        </Field>
+        <Field label={t("bannerForm.subtitle")}>
+          <input value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} placeholder={t("bannerForm.subtitlePlaceholder")} className={inputClass} />
         </Field>
         <Field label={t("bannerForm.bannerImage")} required>
           <p className="mb-2 text-xs text-neutral-500">
@@ -142,9 +149,14 @@ export function BannerForm() {
             </button>
           )}
         </Field>
-        <Field label={t("common.linkUrl")}>
-          <input value={form.linkUrl} onChange={(e) => setForm({ ...form, linkUrl: e.target.value })} placeholder={t("bannerForm.linkUrlPlaceholder")} className={inputClass} />
-        </Field>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label={t("common.linkUrl")}>
+            <input value={form.linkUrl} onChange={(e) => setForm({ ...form, linkUrl: e.target.value })} placeholder={t("bannerForm.linkUrlPlaceholder")} className={inputClass} />
+          </Field>
+          <Field label={t("bannerForm.ctaLabel")}>
+            <input value={form.ctaLabel} onChange={(e) => setForm({ ...form, ctaLabel: e.target.value })} placeholder={t("bannerForm.ctaLabelPlaceholder")} className={inputClass} />
+          </Field>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <Field label={t("bannerForm.placement")} required>
             <select value={form.placement} onChange={(e) => setForm({ ...form, placement: e.target.value as BannerPlacement })} className={inputClass}>

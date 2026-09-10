@@ -4,6 +4,7 @@ exports.deleteSubscriber = exports.exportSubscribers = exports.listSubscribers =
 const asyncHandler_1 = require("../utils/asyncHandler");
 const db_1 = require("../config/db");
 const pagination_1 = require("../utils/pagination");
+const ApiError_1 = require("../utils/ApiError");
 exports.listSubscribers = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const pagination = (0, pagination_1.getPagination)(req);
     const search = req.query.search;
@@ -22,7 +23,10 @@ exports.exportSubscribers = (0, asyncHandler_1.asyncHandler)(async (_req, res) =
     res.send(csv);
 });
 exports.deleteSubscriber = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
-    await (0, db_1.execute)("DELETE FROM `NewsletterSubscriber` WHERE id = ?", [req.params.id]).catch(() => null);
+    const result = await (0, db_1.execute)("DELETE FROM `NewsletterSubscriber` WHERE id = ?", [req.params.id]);
+    if (result.affectedRows === 0) {
+        throw ApiError_1.ApiError.notFound("Subscriber not found");
+    }
     res.json({ success: true, data: null, message: "Subscriber removed" });
 });
 //# sourceMappingURL=newsletter.controller.js.map

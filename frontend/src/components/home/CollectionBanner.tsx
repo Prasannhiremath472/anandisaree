@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 interface CollectionBannerProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   image: string;
   ctaHref: string;
   ctaLabel?: string;
@@ -40,7 +40,7 @@ export function CollectionBanner({
         >
           <span className="font-heading text-ds-xs uppercase tracking-[0.3em] text-gold-300">Limited Edit</span>
           <h3 className="mt-ds-6 text-balance font-display text-3xl font-semibold sm:text-4xl">{title}</h3>
-          <p className="mt-ds-6 max-w-md text-ds-sm text-cream-200 sm:text-ds-md">{subtitle}</p>
+          {subtitle && <p className="mt-ds-6 max-w-md text-ds-sm text-cream-200 sm:text-ds-md">{subtitle}</p>}
           <Link
             to={ctaHref}
             className="mt-ds-8 inline-block w-fit rounded-full border border-gold-300 px-7 py-ds-4 font-heading text-ds-sm font-semibold transition-colors hover:bg-white/10"

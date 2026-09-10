@@ -33,15 +33,26 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const productController = __importStar(require("../controllers/product.controller"));
-const reelController = __importStar(require("../controllers/reel.controller"));
-const bannerController = __importStar(require("../controllers/banner.controller"));
-const router = (0, express_1.Router)();
-router.get("/products", productController.listPublicProducts);
-router.get("/products/:slug", productController.getPublicProductBySlug);
-router.get("/categories", productController.listPublicCategoriesLookup);
-router.get("/reels", reelController.listPublicReels);
-router.get("/banners", bannerController.listPublicBanners);
-exports.default = router;
-//# sourceMappingURL=storefront.routes.js.map
+exports.deleteCategory = exports.updateCategory = exports.createCategory = exports.listCategories = void 0;
+const asyncHandler_1 = require("../utils/asyncHandler");
+const categoryService = __importStar(require("../services/category.service"));
+const category_schema_1 = require("../validation/category.schema");
+exports.listCategories = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
+    const categories = await categoryService.listCategories();
+    res.json({ success: true, data: categories });
+});
+exports.createCategory = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const input = category_schema_1.categoryCreateSchema.parse(req.body);
+    const category = await categoryService.createCategory(input);
+    res.status(201).json({ success: true, data: category });
+});
+exports.updateCategory = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const input = category_schema_1.categoryUpdateSchema.parse(req.body);
+    const category = await categoryService.updateCategory(req.params.id, input);
+    res.json({ success: true, data: category });
+});
+exports.deleteCategory = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    await categoryService.deleteCategory(req.params.id);
+    res.json({ success: true, data: null, message: "Category deleted" });
+});
+//# sourceMappingURL=category.controller.js.map

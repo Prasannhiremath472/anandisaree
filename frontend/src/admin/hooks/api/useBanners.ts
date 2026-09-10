@@ -6,8 +6,10 @@ export type BannerPlacement = "HOMEPAGE_SLIDER" | "FESTIVAL_BANNER" | "OFFER_BAN
 export interface Banner {
   id: string;
   title: string;
+  subtitle: string | null;
   imageUrl: string;
   linkUrl: string | null;
+  ctaLabel: string | null;
   placement: BannerPlacement;
   sortOrder: number;
   isActive: boolean;
@@ -15,8 +17,10 @@ export interface Banner {
 
 export interface BannerFormValues {
   title: string;
+  subtitle?: string;
   imageUrl: string;
   linkUrl?: string;
+  ctaLabel?: string;
   placement: BannerPlacement;
   sortOrder?: number;
   isActive: boolean;

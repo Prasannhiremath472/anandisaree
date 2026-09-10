@@ -17,6 +17,8 @@ const id_1 = require("../utils/id");
 const ApiError_1 = require("../utils/ApiError");
 const tokens_1 = require("../utils/tokens");
 const mailer_service_1 = require("./mailer.service");
+const env_1 = require("../config/env");
+const logger_1 = require("../config/logger");
 async function issueTokenPair(user) {
     const accessToken = (0, tokens_1.signAccessToken)({ userId: user.id, email: user.email, role: user.role });
     const refreshToken = (0, tokens_1.generateRefreshTokenValue)();
@@ -98,6 +100,10 @@ async function requestOtp(identifier, purpose) {
     await (0, db_1.execute)("INSERT INTO `OtpCode` (id, userId, identifier, code, purpose, expiresAt, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW(3))", [(0, id_1.createId)(), user?.id ?? null, identifier, code, purpose, expiresAt]);
     if (identifier.includes("@")) {
         await (0, mailer_service_1.sendOtpEmail)(identifier, code, purpose);
+    }
+    // Dev/test convenience only — never log real OTP codes in production.
+    if (!env_1.isProd) {
+        logger_1.logger.info(`[DEV] OTP for ${identifier} (${purpose}): ${code}`);
     }
     return { expiresAt };
 }
