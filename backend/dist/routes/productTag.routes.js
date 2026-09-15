@@ -34,14 +34,12 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const customerController = __importStar(require("../controllers/customer.controller"));
+const productTagController = __importStar(require("../controllers/productTag.controller"));
 const auth_1 = require("../middleware/auth");
 const roles_1 = require("../utils/roles");
 const router = (0, express_1.Router)();
-router.use(auth_1.authenticate, (0, auth_1.authorize)(...roles_1.SUPPORT_ROLES));
-router.get("/", customerController.listCustomers);
-router.get("/export", customerController.exportCustomers);
-router.get("/:id", customerController.getCustomer);
-router.patch("/:id/status", customerController.updateCustomerStatus);
+router.use(auth_1.authenticate, (0, auth_1.authorize)(...roles_1.INVENTORY_ROLES));
+router.get("/", productTagController.listProductTags);
+router.post("/", productTagController.createProductTag);
 exports.default = router;
-//# sourceMappingURL=customer.routes.js.map
+//# sourceMappingURL=productTag.routes.js.map

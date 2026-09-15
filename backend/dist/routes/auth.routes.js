@@ -41,6 +41,7 @@ const router = (0, express_1.Router)();
 router.post("/register/otp/request", rateLimiter_1.authLimiter, authController.requestRegisterOtp);
 router.post("/register/otp/verify", rateLimiter_1.authLimiter, authController.verifyRegisterOtp);
 router.post("/login", rateLimiter_1.authLimiter, authController.login);
+router.post("/admin/login", rateLimiter_1.authLimiter, authController.adminLogin);
 router.post("/refresh", authController.refresh);
 router.post("/logout", authController.logout);
 router.post("/otp/request", rateLimiter_1.authLimiter, authController.requestOtp);

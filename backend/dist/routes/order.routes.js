@@ -40,6 +40,8 @@ const roles_1 = require("../utils/roles");
 const router = (0, express_1.Router)();
 router.use(auth_1.authenticate, (0, auth_1.authorize)(...roles_1.ORDER_ROLES));
 router.get("/", orderController.listOrders);
+router.post("/", orderController.createAdminOrder);
+router.get("/export", orderController.exportOrders);
 router.get("/:id", orderController.getOrder);
 router.patch("/:id/status", orderController.updateOrderStatus);
 exports.default = router;

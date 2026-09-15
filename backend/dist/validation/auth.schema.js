@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetPasswordSchema = exports.forgotPasswordSchema = exports.verifyOtpSchema = exports.requestOtpSchema = exports.loginSchema = exports.registerVerifyOtpSchema = exports.registerRequestOtpSchema = void 0;
+exports.resetPasswordSchema = exports.forgotPasswordSchema = exports.verifyOtpSchema = exports.requestOtpSchema = exports.adminLoginSchema = exports.loginSchema = exports.registerVerifyOtpSchema = exports.registerRequestOtpSchema = void 0;
 const zod_1 = require("zod");
 exports.registerRequestOtpSchema = zod_1.z.object({
     name: zod_1.z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -21,6 +21,10 @@ exports.registerVerifyOtpSchema = zod_1.z.object({
 });
 exports.loginSchema = zod_1.z.object({
     email: zod_1.z.string().email("Invalid email address"),
+    password: zod_1.z.string().min(1, "Password is required"),
+});
+exports.adminLoginSchema = zod_1.z.object({
+    identifier: zod_1.z.string().min(3, "Mobile number is required"),
     password: zod_1.z.string().min(1, "Password is required"),
 });
 exports.requestOtpSchema = zod_1.z.object({

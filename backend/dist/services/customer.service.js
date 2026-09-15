@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listCustomers = listCustomers;
+exports.listAllCustomersForExport = listAllCustomersForExport;
 exports.getCustomerById = getCustomerById;
 exports.setCustomerStatus = setCustomerStatus;
 const db_1 = require("../config/db");
 const ApiError_1 = require("../utils/ApiError");
 const pagination_1 = require("../utils/pagination");
-async function listCustomers(pagination, filters) {
+function buildCustomerListWhere(filters) {
     const conditions = ["role = 'CUSTOMER'", "deletedAt IS NULL"];
     const params = [];
     if (filters.isActive !== undefined) {
@@ -18,7 +19,10 @@ async function listCustomers(pagination, filters) {
         const like = `%${filters.search}%`;
         params.push(like, like, like);
     }
-    const whereClause = conditions.join(" AND ");
+    return { whereClause: conditions.join(" AND "), params };
+}
+async function listCustomers(pagination, filters) {
+    const { whereClause, params } = buildCustomerListWhere(filters);
     const rows = await (0, db_1.query)(`SELECT id, name, email, phone, isActive, isEmailVerified, createdAt FROM \`User\`
      WHERE ${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`, [...params, pagination.take, pagination.skip]);
     const totalRow = await (0, db_1.queryOne)(`SELECT COUNT(*) as count FROM \`User\` WHERE ${whereClause}`, params);
@@ -31,6 +35,10 @@ async function listCustomers(pagination, filters) {
         _count: { orders: orderCounts.find((o) => o.userId === row.id)?.count ?? 0 },
     }));
     return (0, pagination_1.buildPaginatedResult)(items, totalRow?.count ?? 0, pagination);
+}
+async function listAllCustomersForExport(filters) {
+    const { whereClause, params } = buildCustomerListWhere(filters);
+    return (0, db_1.query)(`SELECT name, email, phone, isActive, createdAt FROM \`User\` WHERE ${whereClause} ORDER BY createdAt DESC`, params);
 }
 async function getCustomerById(id) {
     const customer = await (0, db_1.queryOne)("SELECT * FROM `User` WHERE id = ? AND role = 'CUSTOMER' AND deletedAt IS NULL LIMIT 1", [id]);

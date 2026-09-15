@@ -40,6 +40,7 @@ const roles_1 = require("../utils/roles");
 const router = (0, express_1.Router)();
 router.use(auth_1.authenticate, (0, auth_1.authorize)(...roles_1.SUPPORT_ROLES));
 router.get("/", reviewController.listReviews);
+router.get("/export", reviewController.exportReviews);
 router.patch("/:id/status", reviewController.updateReviewStatus);
 router.patch("/:id/featured", reviewController.setReviewFeatured);
 router.delete("/:id", reviewController.deleteReview);

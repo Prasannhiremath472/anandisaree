@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listAddresses = listAddresses;
 exports.createAddress = createAddress;
+exports.priceOrderItems = priceOrderItems;
 exports.createOrder = createOrder;
 exports.verifyPayment = verifyPayment;
 exports.listMyOrders = listMyOrders;
@@ -9,6 +10,7 @@ const db_1 = require("../config/db");
 const id_1 = require("../utils/id");
 const ApiError_1 = require("../utils/ApiError");
 const razorpay_service_1 = require("./razorpay.service");
+const notification_service_1 = require("./notification.service");
 async function listAddresses(userId) {
     return (0, db_1.query)("SELECT * FROM `Address` WHERE userId = ? ORDER BY isDefault DESC, createdAt DESC", [userId]);
 }
@@ -109,6 +111,11 @@ async function createOrder(userId, input) {
         }
         await conn.query("INSERT INTO `OrderStatusHistory` (id, orderId, status, note, createdAt) VALUES (?, ?, 'PENDING', 'Order placed', NOW(3))", [(0, id_1.createId)(), orderId]);
     });
+    await (0, notification_service_1.createNotification)("ORDER", `New order ${orderNumber} placed (₹${totalAmount.toLocaleString("en-IN")})`, `/orders/${orderId}`);
+    const uniqueProductIds = [...new Set(pricedItems.map((i) => i.productId))];
+    for (const productId of uniqueProductIds) {
+        await (0, notification_service_1.checkLowStockAndNotify)(productId);
+    }
     return {
         id: orderId,
         orderNumber,

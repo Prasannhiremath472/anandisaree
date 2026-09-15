@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.importProducts = exports.listBrandsLookup = exports.listPublicCategoriesLookup = exports.listCategoriesLookup = exports.bulkDeleteProducts = exports.generateDescription = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getPublicProductBySlug = exports.listPublicProducts = exports.getProduct = exports.listProducts = void 0;
+exports.importProducts = exports.exportProducts = exports.listBrandsLookup = exports.listPublicCategoriesLookup = exports.listCategoriesLookup = exports.bulkDeleteProducts = exports.generateDescription = exports.listVariantValues = exports.getNextSku = exports.permanentlyDeleteProduct = exports.restoreProduct = exports.listTrashedProducts = exports.updateProductStatus = exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getPublicProductBySlug = exports.listPublicProducts = exports.getProduct = exports.listProducts = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const pagination_1 = require("../utils/pagination");
 const productService = __importStar(require("../services/product.service"));
@@ -42,6 +42,7 @@ const zod_1 = require("zod");
 const db_1 = require("../config/db");
 const gemini_service_1 = require("../services/gemini.service");
 const productImport_service_1 = require("../services/productImport.service");
+const csv_1 = require("../utils/csv");
 exports.listProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const query = product_schema_1.productListQuerySchema.parse(req.query);
     const pagination = (0, pagination_1.getPagination)(req);
@@ -89,6 +90,37 @@ exports.deleteProduct = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     await productService.softDeleteProduct(req.params.id);
     res.json({ success: true, data: null, message: "Product deleted" });
 });
+exports.updateProductStatus = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const { status } = product_schema_1.productStatusUpdateSchema.parse(req.body);
+    const product = await productService.updateProductStatus(req.params.id, status);
+    res.json({ success: true, data: product });
+});
+exports.listTrashedProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const query = zod_1.z.object({ search: zod_1.z.string().optional() }).parse(req.query);
+    const pagination = (0, pagination_1.getPagination)(req);
+    const result = await productService.listTrashedProducts(pagination, query);
+    res.json({ success: true, data: result });
+});
+exports.restoreProduct = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const product = await productService.restoreProduct(req.params.id);
+    res.json({ success: true, data: product });
+});
+exports.permanentlyDeleteProduct = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    await productService.permanentlyDeleteProduct(req.params.id);
+    res.json({ success: true, data: null, message: "Product permanently deleted" });
+});
+exports.getNextSku = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const { categoryId } = zod_1.z.object({ categoryId: zod_1.z.string().min(1) }).parse(req.query);
+    const sku = await productService.generateNextSku(categoryId);
+    res.json({ success: true, data: { sku } });
+});
+const variantValuesQuerySchema = zod_1.z.object({ optionName: zod_1.z.enum(["Color", "Size"]) });
+exports.listVariantValues = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const { optionName } = variantValuesQuerySchema.parse(req.query);
+    const column = optionName === "Color" ? "color" : "size";
+    const values = await (0, db_1.query)(`SELECT DISTINCT \`${column}\` as value FROM \`ProductVariant\` WHERE \`${column}\` IS NOT NULL AND \`${column}\` != '' ORDER BY \`${column}\` ASC`);
+    res.json({ success: true, data: values.map((v) => v.value) });
+});
 const generateDescriptionSchema = zod_1.z.object({
     name: zod_1.z.string().min(1),
     fabric: zod_1.z.string().min(1),
@@ -118,6 +150,24 @@ exports.listPublicCategoriesLookup = (0, asyncHandler_1.asyncHandler)(async (_re
 exports.listBrandsLookup = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
     const brands = await (0, db_1.query)("SELECT id, name FROM `Brand` WHERE isActive = 1");
     res.json({ success: true, data: brands });
+});
+exports.exportProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const filters = product_schema_1.productListQuerySchema.parse(req.query);
+    const products = await productService.listAllProductsForExport(filters);
+    const headers = ["SKU", "Name", "Fabric", "Color", "Category", "MRP", "Selling Price", "Stock", "Status", "Created At"];
+    const rows = products.map((p) => [
+        p.sku,
+        p.name,
+        p.fabric,
+        p.color,
+        p.categoryNames,
+        p.mrp,
+        p.sellingPrice,
+        p.stockQuantity,
+        p.status,
+        new Date(p.createdAt).toISOString(),
+    ]);
+    (0, csv_1.sendCsv)(res, "products.csv", (0, csv_1.toCsv)(headers, rows));
 });
 exports.importProducts = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     if (!req.file) {

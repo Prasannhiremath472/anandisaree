@@ -40,6 +40,7 @@ const roles_1 = require("../utils/roles");
 const router = (0, express_1.Router)();
 router.use(auth_1.authenticate, (0, auth_1.authorize)(...roles_1.MARKETING_ROLES));
 router.get("/", couponController.listCoupons);
+router.get("/export", couponController.exportCoupons);
 router.get("/:id", couponController.getCoupon);
 router.post("/", couponController.createCoupon);
 router.put("/:id", couponController.updateCoupon);

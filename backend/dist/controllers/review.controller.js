@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteReview = exports.setReviewFeatured = exports.updateReviewStatus = exports.listReviews = void 0;
+exports.deleteReview = exports.setReviewFeatured = exports.updateReviewStatus = exports.exportReviews = exports.listReviews = void 0;
 const zod_1 = require("zod");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const db_1 = require("../config/db");
 const ApiError_1 = require("../utils/ApiError");
 const pagination_1 = require("../utils/pagination");
+const csv_1 = require("../utils/csv");
 exports.listReviews = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const pagination = (0, pagination_1.getPagination)(req);
     const status = req.query.status;
@@ -41,6 +42,36 @@ exports.listReviews = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
         };
     });
     res.json({ success: true, data: (0, pagination_1.buildPaginatedResult)(items, totalRow?.count ?? 0, pagination) });
+});
+exports.exportReviews = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const status = req.query.status;
+    const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId : undefined;
+    const conditions = ["1=1"];
+    const params = [];
+    if (status) {
+        conditions.push("r.status = ?");
+        params.push(status);
+    }
+    if (categoryId) {
+        conditions.push("EXISTS (SELECT 1 FROM `ProductCategory` pc WHERE pc.productId = r.productId AND pc.categoryId = ?)");
+        params.push(categoryId);
+    }
+    const whereClause = conditions.join(" AND ");
+    const rows = await (0, db_1.query)(`SELECT r.rating, r.title, r.comment, r.status, r.isFeatured, r.createdAt, u.name as customerName, p.name as productName
+     FROM \`Review\` r JOIN \`User\` u ON u.id = r.userId JOIN \`Product\` p ON p.id = r.productId
+     WHERE ${whereClause} ORDER BY r.createdAt DESC`, params);
+    const headers = ["Product", "Customer", "Rating", "Title", "Comment", "Status", "Featured", "Created At"];
+    const csvRows = rows.map((r) => [
+        r.productName,
+        r.customerName,
+        r.rating,
+        r.title,
+        r.comment,
+        r.status,
+        r.isFeatured ? "Yes" : "No",
+        new Date(r.createdAt).toISOString(),
+    ]);
+    (0, csv_1.sendCsv)(res, "reviews.csv", (0, csv_1.toCsv)(headers, csvRows));
 });
 const statusUpdateSchema = zod_1.z.object({ status: zod_1.z.enum(["PENDING", "APPROVED", "REJECTED", "SPAM"]) });
 exports.updateReviewStatus = (0, asyncHandler_1.asyncHandler)(async (req, res) => {

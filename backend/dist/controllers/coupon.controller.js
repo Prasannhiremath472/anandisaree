@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCoupon = exports.updateCoupon = exports.createCoupon = exports.getCoupon = exports.listCoupons = void 0;
+exports.deleteCoupon = exports.updateCoupon = exports.createCoupon = exports.getCoupon = exports.exportCoupons = exports.listCoupons = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const pagination_1 = require("../utils/pagination");
 const db_1 = require("../config/db");
 const id_1 = require("../utils/id");
 const ApiError_1 = require("../utils/ApiError");
 const coupon_schema_1 = require("../validation/coupon.schema");
+const csv_1 = require("../utils/csv");
 exports.listCoupons = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const q = coupon_schema_1.couponListQuerySchema.parse(req.query);
     const pagination = (0, pagination_1.getPagination)(req);
@@ -24,6 +25,35 @@ exports.listCoupons = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const items = await (0, db_1.query)(`SELECT * FROM \`Coupon\` WHERE ${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`, [...params, pagination.take, pagination.skip]);
     const totalRow = await (0, db_1.queryOne)(`SELECT COUNT(*) as count FROM \`Coupon\` WHERE ${whereClause}`, params);
     res.json({ success: true, data: (0, pagination_1.buildPaginatedResult)(items, totalRow?.count ?? 0, pagination) });
+});
+exports.exportCoupons = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const q = coupon_schema_1.couponListQuerySchema.parse(req.query);
+    const conditions = ["1=1"];
+    const params = [];
+    if (q.isActive !== undefined) {
+        conditions.push("isActive = ?");
+        params.push(q.isActive);
+    }
+    if (q.search) {
+        conditions.push("code LIKE ?");
+        params.push(`%${q.search}%`);
+    }
+    const whereClause = conditions.join(" AND ");
+    const coupons = await (0, db_1.query)(`SELECT code, type, value, minOrderAmount, usageLimit, usedCount, isFestival, isActive, expiresAt, createdAt FROM \`Coupon\` WHERE ${whereClause} ORDER BY createdAt DESC`, params);
+    const headers = ["Code", "Type", "Value", "Min Order", "Usage Limit", "Used Count", "Festival", "Active", "Expires At", "Created At"];
+    const rows = coupons.map((c) => [
+        c.code,
+        c.type,
+        c.value,
+        c.minOrderAmount,
+        c.usageLimit,
+        c.usedCount,
+        c.isFestival ? "Yes" : "No",
+        c.isActive ? "Yes" : "No",
+        c.expiresAt ? new Date(c.expiresAt).toISOString() : "",
+        new Date(c.createdAt).toISOString(),
+    ]);
+    (0, csv_1.sendCsv)(res, "coupons.csv", (0, csv_1.toCsv)(headers, rows));
 });
 exports.getCoupon = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const coupon = await (0, db_1.queryOne)("SELECT * FROM `Coupon` WHERE id = ? LIMIT 1", [req.params.id]);

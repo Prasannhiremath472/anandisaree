@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.me = exports.resetPassword = exports.forgotPassword = exports.verifyOtpAndLogin = exports.requestOtp = exports.logout = exports.refresh = exports.login = exports.verifyRegisterOtp = exports.requestRegisterOtp = void 0;
+exports.me = exports.resetPassword = exports.forgotPassword = exports.verifyOtpAndLogin = exports.requestOtp = exports.logout = exports.refresh = exports.adminLogin = exports.login = exports.verifyRegisterOtp = exports.requestRegisterOtp = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const env_1 = require("../config/env");
 const authService = __importStar(require("../services/auth.service"));
@@ -74,6 +74,12 @@ exports.verifyRegisterOtp = (0, asyncHandler_1.asyncHandler)(async (req, res) =>
 exports.login = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const input = auth_schema_1.loginSchema.parse(req.body);
     const result = await authService.login(input);
+    setRefreshCookie(res, result.refreshToken);
+    res.json({ success: true, data: { user: result.user, accessToken: result.accessToken } });
+});
+exports.adminLogin = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const input = auth_schema_1.adminLoginSchema.parse(req.body);
+    const result = await authService.adminLogin(input);
     setRefreshCookie(res, result.refreshToken);
     res.json({ success: true, data: { user: result.user, accessToken: result.accessToken } });
 });

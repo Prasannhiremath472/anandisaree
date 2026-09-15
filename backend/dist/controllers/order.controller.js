@@ -33,11 +33,12 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDashboardSummary = exports.updateOrderStatus = exports.getOrder = exports.listOrders = void 0;
+exports.getDashboardSummary = exports.updateOrderStatus = exports.exportOrders = exports.createAdminOrder = exports.getOrder = exports.listOrders = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const pagination_1 = require("../utils/pagination");
 const orderService = __importStar(require("../services/order.service"));
 const order_schema_1 = require("../validation/order.schema");
+const csv_1 = require("../utils/csv");
 exports.listOrders = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const query = order_schema_1.orderListQuerySchema.parse(req.query);
     const pagination = (0, pagination_1.getPagination)(req);
@@ -47,6 +48,28 @@ exports.listOrders = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
 exports.getOrder = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const order = await orderService.getOrderById(req.params.id);
     res.json({ success: true, data: order });
+});
+exports.createAdminOrder = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const input = order_schema_1.adminCreateOrderSchema.parse(req.body);
+    const order = await orderService.createAdminOrder(input, req.user?.userId);
+    res.status(201).json({ success: true, data: order });
+});
+exports.exportOrders = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const filters = order_schema_1.orderListQuerySchema.parse(req.query);
+    const orders = await orderService.listAllOrdersForExport(filters);
+    const headers = ["Order Number", "Customer", "Email", "Phone", "Status", "Payment Method", "Payment Status", "Total", "Created At"];
+    const rows = orders.map((o) => [
+        o.orderNumber,
+        o.customerName,
+        o.customerEmail,
+        o.customerPhone,
+        o.status,
+        o.paymentMethod,
+        o.paymentStatus,
+        o.totalAmount,
+        new Date(o.createdAt).toISOString(),
+    ]);
+    (0, csv_1.sendCsv)(res, "orders.csv", (0, csv_1.toCsv)(headers, rows));
 });
 exports.updateOrderStatus = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const input = order_schema_1.orderStatusUpdateSchema.parse(req.body);

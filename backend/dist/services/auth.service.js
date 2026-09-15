@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.requestRegisterOtp = requestRegisterOtp;
 exports.verifyRegisterOtp = verifyRegisterOtp;
 exports.login = login;
+exports.adminLogin = adminLogin;
 exports.refreshAccessToken = refreshAccessToken;
 exports.revokeRefreshToken = revokeRefreshToken;
 exports.requestOtp = requestOtp;
@@ -19,6 +20,7 @@ const tokens_1 = require("../utils/tokens");
 const mailer_service_1 = require("./mailer.service");
 const env_1 = require("../config/env");
 const logger_1 = require("../config/logger");
+const roles_1 = require("../utils/roles");
 async function issueTokenPair(user) {
     const accessToken = (0, tokens_1.signAccessToken)({ userId: user.id, email: user.email, role: user.role });
     const refreshToken = (0, tokens_1.generateRefreshTokenValue)();
@@ -64,6 +66,27 @@ async function login(input) {
     const valid = await bcryptjs_1.default.compare(input.password, user.passwordHash);
     if (!valid) {
         throw ApiError_1.ApiError.unauthorized("Invalid email or password");
+    }
+    const tokens = await issueTokenPair(user);
+    return { user: sanitizeUser(user), ...tokens };
+}
+async function adminLogin(input) {
+    const user = await (0, db_1.queryOne)("SELECT * FROM `User` WHERE email = ? OR phone = ? LIMIT 1", [
+        input.identifier,
+        input.identifier,
+    ]);
+    if (!user || !roles_1.ADMIN_ROLES.includes(user.role)) {
+        throw ApiError_1.ApiError.unauthorized("Invalid mobile number or password");
+    }
+    if (!user.isActive) {
+        throw ApiError_1.ApiError.forbidden("This account has been deactivated");
+    }
+    if (!user.passwordHash) {
+        throw ApiError_1.ApiError.unauthorized("No password set for this account yet. Use Forgot Password to set one.");
+    }
+    const valid = await bcryptjs_1.default.compare(input.password, user.passwordHash);
+    if (!valid) {
+        throw ApiError_1.ApiError.unauthorized("Invalid mobile number or password");
     }
     const tokens = await issueTokenPair(user);
     return { user: sanitizeUser(user), ...tokens };

@@ -33,15 +33,20 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const customerController = __importStar(require("../controllers/customer.controller"));
-const auth_1 = require("../middleware/auth");
-const roles_1 = require("../utils/roles");
-const router = (0, express_1.Router)();
-router.use(auth_1.authenticate, (0, auth_1.authorize)(...roles_1.SUPPORT_ROLES));
-router.get("/", customerController.listCustomers);
-router.get("/export", customerController.exportCustomers);
-router.get("/:id", customerController.getCustomer);
-router.patch("/:id/status", customerController.updateCustomerStatus);
-exports.default = router;
-//# sourceMappingURL=customer.routes.js.map
+exports.markAllRead = exports.markRead = exports.listNotifications = void 0;
+const asyncHandler_1 = require("../utils/asyncHandler");
+const notificationService = __importStar(require("../services/notification.service"));
+exports.listNotifications = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const limit = Math.min(50, Math.max(1, parseInt(String(req.query.limit ?? "20"), 10) || 20));
+    const result = await notificationService.listNotifications(limit);
+    res.json({ success: true, data: result });
+});
+exports.markRead = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    await notificationService.markNotificationRead(req.params.id);
+    res.json({ success: true, data: null });
+});
+exports.markAllRead = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
+    await notificationService.markAllNotificationsRead();
+    res.json({ success: true, data: null });
+});
+//# sourceMappingURL=notification.controller.js.map

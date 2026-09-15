@@ -33,11 +33,12 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCustomerStatus = exports.getCustomer = exports.listCustomers = void 0;
+exports.exportCustomers = exports.updateCustomerStatus = exports.getCustomer = exports.listCustomers = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const pagination_1 = require("../utils/pagination");
 const customerService = __importStar(require("../services/customer.service"));
 const customer_schema_1 = require("../validation/customer.schema");
+const csv_1 = require("../utils/csv");
 exports.listCustomers = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const query = customer_schema_1.customerListQuerySchema.parse(req.query);
     const pagination = (0, pagination_1.getPagination)(req);
@@ -52,5 +53,12 @@ exports.updateCustomerStatus = (0, asyncHandler_1.asyncHandler)(async (req, res)
     const { isActive } = customer_schema_1.customerStatusUpdateSchema.parse(req.body);
     const customer = await customerService.setCustomerStatus(req.params.id, isActive);
     res.json({ success: true, data: customer });
+});
+exports.exportCustomers = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const filters = customer_schema_1.customerListQuerySchema.parse(req.query);
+    const customers = await customerService.listAllCustomersForExport(filters);
+    const headers = ["Name", "Email", "Phone", "Active", "Joined"];
+    const rows = customers.map((c) => [c.name, c.email, c.phone, c.isActive ? "Yes" : "No", new Date(c.createdAt).toISOString()]);
+    (0, csv_1.sendCsv)(res, "customers.csv", (0, csv_1.toCsv)(headers, rows));
 });
 //# sourceMappingURL=customer.controller.js.map

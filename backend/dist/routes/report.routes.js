@@ -40,6 +40,7 @@ const roles_1 = require("../utils/roles");
 const router = (0, express_1.Router)();
 router.use(auth_1.authenticate, (0, auth_1.authorize)(...roles_1.ADMIN_ROLES));
 router.get("/sales", reportController.salesReport);
+router.get("/sales/export", reportController.exportSalesReport);
 router.get("/order-status", reportController.orderStatusReport);
 router.get("/top-products", reportController.topProductsReport);
 router.get("/inventory", reportController.inventoryReport);

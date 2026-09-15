@@ -1,13 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.productUpdateSchema = exports.productCreateSchema = exports.productListQuerySchema = void 0;
+exports.productStatusUpdateSchema = exports.productUpdateSchema = exports.productCreateSchema = exports.productListQuerySchema = exports.productStatusEnum = void 0;
 const zod_1 = require("zod");
+exports.productStatusEnum = zod_1.z.enum(["ACTIVE", "INACTIVE", "OUT_OF_STOCK"]);
 exports.productListQuerySchema = zod_1.z.object({
     page: zod_1.z.coerce.number().int().positive().optional(),
     pageSize: zod_1.z.coerce.number().int().positive().max(100).optional(),
     search: zod_1.z.string().optional(),
     categoryId: zod_1.z.string().optional(),
     isActive: zod_1.z.coerce.boolean().optional(),
+    status: exports.productStatusEnum.optional(),
+    fabric: zod_1.z.string().optional(),
+    lowStockOnly: zod_1.z.coerce.boolean().optional(),
+    trashed: zod_1.z.coerce.boolean().optional(),
     sortBy: zod_1.z.enum(["createdAt", "sellingPrice", "name", "stockQuantity"]).optional(),
     sortOrder: zod_1.z.enum(["asc", "desc"]).optional(),
 });
@@ -43,6 +48,7 @@ exports.productCreateSchema = zod_1.z.object({
     deliveryEstimateDays: zod_1.z.coerce.number().int().min(0).optional(),
     washCare: zod_1.z.string().optional(),
     isActive: zod_1.z.coerce.boolean().optional(),
+    status: exports.productStatusEnum.optional(),
     isFeatured: zod_1.z.coerce.boolean().optional(),
     isNewArrival: zod_1.z.coerce.boolean().optional(),
     isBestSeller: zod_1.z.coerce.boolean().optional(),
@@ -54,6 +60,7 @@ exports.productCreateSchema = zod_1.z.object({
     categoryIds: zod_1.z.array(zod_1.z.string()).optional(),
     collectionIds: zod_1.z.array(zod_1.z.string()).optional(),
     occasionIds: zod_1.z.array(zod_1.z.string()).optional(),
+    tagIds: zod_1.z.array(zod_1.z.string()).optional(),
     images: zod_1.z.array(zod_1.z.object({ url: zod_1.z.string(), altText: zod_1.z.string().optional(), isPrimary: zod_1.z.coerce.boolean().optional() })).optional(),
     variants: zod_1.z
         .array(zod_1.z.object({
@@ -69,4 +76,7 @@ exports.productCreateSchema = zod_1.z.object({
         .optional(),
 });
 exports.productUpdateSchema = exports.productCreateSchema.partial();
+exports.productStatusUpdateSchema = zod_1.z.object({
+    status: exports.productStatusEnum,
+});
 //# sourceMappingURL=product.schema.js.map
