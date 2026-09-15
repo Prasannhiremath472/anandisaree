@@ -4,8 +4,9 @@ import { useTranslation } from "react-i18next";
 import { ImagePlus, Loader2, Plus, Trash2, X } from "lucide-react";
 import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
-import { TagInput } from "@/admin/components/ui/TagInput";
+import { SearchableMultiSelect } from "@/admin/components/ui/SearchableMultiSelect";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
+import { useVariantValues } from "@/admin/hooks/api/useProducts";
 
 export interface VariantOption {
   id: string;
@@ -51,6 +52,8 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
   const [editingOptionId, setEditingOptionId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
   const [draftValues, setDraftValues] = useState<string[]>([]);
+  const knownOptionName = draftName.trim() === "Color" || draftName.trim() === "Size" ? (draftName.trim() as "Color" | "Size") : undefined;
+  const { data: valueSuggestions } = useVariantValues(knownOptionName);
 
   function startAddOption() {
     const id = crypto.randomUUID();
@@ -168,7 +171,12 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
               />
             </Field>
             <Field label={t("variantsCard.optionValues")} required>
-              <TagInput values={draftValues} onChange={setDraftValues} placeholder={t("variantsCard.optionValuesPlaceholder")} />
+              <SearchableMultiSelect
+                suggestions={valueSuggestions ?? []}
+                values={draftValues}
+                onChange={setDraftValues}
+                placeholder={t("variantsCard.optionValuesPlaceholder")}
+              />
             </Field>
             <div className="flex gap-2">
               <button

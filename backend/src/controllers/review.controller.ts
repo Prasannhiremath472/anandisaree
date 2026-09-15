@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { query, queryOne, execute } from "../config/db";
 import { ApiError } from "../utils/ApiError";
 import { getPagination, buildPaginatedResult } from "../utils/pagination";
+import { toCsv, sendCsv } from "../utils/csv";
 
 export const listReviews = asyncHandler(async (req: Request, res: Response) => {
   const pagination = getPagination(req);
@@ -54,6 +55,44 @@ export const listReviews = asyncHandler(async (req: Request, res: Response) => {
   });
 
   res.json({ success: true, data: buildPaginatedResult(items, totalRow?.count ?? 0, pagination) });
+});
+
+export const exportReviews = asyncHandler(async (req: Request, res: Response) => {
+  const status = req.query.status as string | undefined;
+  const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId : undefined;
+
+  const conditions: string[] = ["1=1"];
+  const params: string[] = [];
+  if (status) {
+    conditions.push("r.status = ?");
+    params.push(status);
+  }
+  if (categoryId) {
+    conditions.push("EXISTS (SELECT 1 FROM `ProductCategory` pc WHERE pc.productId = r.productId AND pc.categoryId = ?)");
+    params.push(categoryId);
+  }
+  const whereClause = conditions.join(" AND ");
+
+  const rows = await query<Record<string, unknown>>(
+    `SELECT r.rating, r.title, r.comment, r.status, r.isFeatured, r.createdAt, u.name as customerName, p.name as productName
+     FROM \`Review\` r JOIN \`User\` u ON u.id = r.userId JOIN \`Product\` p ON p.id = r.productId
+     WHERE ${whereClause} ORDER BY r.createdAt DESC`,
+    params
+  );
+
+  const headers = ["Product", "Customer", "Rating", "Title", "Comment", "Status", "Featured", "Created At"];
+  const csvRows = rows.map((r) => [
+    r.productName,
+    r.customerName,
+    r.rating,
+    r.title,
+    r.comment,
+    r.status,
+    r.isFeatured ? "Yes" : "No",
+    new Date(r.createdAt as string).toISOString(),
+  ]);
+
+  sendCsv(res, "reviews.csv", toCsv(headers, csvRows));
 });
 
 const statusUpdateSchema = z.object({ status: z.enum(["PENDING", "APPROVED", "REJECTED", "SPAM"]) });

@@ -8,6 +8,7 @@ const router = Router();
 router.use(authenticate, authorize(...MARKETING_ROLES));
 
 router.get("/", couponController.listCoupons);
+router.get("/export", couponController.exportCoupons);
 router.get("/:id", couponController.getCoupon);
 router.post("/", couponController.createCoupon);
 router.put("/:id", couponController.updateCoupon);

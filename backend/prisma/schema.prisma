@@ -67,6 +67,12 @@ enum ReviewStatus {
   SPAM
 }
 
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+}
+
 enum StockMovementType {
   PURCHASE_IN
   SALE_OUT
@@ -317,6 +323,7 @@ model Product {
   washCare                    String?   @db.Text
 
   isActive           Boolean   @default(true)
+  status             ProductStatus @default(ACTIVE)
   isFeatured         Boolean   @default(false)
   isNewArrival       Boolean   @default(false)
   isBestSeller       Boolean   @default(false)
@@ -349,10 +356,12 @@ model Product {
   orderItems         OrderItem[]
   stockMovements     StockMovement[]
   recentlyViewedBy   RecentlyViewed[]
+  tags               ProductTagAssignment[]
 
   @@index([fabric])
   @@index([color])
   @@index([isActive])
+  @@index([status])
   @@index([isFeatured])
   @@index([isNewArrival])
   @@index([isBestSeller])
@@ -372,6 +381,28 @@ model ProductCategory {
 
   @@id([productId, categoryId])
   @@index([categoryId])
+}
+
+// Free-form merchandising labels an admin can create on the fly (e.g. "Gift
+// Ready", "Limited Edition") — additive alongside the fixed isFeatured /
+// isBestSeller / etc. boolean flags, not a replacement for them.
+model ProductTag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  products  ProductTagAssignment[]
+}
+
+model ProductTagAssignment {
+  productId String
+  tagId     String
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       ProductTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([productId, tagId])
+  @@index([tagId])
 }
 
 model ProductCollection {

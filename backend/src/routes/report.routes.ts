@@ -8,6 +8,7 @@ const router = Router();
 router.use(authenticate, authorize(...ADMIN_ROLES));
 
 router.get("/sales", reportController.salesReport);
+router.get("/sales/export", reportController.exportSalesReport);
 router.get("/order-status", reportController.orderStatusReport);
 router.get("/top-products", reportController.topProductsReport);
 router.get("/inventory", reportController.inventoryReport);

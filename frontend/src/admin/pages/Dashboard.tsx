@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { IndianRupee, ShoppingBag, UserPlus, PackageX } from "lucide-react";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { useDashboard } from "@/admin/hooks/api/useDashboard";
 import { useAppSelector } from "@/admin/hooks/redux";
@@ -10,22 +11,55 @@ export function Dashboard() {
   const { data, isLoading } = useDashboard(selectedCategoryId);
 
   const statCards = [
-    { label: t("dashboard.revenue30d"), value: `₹${Number(data?.revenue30d ?? 0).toLocaleString("en-IN")}` },
-    { label: t("dashboard.orders30d"), value: String(data?.orders30d ?? 0) },
-    { label: t("dashboard.newCustomers30d"), value: String(data?.newCustomers30d ?? 0) },
-    { label: t("dashboard.lowStockItems"), value: String(data?.lowStockCount ?? 0) },
+    {
+      label: t("dashboard.revenue30d"),
+      value: `₹${Number(data?.revenue30d ?? 0).toLocaleString("en-IN")}`,
+      to: "/reports",
+      icon: IndianRupee,
+      accent: "bg-green-50 text-green-600",
+    },
+    {
+      label: t("dashboard.orders30d"),
+      value: String(data?.orders30d ?? 0),
+      to: "/orders",
+      icon: ShoppingBag,
+      accent: "bg-royal-50 text-royal-600",
+    },
+    {
+      label: t("dashboard.newCustomers30d"),
+      value: String(data?.newCustomers30d ?? 0),
+      to: "/customers",
+      icon: UserPlus,
+      accent: "bg-blue-50 text-blue-600",
+    },
+    {
+      label: t("dashboard.lowStockItems"),
+      value: String(data?.lowStockCount ?? 0),
+      to: "/products",
+      icon: PackageX,
+      accent: "bg-amber-50 text-amber-600",
+    },
   ];
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
-          <div key={card.label} className="rounded-xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-neutral-500">{card.label}</p>
-            <p className="mt-2 font-heading text-2xl font-semibold text-neutral-800">
-              {isLoading ? "..." : card.value}
-            </p>
-          </div>
+          <Link
+            key={card.label}
+            to={card.to}
+            className="flex items-start gap-4 rounded-xl bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${card.accent}`}>
+              <card.icon className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm text-neutral-500">{card.label}</p>
+              <p className="mt-1 font-heading text-2xl font-semibold text-neutral-800">
+                {isLoading ? "..." : card.value}
+              </p>
+            </div>
+          </Link>
         ))}
       </div>
 

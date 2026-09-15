@@ -1,13 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/admin/api/client";
 import type { PaginatedResult } from "@/admin/types/api";
-import type { CategoryLookup, Product, ProductFormValues } from "@/admin/types/product";
+import type { CategoryLookup, Product, ProductFormValues, ProductStatus } from "@/admin/types/product";
 
 interface ListParams {
   page: number;
   pageSize: number;
   search?: string;
   isActive?: boolean;
+  status?: ProductStatus;
+  fabric?: string;
+  lowStockOnly?: boolean;
   categoryId?: string;
 }
 
@@ -111,5 +114,83 @@ export function useDeleteProduct() {
       await apiClient.delete(`/admin/products/${id}`);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
+  });
+}
+
+export function useUpdateProductStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: ProductStatus }) => {
+      const res = await apiClient.patch(`/admin/products/${id}/status`, { status });
+      return res.data.data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
+  });
+}
+
+interface TrashListParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+}
+
+export function useTrashedProducts(params: TrashListParams) {
+  return useQuery({
+    queryKey: ["products-trash", params],
+    queryFn: async () => {
+      const res = await apiClient.get<{ data: PaginatedResult<Product> }>("/admin/products/trash", { params });
+      return res.data.data;
+    },
+  });
+}
+
+export function useRestoreProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiClient.post(`/admin/products/${id}/restore`);
+      return res.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["products-trash"] });
+    },
+  });
+}
+
+export function usePermanentlyDeleteProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/admin/products/${id}/permanent`);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products-trash"] }),
+  });
+}
+
+export function useVariantValues(optionName: "Color" | "Size" | undefined) {
+  return useQuery({
+    queryKey: ["variant-values", optionName],
+    queryFn: async () => {
+      const res = await apiClient.get<{ data: string[] }>("/admin/products/variant-values", {
+        params: { optionName },
+      });
+      return res.data.data;
+    },
+    enabled: Boolean(optionName),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useNextSku(categoryId: string | undefined) {
+  return useQuery({
+    queryKey: ["next-sku", categoryId],
+    queryFn: async () => {
+      const res = await apiClient.get<{ data: { sku: string } }>("/admin/products/next-sku", {
+        params: { categoryId },
+      });
+      return res.data.data.sku;
+    },
+    enabled: Boolean(categoryId),
   });
 }

@@ -24,6 +24,11 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+export const adminLoginSchema = z.object({
+  identifier: z.string().min(3, "Mobile number is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
 export const requestOtpSchema = z.object({
   identifier: z.string().min(3, "Email or phone is required"),
   purpose: z.enum(["LOGIN", "REGISTER", "RESET_PASSWORD"]),
@@ -53,3 +58,4 @@ export const resetPasswordSchema = z.object({
 export type RegisterRequestOtpInput = z.infer<typeof registerRequestOtpSchema>;
 export type RegisterVerifyOtpInput = z.infer<typeof registerVerifyOtpSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type AdminLoginInput = z.infer<typeof adminLoginSchema>;

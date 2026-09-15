@@ -32,6 +32,44 @@ export function useOrder(id: string | null) {
   });
 }
 
+export interface AdminOrderAddressInput {
+  type?: "HOME" | "WORK" | "OTHER";
+  fullName: string;
+  phone: string;
+  line1: string;
+  line2?: string;
+  landmark?: string;
+  city: string;
+  district?: string;
+  state: string;
+  pincode: string;
+}
+
+export interface CreateOrderInput {
+  userId?: string;
+  addressId?: string;
+  newCustomer?: {
+    name: string;
+    phone: string;
+    email?: string;
+    address: AdminOrderAddressInput;
+  };
+  paymentMethod: "COD" | "RAZORPAY" | "UPI" | "CARD" | "NETBANKING" | "WALLET";
+  paymentStatus?: "PENDING" | "PAID";
+  items: { productId: string; variantId?: string; quantity: number }[];
+}
+
+export function useCreateOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: CreateOrderInput) => {
+      const res = await apiClient.post<{ data: OrderDetail }>("/admin/orders", input);
+      return res.data.data;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["orders"] }),
+  });
+}
+
 export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
   return useMutation({

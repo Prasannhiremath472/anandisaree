@@ -8,10 +8,11 @@ import {
   refreshTokenExpiryDate,
   signAccessToken,
 } from "../utils/tokens";
-import type { LoginInput, RegisterRequestOtpInput, RegisterVerifyOtpInput } from "../validation/auth.schema";
+import type { AdminLoginInput, LoginInput, RegisterRequestOtpInput, RegisterVerifyOtpInput } from "../validation/auth.schema";
 import { sendOtpEmail } from "./mailer.service";
 import { isProd } from "../config/env";
 import { logger } from "../config/logger";
+import { ADMIN_ROLES } from "../utils/roles";
 
 interface UserRow {
   id: string;
@@ -90,6 +91,31 @@ export async function login(input: LoginInput) {
   const valid = await bcrypt.compare(input.password, user.passwordHash);
   if (!valid) {
     throw ApiError.unauthorized("Invalid email or password");
+  }
+
+  const tokens = await issueTokenPair(user);
+  return { user: sanitizeUser(user), ...tokens };
+}
+
+export async function adminLogin(input: AdminLoginInput) {
+  const user = await queryOne<UserRow>("SELECT * FROM `User` WHERE email = ? OR phone = ? LIMIT 1", [
+    input.identifier,
+    input.identifier,
+  ]);
+
+  if (!user || !ADMIN_ROLES.includes(user.role as never)) {
+    throw ApiError.unauthorized("Invalid mobile number or password");
+  }
+  if (!user.isActive) {
+    throw ApiError.forbidden("This account has been deactivated");
+  }
+  if (!user.passwordHash) {
+    throw ApiError.unauthorized("No password set for this account yet. Use Forgot Password to set one.");
+  }
+
+  const valid = await bcrypt.compare(input.password, user.passwordHash);
+  if (!valid) {
+    throw ApiError.unauthorized("Invalid mobile number or password");
   }
 
   const tokens = await issueTokenPair(user);

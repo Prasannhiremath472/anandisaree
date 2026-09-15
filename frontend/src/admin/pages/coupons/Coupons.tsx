@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Download } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { SearchInput } from "@/admin/components/ui/SearchInput";
 import { DataTable, type Column } from "@/admin/components/ui/DataTable";
 import { Pagination } from "@/admin/components/ui/Pagination";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { ConfirmDialog } from "@/admin/components/ui/ConfirmDialog";
+import { useExportCsv } from "@/admin/hooks/useExportCsv";
 import { useCoupons, useDeleteCoupon, type Coupon } from "@/admin/hooks/api/useCoupons";
 
 export function Coupons() {
@@ -20,6 +21,7 @@ export function Coupons() {
 
   const { data, isLoading } = useCoupons({ page, pageSize: 10, search: search || undefined });
   const deleteMutation = useDeleteCoupon();
+  const { exportCsv, exporting } = useExportCsv("/admin/coupons/export", "coupons.csv");
 
   async function confirmDelete() {
     if (!deletingId) return;
@@ -73,12 +75,22 @@ export function Coupons() {
         title={t("coupons.title")}
         description={t("coupons.description")}
         actions={
-          <Link
-            to="/coupons/new"
-            className="flex items-center gap-2 rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm"
-          >
-            <Plus className="h-4 w-4" /> {t("coupons.createCoupon")}
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => exportCsv({ search: search || undefined })}
+              disabled={exporting}
+              className="flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+            >
+              <Download className="h-4 w-4" /> {exporting ? t("common.exporting") : t("common.export")}
+            </button>
+            <Link
+              to="/coupons/new"
+              className="flex items-center gap-2 rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm"
+            >
+              <Plus className="h-4 w-4" /> {t("coupons.createCoupon")}
+            </Link>
+          </div>
         }
       />
 

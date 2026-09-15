@@ -5,6 +5,7 @@ import { Login } from "@/admin/pages/Login";
 import { Dashboard } from "@/admin/pages/Dashboard";
 import { Products } from "@/admin/pages/products/Products";
 import { ProductForm } from "@/admin/pages/products/ProductForm";
+import { ProductTrash } from "@/admin/pages/products/ProductTrash";
 import { Orders } from "@/admin/pages/orders/Orders";
 import { OrderDetail } from "@/admin/pages/orders/OrderDetail";
 import { Customers } from "@/admin/pages/customers/Customers";
@@ -35,6 +36,7 @@ export const adminRouter = createBrowserRouter(
             { index: true, element: <Dashboard /> },
 
             { path: "products", element: <Products /> },
+            { path: "products/trash", element: <ProductTrash /> },
             { path: "products/new", element: <ProductForm /> },
             { path: "products/:id/edit", element: <ProductForm /> },
 

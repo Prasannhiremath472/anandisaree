@@ -8,6 +8,7 @@ const router = Router();
 router.use(authenticate, authorize(...SUPPORT_ROLES));
 
 router.get("/", customerController.listCustomers);
+router.get("/export", customerController.exportCustomers);
 router.get("/:id", customerController.getCustomer);
 router.patch("/:id/status", customerController.updateCustomerStatus);
 

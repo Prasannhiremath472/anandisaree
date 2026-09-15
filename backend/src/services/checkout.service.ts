@@ -3,6 +3,7 @@ import { createId } from "../utils/id";
 import { ApiError } from "../utils/ApiError";
 import type { AddressInput, CreateOrderInput } from "../validation/checkout.schema";
 import { createRazorpayOrder, verifyRazorpaySignature } from "./razorpay.service";
+import { createNotification, checkLowStockAndNotify } from "./notification.service";
 
 export async function listAddresses(userId: string) {
   return query<Record<string, unknown>>(
@@ -46,7 +47,7 @@ function generateOrderNumber() {
   return `AS${stamp}${rand}`;
 }
 
-async function priceOrderItems(items: CreateOrderInput["items"]) {
+export async function priceOrderItems(items: CreateOrderInput["items"]) {
   const priced: {
     productId: string;
     variantId: string | null;
@@ -148,6 +149,13 @@ export async function createOrder(userId: string, input: CreateOrderInput) {
       [createId(), orderId]
     );
   });
+
+  await createNotification("ORDER", `New order ${orderNumber} placed (₹${totalAmount.toLocaleString("en-IN")})`, `/orders/${orderId}`);
+
+  const uniqueProductIds = [...new Set(pricedItems.map((i) => i.productId))];
+  for (const productId of uniqueProductIds) {
+    await checkLowStockAndNotify(productId);
+  }
 
   return {
     id: orderId,

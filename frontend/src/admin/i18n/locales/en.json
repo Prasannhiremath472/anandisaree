@@ -17,7 +17,10 @@
   },
   "topbar": {
     "notifications": "Notifications",
-    "logout": "Log out"
+    "logout": "Log out",
+    "resetPassword": "Reset Password",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications yet."
   },
   "common": {
     "cancel": "Cancel",
@@ -50,7 +53,15 @@
     "pageOf": "Page {{page}} of {{totalPages}}",
     "previousPage": "Previous page",
     "nextPage": "Next page",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "select": "Select...",
+    "noMatchesFound": "No matches found",
+    "createValue": "Add \"{{value}}\"",
+    "yes": "Yes",
+    "no": "No",
+    "export": "Export CSV",
+    "exporting": "Exporting...",
+    "exportFailed": "Failed to export. Please try again."
   },
   "status": {
     "PENDING": "Pending",
@@ -68,6 +79,7 @@
     "SPAM": "Spam",
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
+    "OUT_OF_STOCK": "Out of Stock",
     "ALL": "All"
   },
   "productForm": {
@@ -101,6 +113,7 @@
     "mrp": "MRP (₹)",
     "sellingPrice": "Selling Price (₹)",
     "gst": "GST (%)",
+    "totalPrice": "Total Price (with GST)",
     "inventory": "Stock",
     "stockQuantity": "Stock Quantity",
     "lowStockThreshold": "Low Stock Alert Level",
@@ -133,6 +146,8 @@
     "lockedCategoryHint": "Adding to this category. Switch tabs and click \"Add Product\" again to add to a different one.",
     "selectCategory": "Choose category",
     "sku": "Product Code (SKU)",
+    "skuPending": "Select a category to generate a code",
+    "skuAutoHint": "Auto-generated based on the category. This can't be edited.",
     "merchandising": "Show On Homepage",
     "featured": "Featured",
     "newArrival": "New Arrival",
@@ -141,6 +156,9 @@
     "liveSpecialToday": "Live Special Today",
     "topSelection": "Top Selection",
     "handloom": "Handloom",
+    "customTags": "Custom Tags",
+    "customTagsHint": "Add your own labels for this product (e.g. \"Gift Ready\"). Search existing tags or type a new one.",
+    "addTagPlaceholder": "Add a tag...",
     "blouseIncluded": "Blouse Included",
     "createProduct": "Add Product"
   },
@@ -188,9 +206,12 @@
     "uploadVariantImageAria": "Upload photo"
   },
   "products": {
-    "productDeleted": "Product deleted",
+    "productDeleted": "Product moved to Trash",
     "failedToDeleteProduct": "Failed to delete product",
     "failedToImportProducts": "Failed to import products",
+    "statusUpdated": "Status updated",
+    "failedToUpdateStatus": "Failed to update status",
+    "trash": "Trash",
     "columnProduct": "Product",
     "columnFabric": "Fabric",
     "columnPrice": "Price",
@@ -203,7 +224,7 @@
     "searchPlaceholder": "Search by name, code or fabric...",
     "emptyMessage": "No products yet. Add your first saree.",
     "deleteConfirmTitle": "Delete product?",
-    "deleteConfirmDescription": "This product will be hidden from the storefront. This action can be reversed by an administrator.",
+    "deleteConfirmDescription": "This product will move to Trash and be hidden from the storefront. You can restore it later from Trash.",
     "importResults": "Import Results",
     "createdCount": "{{count}} added",
     "skippedCount": "{{count}} skipped",
@@ -344,7 +365,7 @@
   "login": {
     "otpSent": "We've emailed you a 6-digit code.",
     "couldNotSendCode": "Could not send code. Please try again.",
-    "noAdminAccess": "This account does not have admin access",
+    "invalidCredentials": "Invalid mobile number or password.",
     "invalidCode": "Invalid or expired code.",
     "logoAlt": "Anandi Sarees",
     "signInToManageStore": "Sign in to manage your store",
@@ -354,8 +375,19 @@
     "sendOtp": "Send Code",
     "sixDigitCode": "6-digit code",
     "verifying": "Verifying...",
-    "verifyAndSignIn": "Verify & Sign In",
-    "useDifferentEmail": "Use a different email"
+    "useDifferentEmail": "Use a different email",
+    "mobileNumber": "Mobile Number",
+    "password": "Password",
+    "keepSignedIn": "Keep me signed in for 14 days",
+    "signingIn": "Signing in...",
+    "signIn": "Sign In",
+    "forgotPassword": "Forgot Password?",
+    "forgotPasswordHint": "Enter your registered email — we'll send a code to reset your password.",
+    "backToSignIn": "Back to Sign In",
+    "newPassword": "New Password",
+    "passwordHint": "At least 8 characters, with an uppercase letter, lowercase letter, and a number.",
+    "setPasswordAndSignIn": "Set Password",
+    "passwordResetSuccess": "Password updated. You can sign in now."
   },
   "settings": {
     "website": "Website",
@@ -488,7 +520,35 @@
     "title": "Orders",
     "description": "Track and manage customer orders.",
     "searchPlaceholder": "Search order number or customer...",
-    "allStatuses": "All Statuses"
+    "allStatuses": "All Statuses",
+    "createOrder": "Create Order"
+  },
+  "createOrder": {
+    "title": "Create Order",
+    "existingCustomer": "Existing Customer",
+    "newCustomer": "New Customer",
+    "customer": "Customer",
+    "searchCustomerPlaceholder": "Search by name, phone or email...",
+    "deliveryAddress": "Delivery Address",
+    "selectAddress": "Select an address",
+    "noAddressesOnFile": "This customer has no saved addresses. Switch to New Customer to add one.",
+    "customerName": "Customer Name",
+    "pincode": "Pincode",
+    "addressLine1": "Address Line 1",
+    "addressLine2": "Address Line 2",
+    "city": "City",
+    "state": "State",
+    "items": "Order Items",
+    "addItem": "Add Item",
+    "noItemsYet": "No items added yet.",
+    "selectProduct": "Select a product",
+    "noVariant": "No variant",
+    "createOrder": "Create Order",
+    "addAtLeastOneItem": "Add at least one item to the order",
+    "selectCustomerAndAddress": "Select a customer and delivery address",
+    "fillCustomerDetails": "Fill in all required customer details",
+    "orderCreated": "Order created successfully",
+    "failedToCreateOrder": "Failed to create order"
   },
   "cmsPageEditor": {
     "pageHome": "Home",
@@ -557,6 +617,28 @@
     "description": "View and manage your customers.",
     "searchPlaceholder": "Search by name, email or phone...",
     "emptyMessage": "No customers yet."
+  },
+  "productTrash": {
+    "title": "Trash",
+    "description": "Products you deleted. Restore them or remove them permanently.",
+    "backToProducts": "Back to Products",
+    "restore": "Restore",
+    "deletePermanently": "Delete Permanently",
+    "productRestored": "Product restored",
+    "failedToRestore": "Failed to restore product",
+    "productPermanentlyDeleted": "Product permanently deleted",
+    "failedToPermanentlyDelete": "Failed to permanently delete product",
+    "emptyMessage": "Trash is empty.",
+    "deleteConfirmTitle": "Delete this product permanently?",
+    "deleteConfirmDescription": "This cannot be undone. The product and its photos, variants and stock history will be removed completely."
+  },
+  "productDetail": {
+    "title": "Product Details",
+    "photos": "Photos",
+    "noPhotos": "No photos added yet.",
+    "basicInfo": "Basic Info",
+    "pricingAndStock": "Price & Stock",
+    "noMerchandisingLabels": "No labels set for this product."
   },
   "productFields": {
     "sareeLength": "Saree Length",

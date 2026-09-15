@@ -16,6 +16,8 @@ import storefrontRoutes from "./storefront.routes";
 import checkoutRoutes from "./checkout.routes";
 import categoryRoutes from "./category.routes";
 import reelRoutes from "./reel.routes";
+import productTagRoutes from "./productTag.routes";
+import notificationRoutes from "./notification.routes";
 import { authenticate, authorize } from "../middleware/auth";
 import { ADMIN_ROLES } from "../utils/roles";
 import * as orderController from "../controllers/order.controller";
@@ -43,6 +45,8 @@ router.use("/admin/settings", settingsRoutes);
 router.use("/admin/upload", uploadRoutes);
 router.use("/admin/categories", categoryRoutes);
 router.use("/admin/reels", reelRoutes);
+router.use("/admin/product-tags", productTagRoutes);
+router.use("/admin/notifications", notificationRoutes);
 
 router.use("/coupons", couponClaimRoutes);
 

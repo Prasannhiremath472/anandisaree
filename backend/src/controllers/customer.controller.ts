@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { getPagination } from "../utils/pagination";
 import * as customerService from "../services/customer.service";
 import { customerListQuerySchema, customerStatusUpdateSchema } from "../validation/customer.schema";
+import { toCsv, sendCsv } from "../utils/csv";
 
 export const listCustomers = asyncHandler(async (req: Request, res: Response) => {
   const query = customerListQuerySchema.parse(req.query);
@@ -20,4 +21,14 @@ export const updateCustomerStatus = asyncHandler(async (req: Request, res: Respo
   const { isActive } = customerStatusUpdateSchema.parse(req.body);
   const customer = await customerService.setCustomerStatus(req.params.id, isActive);
   res.json({ success: true, data: customer });
+});
+
+export const exportCustomers = asyncHandler(async (req: Request, res: Response) => {
+  const filters = customerListQuerySchema.parse(req.query);
+  const customers = await customerService.listAllCustomersForExport(filters);
+
+  const headers = ["Name", "Email", "Phone", "Active", "Joined"];
+  const rows = customers.map((c) => [c.name, c.email, c.phone, c.isActive ? "Yes" : "No", new Date(c.createdAt as string).toISOString()]);
+
+  sendCsv(res, "customers.csv", toCsv(headers, rows));
 });

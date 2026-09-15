@@ -6,13 +6,17 @@ import { ImagePlus, Loader2, X, Minus, Plus } from "lucide-react";
 import { BackLink } from "@/admin/components/ui/BackLink";
 import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
-import { useCreateProduct, useGenerateDescription, useProduct, useUpdateProduct } from "@/admin/hooks/api/useProducts";
+import { SearchableSelect } from "@/admin/components/ui/SearchableSelect";
+import { SearchableMultiSelect } from "@/admin/components/ui/SearchableMultiSelect";
+import { useCreateProduct, useGenerateDescription, useNextSku, useProduct, useUpdateProduct } from "@/admin/hooks/api/useProducts";
 import { useCategories } from "@/admin/hooks/api/useCategories";
+import { useCreateProductTag, useProductTags } from "@/admin/hooks/api/useProductTags";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 import { useAppSelector } from "@/admin/hooks/redux";
 import { VariantsCard, type VariantOption, type VariantRow } from "./VariantsCard";
 import { FABRIC_OPTIONS, WASH_CARE_BY_FABRIC } from "./fabricOptions";
 import { ALL_PRODUCT_OPTIONAL_FIELDS, type ProductOptionalField } from "./productFields";
+import type { ProductStatus } from "@/admin/types/product";
 
 type RemovableField = ProductOptionalField;
 
@@ -54,15 +58,13 @@ const emptyForm = {
   weavingTechnique: "",
   borderType: "",
   palluDesign: "",
-  designPattern: "",
-  craftOrigin: "",
-  district: "",
   blouseLength: "0.8",
   weightGrams: "",
   washCare: "",
 
   // Flags
   isActive: true,
+  status: "ACTIVE" as ProductStatus,
   isFeatured: false,
   isNewArrival: false,
   isBestSeller: false,
@@ -71,10 +73,6 @@ const emptyForm = {
   isTopSelection: false,
   blouseIncluded: true,
   isHandloom: false,
-
-  // SEO
-  metaTitle: "",
-  metaDescription: "",
 };
 
 export function ProductForm() {
@@ -87,6 +85,9 @@ export function ProductForm() {
 
   const { data: existing, isLoading } = useProduct(id ?? null);
   const { data: categories } = useCategories();
+  const { data: productTags } = useProductTags();
+  const createTagMutation = useCreateProductTag();
+  const [tagNames, setTagNames] = useState<string[]>([]);
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const uploadMutation = useImageUpload();
@@ -114,9 +115,29 @@ export function ProductForm() {
     setForm((f) => (f.categoryId === (lockedCategoryId ?? "") ? f : { ...f, categoryId: lockedCategoryId ?? "" }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lockedCategoryId, isEdit]);
+  // Auto-fill SKU from the category-based sequence for new products; the
+  // field is read-only in that case (see the SKU Field below), re-fetching
+  // and re-filling whenever the selected category changes.
+  const { data: nextSku } = useNextSku(!isEdit ? form.categoryId || undefined : undefined);
+  useEffect(() => {
+    if (isEdit || !nextSku) return;
+    setForm((f) => ({ ...f, sku: nextSku }));
+  }, [nextSku, isEdit]);
+
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<VariantRow[]>([]);
   const [isCustomFabric, setIsCustomFabric] = useState(false);
+
+  // Selling Price + GST, shown read-only in the Pricing card so the admin can
+  // see the final customer-facing price without doing the math themselves.
+  const totalPriceDisplay = (() => {
+    const sellingPrice = Number(form.sellingPrice);
+    const gstPercent = Number(form.gstPercent);
+    if (!form.sellingPrice || Number.isNaN(sellingPrice)) return "";
+    const gst = Number.isNaN(gstPercent) ? 0 : gstPercent;
+    const total = sellingPrice + (sellingPrice * gst) / 100;
+    return `₹${total.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+  })();
   const [removedFields, setRemovedFields] = useState<Set<RemovableField>>(new Set());
   const [manuallyRestored, setManuallyRestored] = useState<Set<RemovableField>>(new Set());
   const [manuallyRemoved, setManuallyRemoved] = useState<Set<RemovableField>>(new Set());
@@ -245,13 +266,11 @@ export function ProductForm() {
         weavingTechnique: existing.weavingTechnique ?? "",
         borderType: existing.borderType ?? "",
         palluDesign: existing.palluDesign ?? "",
-        designPattern: existing.designPattern ?? "",
-        craftOrigin: existing.craftOrigin ?? "",
-        district: existing.district ?? "",
         blouseLength: existing.blouseLength ?? "",
         weightGrams: existing.weightGrams ? String(existing.weightGrams) : "",
         washCare: existing.washCare ?? "",
         isActive: existing.isActive,
+        status: existing.status,
         isFeatured: existing.isFeatured,
         isNewArrival: existing.isNewArrival,
         isBestSeller: existing.isBestSeller,
@@ -260,9 +279,8 @@ export function ProductForm() {
         isTopSelection: existing.isTopSelection ?? false,
         blouseIncluded: existing.blouseIncluded,
         isHandloom: existing.isHandloom,
-        metaTitle: "",
-        metaDescription: "",
       });
+      setTagNames(existing.tags?.map((t) => t.tag.name) ?? []);
 
       // Fields that were never set on this product start out removed from
       // view, rather than showing a wall of blank optional inputs.
@@ -271,9 +289,6 @@ export function ProductForm() {
       if (!existing.weavingTechnique) emptyOnLoad.push("weavingTechnique");
       if (!existing.borderType) emptyOnLoad.push("borderType");
       if (!existing.palluDesign) emptyOnLoad.push("palluDesign");
-      if (!existing.designPattern) emptyOnLoad.push("designPattern");
-      if (!existing.craftOrigin) emptyOnLoad.push("craftOrigin");
-      if (!existing.district) emptyOnLoad.push("district");
       if (!existing.blouseLength) emptyOnLoad.push("blouseLength");
       if (!existing.weightGrams) emptyOnLoad.push("weightGrams");
       if (!existing.washCare) emptyOnLoad.push("washCare");
@@ -312,8 +327,24 @@ export function ProductForm() {
     }));
   }
 
+  async function resolveTagIds(): Promise<string[]> {
+    const ids: string[] = [];
+    for (const name of tagNames) {
+      const existingTag = productTags?.find((tg) => tg.name.toLowerCase() === name.toLowerCase());
+      if (existingTag) {
+        ids.push(existingTag.id);
+      } else {
+        const created = await createTagMutation.mutateAsync(name);
+        ids.push(created.id);
+      }
+    }
+    return ids;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    const tagIds = await resolveTagIds();
 
     const payload = {
       name: form.name,
@@ -327,9 +358,6 @@ export function ProductForm() {
       weavingTechnique: removedFields.has("weavingTechnique") ? undefined : form.weavingTechnique || undefined,
       borderType: removedFields.has("borderType") ? undefined : form.borderType || undefined,
       palluDesign: removedFields.has("palluDesign") ? undefined : form.palluDesign || undefined,
-      designPattern: removedFields.has("designPattern") ? undefined : form.designPattern || undefined,
-      craftOrigin: removedFields.has("craftOrigin") ? undefined : form.craftOrigin || undefined,
-      district: removedFields.has("district") ? undefined : form.district || undefined,
       blouseLength:
         removedFields.has("blouseLength") || !form.blouseLength ? undefined : Number(form.blouseLength),
       weightGrams: removedFields.has("weightGrams") || !form.weightGrams ? undefined : Number(form.weightGrams),
@@ -340,6 +368,7 @@ export function ProductForm() {
       stockQuantity: Number(form.stockQuantity),
       lowStockThreshold: Number(form.lowStockThreshold),
       isActive: form.isActive,
+      status: form.status,
       isFeatured: form.isFeatured,
       isNewArrival: form.isNewArrival,
       isBestSeller: form.isBestSeller,
@@ -348,9 +377,8 @@ export function ProductForm() {
       isTopSelection: form.isTopSelection,
       blouseIncluded: removedFields.has("blouseIncluded") ? undefined : form.blouseIncluded,
       isHandloom: form.isHandloom,
-      metaTitle: form.metaTitle || undefined,
-      metaDescription: form.metaDescription || undefined,
       categoryIds: form.categoryId ? [form.categoryId] : [],
+      tagIds,
       images: form.images.map((url, i) => ({ url, isPrimary: i === 0 })),
       variants: variants.length
         ? variants.map((v) => ({
@@ -515,7 +543,7 @@ export function ProductForm() {
             </Card>
 
             <Card title={t("productForm.pricing")}>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <Field label={t("productForm.mrp")} required>
                   <input required type="number" value={form.mrp} onChange={(e) => setForm({ ...form, mrp: e.target.value })} className={inputClass} />
                 </Field>
@@ -531,7 +559,87 @@ export function ProductForm() {
                 <Field label={t("productForm.gst")}>
                   <input type="number" value={form.gstPercent} onChange={(e) => setForm({ ...form, gstPercent: e.target.value })} className={inputClass} />
                 </Field>
+                <Field label={t("productForm.totalPrice")}>
+                  <input
+                    disabled
+                    value={totalPriceDisplay}
+                    className={`${inputClass} cursor-not-allowed bg-neutral-50 text-neutral-500`}
+                  />
+                </Field>
               </div>
+            </Card>
+
+            <VariantsCard
+              options={variantOptions}
+              onOptionsChange={setVariantOptions}
+              variants={variants}
+              onVariantsChange={setVariants}
+              baseSku={form.sku}
+            />
+          </div>
+
+          {/* Sidebar column */}
+          <div className="space-y-6">
+            <Card title={t("productForm.status")}>
+              <select
+                value={form.status}
+                onChange={(e) => {
+                  const status = e.target.value as ProductStatus;
+                  setForm({ ...form, status, isActive: status !== "INACTIVE" });
+                }}
+                className={inputClass}
+              >
+                <option value="ACTIVE">{t("status.ACTIVE")}</option>
+                <option value="INACTIVE">{t("status.INACTIVE")}</option>
+                <option value="OUT_OF_STOCK">{t("status.OUT_OF_STOCK")}</option>
+              </select>
+            </Card>
+
+            <Card title={t("productForm.productOrganization")}>
+              <Field label={t("productForm.category")}>
+                {lockedCategoryId ? (
+                  <>
+                    <select value={form.categoryId} disabled className={`${inputClass} bg-neutral-50 text-neutral-500`}>
+                      {(() => {
+                        const c = categories?.find((cat) => cat.id === lockedCategoryId);
+                        return (
+                          <option value={lockedCategoryId}>
+                            {c ? `${c.group === "MAHARASHTRIAN" ? "🪷 " : ""}${c.name}` : t("productForm.loadingEllipsis")}
+                          </option>
+                        );
+                      })()}
+                    </select>
+                    <p className="mt-1 text-xs text-neutral-400">
+                      {t("productForm.lockedCategoryHint")}
+                    </p>
+                  </>
+                ) : (
+                  <SearchableSelect
+                    value={form.categoryId}
+                    onChange={(categoryId) => setForm({ ...form, categoryId })}
+                    placeholder={t("productForm.selectCategory")}
+                    options={
+                      categories?.map((c) => ({
+                        value: c.id,
+                        label: `${c.group === "MAHARASHTRIAN" ? "🪷 " : ""}${c.name}`,
+                      })) ?? []
+                    }
+                  />
+                )}
+              </Field>
+              <Field label={t("productForm.sku")} required className="mt-4">
+                <input
+                  required
+                  readOnly={!isEdit}
+                  value={form.sku || (isEdit ? "" : t("productForm.skuPending"))}
+                  onChange={(e) => setForm({ ...form, sku: e.target.value })}
+                  className={`${inputClass} ${!isEdit ? "cursor-not-allowed bg-neutral-50 text-neutral-500" : ""}`}
+                />
+                {!isEdit && <p className="mt-1 text-xs text-neutral-400">{t("productForm.skuAutoHint")}</p>}
+              </Field>
+              <Field label={t("common.slug")} required className="mt-4">
+                <input required value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className={inputClass} />
+              </Field>
             </Card>
 
             <Card title={t("productForm.inventory")}>
@@ -630,21 +738,6 @@ export function ProductForm() {
                     <input value={form.palluDesign} onChange={(e) => setForm({ ...form, palluDesign: e.target.value })} className={inputClass} />
                   </Field>
                 )}
-                {!removedFields.has("designPattern") && (
-                  <Field label={t("productForm.designPattern")} hint={<RemoveFieldButton onClick={() => removeField("designPattern")} />}>
-                    <input value={form.designPattern} onChange={(e) => setForm({ ...form, designPattern: e.target.value })} className={inputClass} />
-                  </Field>
-                )}
-                {!removedFields.has("craftOrigin") && (
-                  <Field label={t("productForm.craftOrigin")} hint={<RemoveFieldButton onClick={() => removeField("craftOrigin")} />}>
-                    <input placeholder={t("productForm.craftOriginPlaceholder")} value={form.craftOrigin} onChange={(e) => setForm({ ...form, craftOrigin: e.target.value })} className={inputClass} />
-                  </Field>
-                )}
-                {!removedFields.has("district") && (
-                  <Field label={t("productForm.district")} hint={<RemoveFieldButton onClick={() => removeField("district")} />}>
-                    <input placeholder={t("productForm.districtPlaceholder")} value={form.district} onChange={(e) => setForm({ ...form, district: e.target.value })} className={inputClass} />
-                  </Field>
-                )}
                 {!removedFields.has("blouseLength") && (
                   <Field label={t("productForm.blouseLength")} hint={<RemoveFieldButton onClick={() => removeField("blouseLength")} />}>
                     <input
@@ -689,77 +782,6 @@ export function ProductForm() {
               )}
             </Card>
 
-            <VariantsCard
-              options={variantOptions}
-              onOptionsChange={setVariantOptions}
-              variants={variants}
-              onVariantsChange={setVariants}
-              baseSku={form.sku}
-            />
-
-            <Card title={t("productForm.seoListing")}>
-              <div className="space-y-4">
-                <Field label={t("common.metaTitle")}>
-                  <input value={form.metaTitle} onChange={(e) => setForm({ ...form, metaTitle: e.target.value })} className={inputClass} />
-                </Field>
-                <Field label={t("common.metaDescription")}>
-                  <textarea rows={2} value={form.metaDescription} onChange={(e) => setForm({ ...form, metaDescription: e.target.value })} className={inputClass} />
-                </Field>
-              </div>
-            </Card>
-          </div>
-
-          {/* Sidebar column */}
-          <div className="space-y-6">
-            <Card title={t("productForm.status")}>
-              <select
-                value={form.isActive ? "active" : "draft"}
-                onChange={(e) => setForm({ ...form, isActive: e.target.value === "active" })}
-                className={inputClass}
-              >
-                <option value="active">{t("common.active")}</option>
-                <option value="draft">{t("productForm.draft")}</option>
-              </select>
-            </Card>
-
-            <Card title={t("productForm.productOrganization")}>
-              <Field label={t("productForm.category")}>
-                {lockedCategoryId ? (
-                  <>
-                    <select value={form.categoryId} disabled className={`${inputClass} bg-neutral-50 text-neutral-500`}>
-                      {(() => {
-                        const c = categories?.find((cat) => cat.id === lockedCategoryId);
-                        return (
-                          <option value={lockedCategoryId}>
-                            {c ? `${c.group === "MAHARASHTRIAN" ? "🪷 " : ""}${c.name}` : t("productForm.loadingEllipsis")}
-                          </option>
-                        );
-                      })()}
-                    </select>
-                    <p className="mt-1 text-xs text-neutral-400">
-                      {t("productForm.lockedCategoryHint")}
-                    </p>
-                  </>
-                ) : (
-                  <select value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })} className={inputClass}>
-                    <option value="">{t("productForm.selectCategory")}</option>
-                    {categories?.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.group === "MAHARASHTRIAN" ? "🪷 " : ""}
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </Field>
-              <Field label={t("productForm.sku")} required className="mt-4">
-                <input required value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} className={inputClass} />
-              </Field>
-              <Field label={t("common.slug")} required className="mt-4">
-                <input required value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} className={inputClass} />
-              </Field>
-            </Card>
-
             <Card title={t("productForm.merchandising")}>
               <div className="space-y-2.5">
                 {(
@@ -797,6 +819,18 @@ export function ProductForm() {
                     <RemoveFieldButton onClick={() => removeField("blouseIncluded")} />
                   </div>
                 )}
+              </div>
+
+              <div className="mt-4 border-t border-neutral-100 pt-4">
+                <label className="text-sm font-medium text-neutral-700">{t("productForm.customTags")}</label>
+                <p className="mt-0.5 text-xs text-neutral-400">{t("productForm.customTagsHint")}</p>
+                <SearchableMultiSelect
+                  className="mt-1.5"
+                  suggestions={productTags?.map((tg) => tg.name) ?? []}
+                  values={tagNames}
+                  onChange={setTagNames}
+                  placeholder={t("productForm.addTagPlaceholder")}
+                />
               </div>
             </Card>
           </div>

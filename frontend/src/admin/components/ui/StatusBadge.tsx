@@ -21,6 +21,7 @@ const COLOR_MAP: Record<string, string> = {
   // Generic
   ACTIVE: "bg-green-100 text-green-700",
   INACTIVE: "bg-neutral-200 text-neutral-700",
+  OUT_OF_STOCK: "bg-amber-100 text-amber-700",
 };
 
 export function StatusBadge({ status }: { status: string }) {

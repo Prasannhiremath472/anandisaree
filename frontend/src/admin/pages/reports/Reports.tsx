@@ -1,7 +1,9 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import { useTranslation } from "react-i18next";
+import { Download } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
+import { useExportCsv } from "@/admin/hooks/useExportCsv";
 import { useInventoryReport, useOrderStatusReport, useSalesReport, useTopProductsReport } from "@/admin/hooks/api/useReports";
 import { useAppSelector } from "@/admin/hooks/redux";
 
@@ -12,10 +14,24 @@ export function Reports() {
   const { data: orderStatus } = useOrderStatusReport();
   const { data: topProducts } = useTopProductsReport(selectedCategoryId);
   const { data: inventory } = useInventoryReport(selectedCategoryId);
+  const { exportCsv, exporting } = useExportCsv("/admin/reports/sales/export", "sales-report.csv");
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t("reports.title")} description={t("reports.description")} />
+      <PageHeader
+        title={t("reports.title")}
+        description={t("reports.description")}
+        actions={
+          <button
+            type="button"
+            onClick={() => exportCsv({ days: 30, categoryId: selectedCategoryId ?? undefined })}
+            disabled={exporting}
+            className="flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+          >
+            <Download className="h-4 w-4" /> {exporting ? t("common.exporting") : t("common.export")}
+          </button>
+        }
+      />
 
       <div className="rounded-xl border border-black/5 bg-white p-6">
         <h3 className="font-heading text-sm font-semibold text-neutral-800">{t("reports.revenueLast30Days")}</h3>

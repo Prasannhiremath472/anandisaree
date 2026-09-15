@@ -8,6 +8,7 @@ const router = Router();
 router.use(authenticate, authorize(...SUPPORT_ROLES));
 
 router.get("/", reviewController.listReviews);
+router.get("/export", reviewController.exportReviews);
 router.patch("/:id/status", reviewController.updateReviewStatus);
 router.patch("/:id/featured", reviewController.setReviewFeatured);
 router.delete("/:id", reviewController.deleteReview);

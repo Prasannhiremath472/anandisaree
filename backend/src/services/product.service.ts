@@ -8,6 +8,10 @@ interface ListFilters {
   search?: string;
   categoryId?: string;
   isActive?: boolean;
+  status?: string;
+  fabric?: string;
+  lowStockOnly?: boolean;
+  trashed?: boolean;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
@@ -61,13 +65,24 @@ async function attachRelations(products: Record<string, unknown>[]) {
   }));
 }
 
-export async function listProducts(pagination: PaginationParams, filters: ListFilters) {
-  const conditions: string[] = ["deletedAt IS NULL"];
+function buildProductListWhere(filters: ListFilters): { whereClause: string; params: QueryParams } {
+  const conditions: string[] = [filters.trashed ? "deletedAt IS NOT NULL" : "deletedAt IS NULL"];
   const params: QueryParams = [];
 
   if (filters.isActive !== undefined) {
     conditions.push("isActive = ?");
     params.push(filters.isActive);
+  }
+  if (filters.status) {
+    conditions.push("status = ?");
+    params.push(filters.status);
+  }
+  if (filters.fabric) {
+    conditions.push("fabric = ?");
+    params.push(filters.fabric);
+  }
+  if (filters.lowStockOnly) {
+    conditions.push("stockQuantity <= lowStockThreshold");
   }
   if (filters.categoryId) {
     conditions.push("id IN (SELECT productId FROM `ProductCategory` WHERE categoryId = ?)");
@@ -79,9 +94,14 @@ export async function listProducts(pagination: PaginationParams, filters: ListFi
     params.push(like, like, like);
   }
 
+  return { whereClause: conditions.join(" AND "), params };
+}
+
+export async function listProducts(pagination: PaginationParams, filters: ListFilters) {
+  const { whereClause, params } = buildProductListWhere(filters);
+
   const sortBy = filters.sortBy && SORTABLE_COLUMNS.has(filters.sortBy) ? filters.sortBy : "createdAt";
   const sortOrder = filters.sortOrder === "asc" ? "ASC" : "DESC";
-  const whereClause = conditions.join(" AND ");
 
   const items = await query<Record<string, unknown>>(
     `SELECT * FROM \`Product\` WHERE ${whereClause} ORDER BY \`${sortBy}\` ${sortOrder} LIMIT ? OFFSET ?`,
@@ -100,6 +120,31 @@ export async function listProducts(pagination: PaginationParams, filters: ListFi
   }));
 
   return buildPaginatedResult(withPrimaryImage, totalRow?.count ?? 0, pagination);
+}
+
+export async function listAllProductsForExport(filters: ListFilters) {
+  const { whereClause, params } = buildProductListWhere(filters);
+
+  const products = await query<Record<string, unknown>>(
+    `SELECT id, sku, name, fabric, color, mrp, sellingPrice, stockQuantity, status, createdAt FROM \`Product\` WHERE ${whereClause} ORDER BY createdAt DESC`,
+    params
+  );
+  if (products.length === 0) return [];
+
+  const ids = products.map((p) => p.id as string);
+  const categoryLinks = await query<{ productId: string; name: string }>(
+    `SELECT pc.productId, c.name FROM \`ProductCategory\` pc JOIN \`Category\` c ON c.id = pc.categoryId
+     WHERE pc.productId IN (${ids.map(() => "?").join(",")})`,
+    ids
+  );
+
+  return products.map((p) => ({
+    ...p,
+    categoryNames: categoryLinks
+      .filter((c) => c.productId === p.id)
+      .map((c) => c.name)
+      .join("; "),
+  })) as (Record<string, unknown> & { categoryNames: string })[];
 }
 
 /** List/grid views only need one small image, not the full-resolution data URI. */
@@ -192,6 +237,12 @@ export async function getProductById(id: string) {
      WHERE po.productId = ?`,
     [id]
   );
+  const tagLinks = await query<{ productId: string; tagId: string; id: string; name: string; slug: string }>(
+    `SELECT pt.productId, pt.tagId, t.id, t.name, t.slug
+     FROM \`ProductTagAssignment\` pt JOIN \`ProductTag\` t ON t.id = pt.tagId
+     WHERE pt.productId = ?`,
+    [id]
+  );
 
   const [withCategoryAndImages] = await attachRelations([product]);
 
@@ -208,6 +259,11 @@ export async function getProductById(id: string) {
       productId: o.productId,
       occasionId: o.occasionId,
       occasion: { id: o.id, name: o.name, slug: o.slug },
+    })),
+    tags: tagLinks.map((t) => ({
+      productId: t.productId,
+      tagId: t.tagId,
+      tag: { id: t.id, name: t.name, slug: t.slug },
     })),
   };
 }
@@ -244,6 +300,7 @@ const PRODUCT_COLUMNS = [
   "deliveryEstimateDays",
   "washCare",
   "isActive",
+  "status",
   "isFeatured",
   "isNewArrival",
   "isBestSeller",
@@ -262,7 +319,7 @@ export async function createProduct(input: ProductCreateInput) {
   const existingSlug = await queryOne("SELECT id FROM `Product` WHERE slug = ? LIMIT 1", [input.slug]);
   if (existingSlug) throw ApiError.conflict("A product with this slug already exists");
 
-  const { categoryIds, collectionIds, occasionIds, images, variants, ...productData } = input as Record<string, unknown>;
+  const { categoryIds, collectionIds, occasionIds, tagIds, images, variants, ...productData } = input as Record<string, unknown>;
 
   if ((variants as { sku: string }[] | undefined)?.length) {
     const skus = (variants as { sku: string }[]).map((v) => v.sku);
@@ -301,6 +358,12 @@ export async function createProduct(input: ProductCreateInput) {
     if (occasionIdList?.length) {
       for (const occasionId of occasionIdList) {
         await conn.query("INSERT INTO `ProductOccasion` (productId, occasionId) VALUES (?, ?)", [productId, occasionId]);
+      }
+    }
+    const tagIdList = tagIds as string[] | undefined;
+    if (tagIdList?.length) {
+      for (const tagId of tagIdList) {
+        await conn.query("INSERT INTO `ProductTagAssignment` (productId, tagId) VALUES (?, ?)", [productId, tagId]);
       }
     }
 
@@ -342,7 +405,7 @@ export async function createProduct(input: ProductCreateInput) {
 export async function updateProduct(id: string, input: ProductUpdateInput) {
   await getProductById(id);
 
-  const { categoryIds, collectionIds, occasionIds, images, variants, ...productData } = input as Record<string, unknown>;
+  const { categoryIds, collectionIds, occasionIds, tagIds, images, variants, ...productData } = input as Record<string, unknown>;
 
   if (input.sku) {
     const existing = await queryOne("SELECT id FROM `Product` WHERE sku = ? AND id != ? LIMIT 1", [input.sku, id]);
@@ -389,6 +452,13 @@ export async function updateProduct(id: string, input: ProductUpdateInput) {
         await conn.query("INSERT INTO `ProductOccasion` (productId, occasionId) VALUES (?, ?)", [id, occasionId]);
       }
     }
+    const tagIdList = tagIds as string[] | undefined;
+    if (tagIdList) {
+      await conn.query("DELETE FROM `ProductTagAssignment` WHERE productId = ?", [id]);
+      for (const tagId of tagIdList) {
+        await conn.query("INSERT INTO `ProductTagAssignment` (productId, tagId) VALUES (?, ?)", [id, tagId]);
+      }
+    }
 
     const imageList = images as { url: string; altText?: string; isPrimary?: boolean }[] | undefined;
     if (imageList) {
@@ -429,13 +499,88 @@ export async function updateProduct(id: string, input: ProductUpdateInput) {
 
 export async function softDeleteProduct(id: string) {
   await getProductById(id);
-  await execute("UPDATE `Product` SET deletedAt = NOW(3), isActive = 0 WHERE id = ?", [id]);
+  await execute("UPDATE `Product` SET deletedAt = NOW(3), isActive = 0, status = 'INACTIVE' WHERE id = ?", [id]);
 }
 
 export async function bulkDeleteProducts(ids: string[]) {
   if (!ids.length) return;
   await execute(
-    `UPDATE \`Product\` SET deletedAt = NOW(3), isActive = 0 WHERE id IN (${ids.map(() => "?").join(",")})`,
+    `UPDATE \`Product\` SET deletedAt = NOW(3), isActive = 0, status = 'INACTIVE' WHERE id IN (${ids.map(() => "?").join(",")})`,
     ids
   );
+}
+
+export async function updateProductStatus(id: string, status: "ACTIVE" | "INACTIVE" | "OUT_OF_STOCK") {
+  const existing = await queryOne<{ id: string }>("SELECT id FROM `Product` WHERE id = ? AND deletedAt IS NULL LIMIT 1", [id]);
+  if (!existing) throw ApiError.notFound("Product not found");
+
+  await execute("UPDATE `Product` SET status = ?, isActive = ?, updatedAt = NOW(3) WHERE id = ?", [
+    status,
+    status === "INACTIVE" ? 0 : 1,
+    id,
+  ]);
+  return getProductById(id);
+}
+
+export async function listTrashedProducts(pagination: PaginationParams, filters: Pick<ListFilters, "search">) {
+  return listProducts(pagination, { ...filters, trashed: true });
+}
+
+export async function restoreProduct(id: string) {
+  const existing = await queryOne<{ id: string }>("SELECT id FROM `Product` WHERE id = ? AND deletedAt IS NOT NULL LIMIT 1", [id]);
+  if (!existing) throw ApiError.notFound("Trashed product not found");
+
+  await execute("UPDATE `Product` SET deletedAt = NULL, isActive = 1, status = 'ACTIVE' WHERE id = ?", [id]);
+  return getProductById(id);
+}
+
+export async function permanentlyDeleteProduct(id: string) {
+  const existing = await queryOne<{ id: string }>("SELECT id FROM `Product` WHERE id = ? AND deletedAt IS NOT NULL LIMIT 1", [id]);
+  if (!existing) throw ApiError.notFound("Trashed product not found");
+
+  const orderItemCount = await queryOne<{ count: number }>(
+    "SELECT COUNT(*) as count FROM `OrderItem` WHERE productId = ?",
+    [id]
+  );
+  if ((orderItemCount?.count ?? 0) > 0) {
+    throw ApiError.conflict("This product is referenced by past orders and cannot be permanently deleted");
+  }
+
+  await withTransaction(async (conn) => {
+    await conn.query("DELETE FROM `ProductImage` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `ProductVideo` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `ProductVariant` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `ProductCategory` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `ProductCollection` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `ProductOccasion` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `StockMovement` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `CartItem` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `WishlistItem` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `RecentlyViewed` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `Review` WHERE productId = ?", [id]);
+    await conn.query("DELETE FROM `Product` WHERE id = ?", [id]);
+  });
+}
+
+const CATEGORY_SKU_CODE_LENGTH = 3;
+
+export async function generateNextSku(categoryId: string): Promise<string> {
+  const category = await queryOne<{ slug: string }>("SELECT slug FROM `Category` WHERE id = ? LIMIT 1", [categoryId]);
+  if (!category) throw ApiError.notFound("Category not found");
+
+  const code = category.slug.replace(/[^a-zA-Z]/g, "").slice(0, CATEGORY_SKU_CODE_LENGTH).toUpperCase().padEnd(CATEGORY_SKU_CODE_LENGTH, "X");
+  const prefix = `ANS-${code}-`;
+
+  const last = await queryOne<{ sku: string }>(
+    "SELECT sku FROM `Product` WHERE sku LIKE ? ORDER BY sku DESC LIMIT 1",
+    [`${prefix}%`]
+  );
+
+  let nextNumber = 1;
+  if (last) {
+    const match = last.sku.match(/(\d+)$/);
+    if (match) nextNumber = parseInt(match[1], 10) + 1;
+  }
+
+  return `${prefix}${String(nextNumber).padStart(4, "0")}`;
 }

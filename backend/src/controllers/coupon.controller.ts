@@ -5,6 +5,7 @@ import { query, queryOne, execute, QueryParams } from "../config/db";
 import { createId } from "../utils/id";
 import { ApiError } from "../utils/ApiError";
 import { couponCreateSchema, couponListQuerySchema, couponUpdateSchema } from "../validation/coupon.schema";
+import { toCsv, sendCsv } from "../utils/csv";
 
 export const listCoupons = asyncHandler(async (req: Request, res: Response) => {
   const q = couponListQuerySchema.parse(req.query);
@@ -32,6 +33,43 @@ export const listCoupons = asyncHandler(async (req: Request, res: Response) => {
   );
 
   res.json({ success: true, data: buildPaginatedResult(items, totalRow?.count ?? 0, pagination) });
+});
+
+export const exportCoupons = asyncHandler(async (req: Request, res: Response) => {
+  const q = couponListQuerySchema.parse(req.query);
+
+  const conditions: string[] = ["1=1"];
+  const params: QueryParams = [];
+  if (q.isActive !== undefined) {
+    conditions.push("isActive = ?");
+    params.push(q.isActive);
+  }
+  if (q.search) {
+    conditions.push("code LIKE ?");
+    params.push(`%${q.search}%`);
+  }
+  const whereClause = conditions.join(" AND ");
+
+  const coupons = await query<Record<string, unknown>>(
+    `SELECT code, type, value, minOrderAmount, usageLimit, usedCount, isFestival, isActive, expiresAt, createdAt FROM \`Coupon\` WHERE ${whereClause} ORDER BY createdAt DESC`,
+    params
+  );
+
+  const headers = ["Code", "Type", "Value", "Min Order", "Usage Limit", "Used Count", "Festival", "Active", "Expires At", "Created At"];
+  const rows = coupons.map((c) => [
+    c.code,
+    c.type,
+    c.value,
+    c.minOrderAmount,
+    c.usageLimit,
+    c.usedCount,
+    c.isFestival ? "Yes" : "No",
+    c.isActive ? "Yes" : "No",
+    c.expiresAt ? new Date(c.expiresAt as string).toISOString() : "",
+    new Date(c.createdAt as string).toISOString(),
+  ]);
+
+  sendCsv(res, "coupons.csv", toCsv(headers, rows));
 });
 
 export const getCoupon = asyncHandler(async (req: Request, res: Response) => {

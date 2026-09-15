@@ -10,6 +10,10 @@ export interface ProductCategoryRef {
   category: { id: string; name: string; slug: string; group: string };
 }
 
+export interface ProductTagRef {
+  tag: { id: string; name: string; slug: string };
+}
+
 export interface ProductVariant {
   id: string;
   sku: string;
@@ -20,6 +24,8 @@ export interface ProductVariant {
   isActive: boolean;
   imageUrl?: string | null;
 }
+
+export type ProductStatus = "ACTIVE" | "INACTIVE" | "OUT_OF_STOCK";
 
 export interface Product {
   id: string;
@@ -48,6 +54,7 @@ export interface Product {
   stockQuantity: number;
   lowStockThreshold: number;
   isActive: boolean;
+  status: ProductStatus;
   isFeatured: boolean;
   isNewArrival: boolean;
   isBestSeller: boolean;
@@ -60,6 +67,7 @@ export interface Product {
   images: ProductImage[];
   categories: ProductCategoryRef[];
   variants: ProductVariant[];
+  tags?: ProductTagRef[];
 }
 
 export interface CategoryLookup {
@@ -81,6 +89,7 @@ export interface ProductFormValues {
   sellingPrice: number;
   stockQuantity: number;
   isActive: boolean;
+  status: ProductStatus;
   isFeatured: boolean;
   isNewArrival: boolean;
   isBestSeller: boolean;

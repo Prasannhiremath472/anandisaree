@@ -7,7 +7,7 @@ interface ListFilters {
   isActive?: boolean;
 }
 
-export async function listCustomers(pagination: PaginationParams, filters: ListFilters) {
+function buildCustomerListWhere(filters: ListFilters): { whereClause: string; params: QueryParams } {
   const conditions: string[] = ["role = 'CUSTOMER'", "deletedAt IS NULL"];
   const params: QueryParams = [];
 
@@ -21,7 +21,11 @@ export async function listCustomers(pagination: PaginationParams, filters: ListF
     params.push(like, like, like);
   }
 
-  const whereClause = conditions.join(" AND ");
+  return { whereClause: conditions.join(" AND "), params };
+}
+
+export async function listCustomers(pagination: PaginationParams, filters: ListFilters) {
+  const { whereClause, params } = buildCustomerListWhere(filters);
 
   const rows = await query<Record<string, unknown>>(
     `SELECT id, name, email, phone, isActive, isEmailVerified, createdAt FROM \`User\`
@@ -47,6 +51,15 @@ export async function listCustomers(pagination: PaginationParams, filters: ListF
   }));
 
   return buildPaginatedResult(items, totalRow?.count ?? 0, pagination);
+}
+
+export async function listAllCustomersForExport(filters: ListFilters) {
+  const { whereClause, params } = buildCustomerListWhere(filters);
+
+  return query<Record<string, unknown>>(
+    `SELECT name, email, phone, isActive, createdAt FROM \`User\` WHERE ${whereClause} ORDER BY createdAt DESC`,
+    params
+  );
 }
 
 export async function getCustomerById(id: string) {

@@ -17,7 +17,10 @@
   },
   "topbar": {
     "notifications": "सूचना",
-    "logout": "लॉग आऊट"
+    "logout": "लॉग आऊट",
+    "resetPassword": "पासवर्ड बदला",
+    "markAllRead": "सर्व वाचले म्हणून चिन्हांकित करा",
+    "noNotifications": "अद्याप कोणतीही सूचना नाही."
   },
   "common": {
     "cancel": "रद्द करा",
@@ -50,7 +53,15 @@
     "pageOf": "पान {{page}} / {{totalPages}}",
     "previousPage": "मागील पान",
     "nextPage": "पुढील पान",
-    "confirm": "होय, पुढे जा"
+    "confirm": "होय, पुढे जा",
+    "select": "निवडा...",
+    "noMatchesFound": "काही सापडले नाही",
+    "createValue": "\"{{value}}\" टाका",
+    "yes": "हो",
+    "no": "नाही",
+    "export": "CSV डाउनलोड करा",
+    "exporting": "डाउनलोड होत आहे...",
+    "exportFailed": "डाउनलोड होऊ शकले नाही. पुन्हा प्रयत्न करा."
   },
   "status": {
     "PENDING": "प्रलंबित",
@@ -68,6 +79,7 @@
     "SPAM": "स्पॅम",
     "ACTIVE": "चालू",
     "INACTIVE": "बंद",
+    "OUT_OF_STOCK": "स्टॉक संपला",
     "ALL": "सर्व"
   },
   "productForm": {
@@ -101,6 +113,7 @@
     "mrp": "MRP (₹)",
     "sellingPrice": "विक्री किंमत (₹)",
     "gst": "GST (%)",
+    "totalPrice": "एकूण किंमत (GST सह)",
     "inventory": "स्टॉक",
     "stockQuantity": "स्टॉक संख्या",
     "lowStockThreshold": "कमी स्टॉक इशारा (इतक्या खाली)",
@@ -133,6 +146,8 @@
     "lockedCategoryHint": "हा प्रॉडक्ट याच कॅटेगरीत टाकला जाईल. दुसऱ्या कॅटेगरीत टाकायचे असल्यास वरची टॅब बदलून पुन्हा \"नवीन प्रॉडक्ट टाका\" दाबा.",
     "selectCategory": "कॅटेगरी निवडा",
     "sku": "प्रॉडक्ट कोड (SKU)",
+    "skuPending": "कोड तयार करण्यासाठी कॅटेगरी निवडा",
+    "skuAutoHint": "कॅटेगरीनुसार आपोआप तयार होतो. हे बदलता येत नाही.",
     "merchandising": "होमपेजवर दाखवा",
     "featured": "फीचर्ड",
     "newArrival": "नवीन आले",
@@ -141,6 +156,9 @@
     "liveSpecialToday": "आज खास ऑफर",
     "topSelection": "टॉप सिलेक्शन",
     "handloom": "हातमाग",
+    "customTags": "स्वतःचे टॅग्स",
+    "customTagsHint": "या प्रॉडक्टसाठी तुमचे स्वतःचे लेबल टाका (उदा. \"गिफ्टसाठी योग्य\"). आधीचे टॅग शोधा किंवा नवीन टाका.",
+    "addTagPlaceholder": "टॅग टाका...",
     "blouseIncluded": "ब्लाऊज सोबत आहे",
     "createProduct": "प्रॉडक्ट टाका"
   },
@@ -188,9 +206,12 @@
     "uploadVariantImageAria": "फोटो अपलोड करा"
   },
   "products": {
-    "productDeleted": "प्रॉडक्ट काढले",
+    "productDeleted": "प्रॉडक्ट ट्रॅशमध्ये टाकले",
     "failedToDeleteProduct": "प्रॉडक्ट काढता आले नाही",
     "failedToImportProducts": "प्रॉडक्ट्स इम्पोर्ट होऊ शकले नाहीत",
+    "statusUpdated": "स्टेटस बदलले",
+    "failedToUpdateStatus": "स्टेटस बदलता आले नाही",
+    "trash": "ट्रॅश",
     "columnProduct": "प्रॉडक्ट",
     "columnFabric": "कापड",
     "columnPrice": "किंमत",
@@ -203,7 +224,7 @@
     "searchPlaceholder": "नाव, कोड किंवा कापड शोधा...",
     "emptyMessage": "अजून कोणतेही प्रॉडक्ट नाही. पहिली साडी टाका.",
     "deleteConfirmTitle": "प्रॉडक्ट काढायचे आहे का?",
-    "deleteConfirmDescription": "हे प्रॉडक्ट वेबसाईटवरून दिसणार नाही. अ‍ॅडमिन हे पुन्हा चालू करू शकतो.",
+    "deleteConfirmDescription": "हे प्रॉडक्ट ट्रॅशमध्ये जाईल आणि वेबसाईटवरून दिसणार नाही. तुम्ही ते नंतर ट्रॅशमधून परत आणू शकता.",
     "importResults": "इम्पोर्ट निकाल",
     "createdCount": "{{count}} टाकले",
     "skippedCount": "{{count}} वगळले",
@@ -344,7 +365,7 @@
   "login": {
     "otpSent": "तुमच्या ईमेलवर 6 अंकी कोड पाठवला आहे.",
     "couldNotSendCode": "कोड पाठवता आला नाही. पुन्हा प्रयत्न करा.",
-    "noAdminAccess": "या अकाउंटला अ‍ॅडमिन अ‍ॅक्सेस नाही",
+    "invalidCredentials": "मोबाईल नंबर किंवा पासवर्ड चुकीचा आहे.",
     "invalidCode": "कोड चुकीचा आहे किंवा वेळ संपली आहे.",
     "logoAlt": "आनंदी साड्या",
     "signInToManageStore": "स्टोअर सांभाळण्यासाठी लॉग इन करा",
@@ -354,8 +375,19 @@
     "sendOtp": "कोड पाठवा",
     "sixDigitCode": "6 अंकी कोड",
     "verifying": "तपासत आहे...",
-    "verifyAndSignIn": "कोड तपासा आणि लॉग इन करा",
-    "useDifferentEmail": "दुसरा ईमेल वापरा"
+    "useDifferentEmail": "दुसरा ईमेल वापरा",
+    "mobileNumber": "मोबाईल नंबर",
+    "password": "पासवर्ड",
+    "keepSignedIn": "14 दिवस लॉग इन ठेवा",
+    "signingIn": "लॉग इन होत आहे...",
+    "signIn": "लॉग इन करा",
+    "forgotPassword": "पासवर्ड विसरलात?",
+    "forgotPasswordHint": "तुमचा नोंदणीकृत ईमेल टाका — आम्ही पासवर्ड बदलण्यासाठी कोड पाठवू.",
+    "backToSignIn": "लॉग इन कडे परत जा",
+    "newPassword": "नवीन पासवर्ड",
+    "passwordHint": "किमान 8 अक्षरे, त्यात एक कॅपिटल अक्षर, एक स्मॉल अक्षर आणि एक आकडा असावा.",
+    "setPasswordAndSignIn": "पासवर्ड सेट करा",
+    "passwordResetSuccess": "पासवर्ड बदलला आहे. आता तुम्ही लॉग इन करू शकता."
   },
   "settings": {
     "website": "वेबसाईट",
@@ -488,7 +520,35 @@
     "title": "ऑर्डर्स",
     "description": "ग्राहकांच्या ऑर्डर्स पहा आणि सांभाळा.",
     "searchPlaceholder": "ऑर्डर नंबर किंवा ग्राहक शोधा...",
-    "allStatuses": "सर्व स्टेटस"
+    "allStatuses": "सर्व स्टेटस",
+    "createOrder": "ऑर्डर तयार करा"
+  },
+  "createOrder": {
+    "title": "ऑर्डर तयार करा",
+    "existingCustomer": "जुना ग्राहक",
+    "newCustomer": "नवीन ग्राहक",
+    "customer": "ग्राहक",
+    "searchCustomerPlaceholder": "नाव, फोन किंवा ईमेलने शोधा...",
+    "deliveryAddress": "डिलिव्हरी पत्ता",
+    "selectAddress": "पत्ता निवडा",
+    "noAddressesOnFile": "या ग्राहकाचा कोणताही जतन केलेला पत्ता नाही. पत्ता जोडण्यासाठी नवीन ग्राहक निवडा.",
+    "customerName": "ग्राहकाचे नाव",
+    "pincode": "पिनकोड",
+    "addressLine1": "पत्ता ओळ 1",
+    "addressLine2": "पत्ता ओळ 2",
+    "city": "शहर",
+    "state": "राज्य",
+    "items": "ऑर्डरमधील वस्तू",
+    "addItem": "वस्तू जोडा",
+    "noItemsYet": "अद्याप कोणतीही वस्तू जोडलेली नाही.",
+    "selectProduct": "उत्पादन निवडा",
+    "noVariant": "व्हेरिएंट नाही",
+    "createOrder": "ऑर्डर तयार करा",
+    "addAtLeastOneItem": "ऑर्डरमध्ये किमान एक वस्तू जोडा",
+    "selectCustomerAndAddress": "ग्राहक आणि डिलिव्हरी पत्ता निवडा",
+    "fillCustomerDetails": "सर्व आवश्यक ग्राहक तपशील भरा",
+    "orderCreated": "ऑर्डर यशस्वीरित्या तयार झाली",
+    "failedToCreateOrder": "ऑर्डर तयार करण्यात अयशस्वी"
   },
   "cmsPageEditor": {
     "pageHome": "होम",
@@ -557,6 +617,28 @@
     "description": "तुमचे ग्राहक पहा आणि सांभाळा.",
     "searchPlaceholder": "नाव, ईमेल किंवा फोनने शोधा...",
     "emptyMessage": "अजून कोणताही ग्राहक नाही."
+  },
+  "productTrash": {
+    "title": "ट्रॅश",
+    "description": "तुम्ही काढलेले प्रॉडक्ट्स. ते परत आणा किंवा कायमचे काढून टाका.",
+    "backToProducts": "प्रॉडक्ट्सकडे परत जा",
+    "restore": "परत आणा",
+    "deletePermanently": "कायमचे काढा",
+    "productRestored": "प्रॉडक्ट परत आणले",
+    "failedToRestore": "प्रॉडक्ट परत आणता आले नाही",
+    "productPermanentlyDeleted": "प्रॉडक्ट कायमचे काढले",
+    "failedToPermanentlyDelete": "प्रॉडक्ट कायमचे काढता आले नाही",
+    "emptyMessage": "ट्रॅश रिकामी आहे.",
+    "deleteConfirmTitle": "हे प्रॉडक्ट कायमचे काढायचे आहे का?",
+    "deleteConfirmDescription": "हे परत आणता येणार नाही. प्रॉडक्ट, त्याचे फोटो, व्हेरिएंट्स आणि स्टॉक हिस्ट्री पूर्णपणे काढली जाईल."
+  },
+  "productDetail": {
+    "title": "प्रॉडक्ट माहिती",
+    "photos": "फोटो",
+    "noPhotos": "अजून फोटो टाकलेले नाहीत.",
+    "basicInfo": "मूळ माहिती",
+    "pricingAndStock": "किंमत आणि स्टॉक",
+    "noMerchandisingLabels": "या प्रॉडक्टसाठी कोणतेही लेबल सेट केलेले नाही."
   },
   "productFields": {
     "sareeLength": "साडीची लांबी",

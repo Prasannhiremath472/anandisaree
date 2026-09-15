@@ -1,11 +1,17 @@
 import { z } from "zod";
 
+export const productStatusEnum = z.enum(["ACTIVE", "INACTIVE", "OUT_OF_STOCK"]);
+
 export const productListQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional(),
   pageSize: z.coerce.number().int().positive().max(100).optional(),
   search: z.string().optional(),
   categoryId: z.string().optional(),
   isActive: z.coerce.boolean().optional(),
+  status: productStatusEnum.optional(),
+  fabric: z.string().optional(),
+  lowStockOnly: z.coerce.boolean().optional(),
+  trashed: z.coerce.boolean().optional(),
   sortBy: z.enum(["createdAt", "sellingPrice", "name", "stockQuantity"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
@@ -42,6 +48,7 @@ export const productCreateSchema = z.object({
   deliveryEstimateDays: z.coerce.number().int().min(0).optional(),
   washCare: z.string().optional(),
   isActive: z.coerce.boolean().optional(),
+  status: productStatusEnum.optional(),
   isFeatured: z.coerce.boolean().optional(),
   isNewArrival: z.coerce.boolean().optional(),
   isBestSeller: z.coerce.boolean().optional(),
@@ -53,6 +60,7 @@ export const productCreateSchema = z.object({
   categoryIds: z.array(z.string()).optional(),
   collectionIds: z.array(z.string()).optional(),
   occasionIds: z.array(z.string()).optional(),
+  tagIds: z.array(z.string()).optional(),
   images: z.array(z.object({ url: z.string(), altText: z.string().optional(), isPrimary: z.coerce.boolean().optional() })).optional(),
   variants: z
     .array(
@@ -72,5 +80,10 @@ export const productCreateSchema = z.object({
 
 export const productUpdateSchema = productCreateSchema.partial();
 
+export const productStatusUpdateSchema = z.object({
+  status: productStatusEnum,
+});
+
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;
 export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;
+export type ProductStatusUpdateInput = z.infer<typeof productStatusUpdateSchema>;

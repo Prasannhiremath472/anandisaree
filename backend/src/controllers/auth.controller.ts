@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { env, isProd } from "../config/env";
 import * as authService from "../services/auth.service";
 import {
+  adminLoginSchema,
   forgotPasswordSchema,
   loginSchema,
   registerRequestOtpSchema,
@@ -60,6 +61,13 @@ export const verifyRegisterOtp = asyncHandler(async (req: Request, res: Response
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const input = loginSchema.parse(req.body);
   const result = await authService.login(input);
+  setRefreshCookie(res, result.refreshToken);
+  res.json({ success: true, data: { user: result.user, accessToken: result.accessToken } });
+});
+
+export const adminLogin = asyncHandler(async (req: Request, res: Response) => {
+  const input = adminLoginSchema.parse(req.body);
+  const result = await authService.adminLogin(input);
   setRefreshCookie(res, result.refreshToken);
   res.json({ success: true, data: { user: result.user, accessToken: result.accessToken } });
 });

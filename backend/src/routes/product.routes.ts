@@ -24,6 +24,10 @@ const router = Router();
 router.use(authenticate, authorize(...INVENTORY_ROLES));
 
 router.get("/", productController.listProducts);
+router.get("/trash", productController.listTrashedProducts);
+router.get("/next-sku", productController.getNextSku);
+router.get("/variant-values", productController.listVariantValues);
+router.get("/export", productController.exportProducts);
 router.get("/lookups/categories", productController.listCategoriesLookup);
 router.get("/lookups/brands", productController.listBrandsLookup);
 router.post("/generate-description", productController.generateDescription);
@@ -32,6 +36,9 @@ router.get("/:id", productController.getProduct);
 router.post("/", productController.createProduct);
 router.post("/bulk-delete", productController.bulkDeleteProducts);
 router.put("/:id", productController.updateProduct);
+router.patch("/:id/status", productController.updateProductStatus);
+router.post("/:id/restore", productController.restoreProduct);
+router.delete("/:id/permanent", productController.permanentlyDeleteProduct);
 router.delete("/:id", productController.deleteProduct);
 
 export default router;

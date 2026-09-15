@@ -3,22 +3,38 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Plus, Pencil, Trash2, Upload, Loader2, X, CheckCircle2, AlertCircle, MinusCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, Download, Loader2, X, CheckCircle2, AlertCircle, MinusCircle } from "lucide-react";
+import { useExportCsv } from "@/admin/hooks/useExportCsv";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { SearchInput } from "@/admin/components/ui/SearchInput";
 import { DataTable, type Column } from "@/admin/components/ui/DataTable";
 import { Pagination } from "@/admin/components/ui/Pagination";
-import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { ConfirmDialog } from "@/admin/components/ui/ConfirmDialog";
-import { useDeleteProduct, useImportProducts, useProducts, type ImportProductsResult } from "@/admin/hooks/api/useProducts";
+import {
+  useDeleteProduct,
+  useImportProducts,
+  useProducts,
+  useUpdateProductStatus,
+  type ImportProductsResult,
+} from "@/admin/hooks/api/useProducts";
 import { useAppSelector } from "@/admin/hooks/redux";
-import type { Product } from "@/admin/types/product";
+import type { Product, ProductStatus } from "@/admin/types/product";
+import { ProductDetailModal } from "./ProductDetailModal";
+
+const STATUS_OPTIONS: ProductStatus[] = ["ACTIVE", "INACTIVE", "OUT_OF_STOCK"];
+
+const STATUS_SELECT_CLASS: Record<ProductStatus, string> = {
+  ACTIVE: "border-green-200 bg-green-50 text-green-700",
+  INACTIVE: "border-neutral-200 bg-neutral-50 text-neutral-600",
+  OUT_OF_STOCK: "border-amber-200 bg-amber-50 text-amber-700",
+};
 
 export function Products() {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [detailProductId, setDetailProductId] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<ImportProductsResult | null>(null);
   const navigate = useNavigate();
   const importFileRef = useRef<HTMLInputElement>(null);
@@ -36,6 +52,17 @@ export function Products() {
   }, [selectedCategoryId]);
   const deleteMutation = useDeleteProduct();
   const importMutation = useImportProducts();
+  const updateStatusMutation = useUpdateProductStatus();
+  const { exportCsv, exporting } = useExportCsv("/admin/products/export", "products.csv");
+
+  async function handleStatusChange(id: string, status: ProductStatus) {
+    try {
+      await updateStatusMutation.mutateAsync({ id, status });
+      toast.success(t("products.statusUpdated"));
+    } catch {
+      toast.error(t("products.failedToUpdateStatus"));
+    }
+  }
 
   async function confirmDelete() {
     if (!deletingId) return;
@@ -103,8 +130,21 @@ export function Products() {
     },
     {
       header: t("common.status"),
-      key: "isActive",
-      render: (p) => <StatusBadge status={p.isActive ? "ACTIVE" : "INACTIVE"} />,
+      key: "status",
+      render: (p) => (
+        <select
+          value={p.status}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => handleStatusChange(p.id, e.target.value as ProductStatus)}
+          className={`rounded-lg border px-2 py-1 text-xs font-medium focus:outline-none ${STATUS_SELECT_CLASS[p.status]}`}
+        >
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {t(`status.${s}`)}
+            </option>
+          ))}
+        </select>
+      ),
     },
     {
       header: t("common.actions"),
@@ -149,6 +189,20 @@ export function Products() {
               )}
               {importMutation.isPending ? t("products.importing") : t("products.importFromExcel")}
             </button>
+            <button
+              type="button"
+              onClick={() => exportCsv({ search: search || undefined, categoryId: selectedCategoryId ?? undefined })}
+              disabled={exporting}
+              className="flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+            >
+              <Download className="h-4 w-4" /> {exporting ? t("common.exporting") : t("common.export")}
+            </button>
+            <Link
+              to="/products/trash"
+              className="flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+            >
+              <Trash2 className="h-4 w-4" /> {t("products.trash")}
+            </Link>
             <Link
               to="/products/new"
               className="flex items-center gap-2 rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm"
@@ -169,8 +223,10 @@ export function Products() {
         rowKey={(p) => p.id}
         loading={isLoading}
         emptyMessage={t("products.emptyMessage")}
-        onRowClick={(p) => navigate(`/products/${p.id}/edit`)}
+        onRowClick={(p) => setDetailProductId(p.id)}
       />
+
+      <ProductDetailModal productId={detailProductId} onOpenChange={(open) => !open && setDetailProductId(null)} />
 
       {data && data.total > 0 && (
         <Pagination page={data.page} totalPages={data.totalPages} total={data.total} pageSize={data.pageSize} onPageChange={setPage} />

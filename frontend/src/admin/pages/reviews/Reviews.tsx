@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import { Check, Star, Trash2, X } from "lucide-react";
+import { Check, Star, Trash2, X, Download } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { DataTable, type Column } from "@/admin/components/ui/DataTable";
 import { Pagination } from "@/admin/components/ui/Pagination";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
+import { useExportCsv } from "@/admin/hooks/useExportCsv";
 import { useDeleteReview, useReviews, useSetReviewFeatured, useUpdateReviewStatus, type Review } from "@/admin/hooks/api/useReviews";
 import { useAppSelector } from "@/admin/hooks/redux";
 
@@ -30,6 +31,7 @@ export function Reviews() {
   const statusMutation = useUpdateReviewStatus();
   const featuredMutation = useSetReviewFeatured();
   const deleteMutation = useDeleteReview();
+  const { exportCsv, exporting } = useExportCsv("/admin/reviews/export", "reviews.csv");
 
   async function handleStatus(id: string, next: string) {
     try {
@@ -115,7 +117,25 @@ export function Reviews() {
 
   return (
     <div>
-      <PageHeader title={t("reviews.title")} description={t("reviews.description")} />
+      <PageHeader
+        title={t("reviews.title")}
+        description={t("reviews.description")}
+        actions={
+          <button
+            type="button"
+            onClick={() =>
+              exportCsv({
+                status: status === "ALL" ? undefined : status,
+                categoryId: selectedCategoryId ?? undefined,
+              })
+            }
+            disabled={exporting}
+            className="flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+          >
+            <Download className="h-4 w-4" /> {exporting ? t("common.exporting") : t("common.export")}
+          </button>
+        }
+      />
 
       <div className="mb-4 flex gap-2">
         {STATUS_FILTERS.map((s) => (

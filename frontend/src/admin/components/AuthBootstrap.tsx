@@ -39,7 +39,16 @@ export function AuthBootstrap({ children }: { children: React.ReactNode }) {
   }, [dispatch]);
 
   if (!ready) {
-    return <div className="flex min-h-screen items-center justify-center text-neutral-400">{t("common.loading")}</div>;
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white">
+        <img
+          src="/images/anandi-sarees-logo-crop.png"
+          alt="Anandi Sarees"
+          className="h-16 animate-pulse rounded-lg"
+        />
+        <p className="text-sm text-neutral-400">{t("common.loading")}</p>
+      </div>
+    );
   }
 
   return <>{children}</>;

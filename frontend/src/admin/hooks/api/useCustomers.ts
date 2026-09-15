@@ -13,8 +13,22 @@ export interface CustomerListItem {
   _count: { orders: number };
 }
 
+export interface CustomerAddress {
+  id: string;
+  fullName: string;
+  phone: string;
+  line1: string;
+  line2?: string | null;
+  landmark?: string | null;
+  city: string;
+  district?: string | null;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+}
+
 export interface CustomerDetail extends CustomerListItem {
-  addresses: { id: string; city: string; state: string; isDefault: boolean }[];
+  addresses: CustomerAddress[];
   orders: { id: string; orderNumber: string; status: string; totalAmount: string; createdAt: string }[];
   wallet: { balance: string } | null;
   _count: { orders: number; reviews: number; wishlist: number };
