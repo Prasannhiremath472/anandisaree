@@ -9,7 +9,7 @@ export interface Subscriber {
   createdAt: string;
 }
 
-export function useSubscribers(params: { page: number; pageSize: number; search?: string }) {
+export function useSubscribers(params: { page: number; pageSize: number; search?: string; isSubscribed?: boolean }) {
   return useQuery({
     queryKey: ["subscribers", params],
     queryFn: async () => {

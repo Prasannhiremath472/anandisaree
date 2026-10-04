@@ -10,7 +10,7 @@ export function AdminLayout() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar />
         <CategoryBar />
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4">
           <Outlet />
         </main>
       </div>

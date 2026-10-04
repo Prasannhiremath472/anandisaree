@@ -17,6 +17,10 @@ export const listCoupons = asyncHandler(async (req: Request, res: Response) => {
     conditions.push("isActive = ?");
     params.push(q.isActive);
   }
+  if (q.type) {
+    conditions.push("type = ?");
+    params.push(q.type);
+  }
   if (q.search) {
     conditions.push("code LIKE ?");
     params.push(`%${q.search}%`);
@@ -43,6 +47,10 @@ export const exportCoupons = asyncHandler(async (req: Request, res: Response) =>
   if (q.isActive !== undefined) {
     conditions.push("isActive = ?");
     params.push(q.isActive);
+  }
+  if (q.type) {
+    conditions.push("type = ?");
+    params.push(q.type);
   }
   if (q.search) {
     conditions.push("code LIKE ?");

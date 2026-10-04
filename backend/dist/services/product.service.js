@@ -73,6 +73,14 @@ function buildProductListWhere(filters) {
     if (filters.lowStockOnly) {
         conditions.push("stockQuantity <= lowStockThreshold");
     }
+    if (filters.minPrice !== undefined) {
+        conditions.push("sellingPrice >= ?");
+        params.push(filters.minPrice);
+    }
+    if (filters.maxPrice !== undefined) {
+        conditions.push("sellingPrice <= ?");
+        params.push(filters.maxPrice);
+    }
     if (filters.categoryId) {
         conditions.push("id IN (SELECT productId FROM `ProductCategory` WHERE categoryId = ?)");
         params.push(filters.categoryId);
@@ -216,6 +224,7 @@ const PRODUCT_COLUMNS = [
     "sareeLength",
     "blouseIncluded",
     "blouseLength",
+    "blouseDetails",
     "weightGrams",
     "craftOrigin",
     "state",
@@ -224,6 +233,7 @@ const PRODUCT_COLUMNS = [
     "mrp",
     "sellingPrice",
     "gstPercent",
+    "specialOfferPercent",
     "stockQuantity",
     "lowStockThreshold",
     "dispatchDays",

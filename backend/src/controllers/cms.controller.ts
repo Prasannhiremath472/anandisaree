@@ -63,9 +63,19 @@ export const upsertCmsPage = asyncHandler(async (req: Request, res: Response) =>
 export const listBlogPosts = asyncHandler(async (req: Request, res: Response) => {
   const pagination = getPagination(req);
   const search = req.query.search as string | undefined;
+  const isPublished = req.query.isPublished as string | undefined;
 
-  const whereClause = search ? "title LIKE ?" : "1=1";
-  const params = search ? [`%${search}%`] : [];
+  const conditions: string[] = ["1=1"];
+  const params: (string | number)[] = [];
+  if (search) {
+    conditions.push("title LIKE ?");
+    params.push(`%${search}%`);
+  }
+  if (isPublished !== undefined) {
+    conditions.push("isPublished = ?");
+    params.push(isPublished === "true" ? 1 : 0);
+  }
+  const whereClause = conditions.join(" AND ");
 
   const items = await query(
     `SELECT * FROM \`BlogPost\` WHERE ${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,

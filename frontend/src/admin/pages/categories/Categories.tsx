@@ -3,8 +3,10 @@ import * as Dialog from "@radix-ui/react-dialog";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { Plus, Pencil, X, Trash2 } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/admin/hooks/redux";
-import { setSelectedCategory } from "@/admin/store/categorySlice";
+import { PageHeader } from "@/admin/components/ui/PageHeader";
+import { DataTable, type Column } from "@/admin/components/ui/DataTable";
+import { StatusBadge } from "@/admin/components/ui/StatusBadge";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import {
   useCategories,
   useCreateCategory,
@@ -14,8 +16,6 @@ import {
   type CategoryFormInput,
 } from "@/admin/hooks/api/useCategories";
 import { ALL_PRODUCT_OPTIONAL_FIELDS, type ProductOptionalField } from "@/admin/pages/products/productFields";
-import { Tooltip } from "@/admin/components/ui/Tooltip";
-import { cn } from "@/admin/utils";
 
 const inputClass =
   "w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500";
@@ -28,25 +28,31 @@ const emptyForm: CategoryFormInput = {
   enabledFields: [...ALL_PRODUCT_OPTIONAL_FIELDS],
 };
 
-export function CategoryBar() {
+export function Categories() {
   const { t } = useTranslation();
   const { data: categories, isLoading } = useCategories();
-  const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
-  const dispatch = useAppDispatch();
 
   const [editing, setEditing] = useState<Category | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<CategoryFormInput>(emptyForm);
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
+  const [groupFilter, setGroupFilter] = useState<"MAHARASHTRIAN" | "PAN_INDIAN" | "">("");
+  const [parentFilter, setParentFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<"active" | "inactive" | "">("");
+
+  const filteredCategories = (categories ?? []).filter((c) => {
+    if (groupFilter && c.group !== groupFilter) return false;
+    if (parentFilter === "__top__" && c.parentId) return false;
+    if (parentFilter && parentFilter !== "__top__" && c.parentId !== parentFilter) return false;
+    if (statusFilter === "active" && !c.isActive) return false;
+    if (statusFilter === "inactive" && c.isActive) return false;
+    return true;
+  });
+
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
   const deleteMutation = useDeleteCategory();
-
-  // The bar's tabs are only the top-level (no parent) categories — e.g.
-  // "Saree", "Nightwear" — their sub-categories (Paithani, Maheshwari…) are
-  // picked from the Product form instead, not shown as separate tabs here.
-  const topLevelCategories = categories?.filter((c) => !c.parentId);
 
   function openAdd() {
     setEditing(null);
@@ -54,8 +60,7 @@ export function CategoryBar() {
     setShowForm(true);
   }
 
-  function openEdit(category: Category, e: React.MouseEvent) {
-    e.stopPropagation();
+  function openEdit(category: Category) {
     setEditing(category);
     setForm({
       name: category.name,
@@ -96,9 +101,6 @@ export function CategoryBar() {
     if (!deleteTarget) return;
     try {
       await deleteMutation.mutateAsync(deleteTarget.id);
-      if (selectedCategoryId === deleteTarget.id) {
-        dispatch(setSelectedCategory(null));
-      }
       toast.success(t("categoryBar.categoryDeleted"));
       setDeleteTarget(null);
     } catch (err: any) {
@@ -107,80 +109,123 @@ export function CategoryBar() {
   }
 
   const saving = createMutation.isPending || updateMutation.isPending;
-  const selectedCategory = categories?.find((c) => c.id === selectedCategoryId);
-  const currentLabel = selectedCategory?.name ?? t("categoryBar.allCategories");
+
+  const columns: Column<Category>[] = [
+    {
+      header: t("categoryBar.name"),
+      key: "name",
+      render: (c) => (
+        <div>
+          <p className="font-medium text-neutral-800">{c.name}</p>
+          <p className="text-xs text-neutral-400">{c.slug}</p>
+        </div>
+      ),
+    },
+    {
+      header: t("categoryBar.group"),
+      key: "group",
+      render: (c) => (c.group === "MAHARASHTRIAN" ? t("categoryBar.maharashtrian") : t("categoryBar.panIndian")),
+    },
+    {
+      header: t("categoryBar.parentCategory"),
+      key: "parentId",
+      render: (c) =>
+        c.parentId ? (
+          <span className="text-neutral-600">{categories?.find((p) => p.id === c.parentId)?.name ?? "—"}</span>
+        ) : (
+          <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">{t("categoryBar.mainMenu")}</span>
+        ),
+    },
+    {
+      header: t("categories.columnProducts"),
+      key: "productCount",
+      render: (c) => c.productCount,
+    },
+    {
+      header: t("common.status"),
+      key: "isActive",
+      render: (c) => <StatusBadge status={c.isActive ? "ACTIVE" : "INACTIVE"} />,
+    },
+    {
+      header: t("common.actions"),
+      key: "actions",
+      stickyRight: true,
+      render: (c) => (
+        <div className="flex items-center gap-3">
+          <Tooltip label={t("common.edit")}>
+            <button onClick={() => openEdit(c)} aria-label={t("common.edit")} className="text-neutral-500 hover:text-royal-600">
+              <Pencil className="h-4 w-4" />
+            </button>
+          </Tooltip>
+          <Tooltip label={t("common.delete")}>
+            <button onClick={() => setDeleteTarget(c)} aria-label={t("common.delete")} className="text-neutral-500 hover:text-red-600">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </Tooltip>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="shrink-0 border-b border-black/5 bg-white px-5 pt-2">
-      <p className="mb-1 text-[11px] text-neutral-400">
-        {t("categoryBar.currentlyViewing")} <span className="font-semibold text-royal-700">{currentLabel}</span>
-      </p>
-
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        <button
-          type="button"
-          onClick={() => dispatch(setSelectedCategory(null))}
-          className={cn(
-            "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors",
-            selectedCategoryId === null
-              ? "bg-royal-gradient text-white shadow-sm"
-              : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-          )}
-        >
-          {t("categoryBar.allCategories")}
-        </button>
-
-        {isLoading ? (
-          <span className="px-3 py-1.5 text-xs text-neutral-400">{t("categoryBar.loadingCategories")}</span>
-        ) : (
-          topLevelCategories?.map((category) => (
-            <div
-              key={category.id}
-              className={cn(
-                "group flex shrink-0 items-center gap-1 rounded-full pl-3.5 pr-1.5 py-1.5 text-xs font-medium transition-colors",
-                selectedCategoryId === category.id
-                  ? "bg-royal-gradient text-white shadow-sm"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-              )}
-            >
-              <button type="button" onClick={() => dispatch(setSelectedCategory(category.id))}>
-                {category.name}
-                {category.productCount > 0 && (
-                  <span className={cn("ml-1 text-xs", selectedCategoryId === category.id ? "text-white/70" : "text-neutral-400")}>
-                    ({category.productCount})
-                  </span>
-                )}
-              </button>
-              <Tooltip label={t("categoryBar.editCategoryAria", { name: category.name })}>
-                <button
-                  type="button"
-                  onClick={(e) => openEdit(category, e)}
-                  aria-label={t("categoryBar.editCategoryAria", { name: category.name })}
-                  className={cn(
-                    "rounded-full p-1 opacity-0 transition-opacity group-hover:opacity-100",
-                    selectedCategoryId === category.id
-                      ? "text-white/70 hover:bg-white/20 hover:text-white"
-                      : "text-neutral-400 hover:bg-white hover:text-royal-600"
-                  )}
-                >
-                  <Pencil className="h-3 w-3" />
-                </button>
-              </Tooltip>
-            </div>
-          ))
-        )}
-
-        <Tooltip label={t("categoryBar.addCategoryAria")}>
+    <div>
+      <PageHeader
+        title={t("categories.title")}
+        description={t("categories.description")}
+        actions={
           <button
             type="button"
             onClick={openAdd}
-            aria-label={t("categoryBar.addCategoryAria")}
-            className="ml-1 flex shrink-0 items-center justify-center rounded-full border border-dashed border-neutral-300 p-1.5 text-neutral-400 hover:border-royal-300 hover:bg-royal-50 hover:text-royal-600"
+            className="flex items-center gap-2 rounded-lg bg-royal-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-sm"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" /> {t("categoryBar.addCategory")}
           </button>
-        </Tooltip>
+        }
+      />
+
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <select
+          value={groupFilter}
+          onChange={(e) => setGroupFilter(e.target.value as typeof groupFilter)}
+          className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs focus:border-royal-500 focus:outline-none"
+        >
+          <option value="">{t("categories.allGroups")}</option>
+          <option value="MAHARASHTRIAN">{t("categoryBar.maharashtrian")}</option>
+          <option value="PAN_INDIAN">{t("categoryBar.panIndian")}</option>
+        </select>
+        <select
+          value={parentFilter}
+          onChange={(e) => setParentFilter(e.target.value)}
+          className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs focus:border-royal-500 focus:outline-none"
+        >
+          <option value="">{t("categories.allCategories")}</option>
+          <option value="__top__">{t("categoryBar.mainMenu")}</option>
+          {categories
+            ?.filter((c) => !c.parentId)
+            .map((c) => (
+              <option key={c.id} value={c.id}>
+                {t("categories.subCategoryOf", { name: c.name })}
+              </option>
+            ))}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+          className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs focus:border-royal-500 focus:outline-none"
+        >
+          <option value="">{t("products.allStatuses")}</option>
+          <option value="active">{t("status.ACTIVE")}</option>
+          <option value="inactive">{t("status.INACTIVE")}</option>
+        </select>
       </div>
+
+      <DataTable
+        columns={columns}
+        rows={filteredCategories}
+        rowKey={(c) => c.id}
+        loading={isLoading}
+        emptyMessage={t("categories.emptyMessage")}
+      />
 
       <Dialog.Root open={showForm} onOpenChange={setShowForm}>
         <Dialog.Portal>
@@ -239,9 +284,7 @@ export function CategoryBar() {
               </div>
               <div>
                 <label className="text-sm font-medium text-neutral-700">{t("categoryBar.productFieldsLabel")}</label>
-                <p className="mt-0.5 text-xs text-neutral-400">
-                  {t("categoryBar.productFieldsHint")}
-                </p>
+                <p className="mt-0.5 text-xs text-neutral-400">{t("categoryBar.productFieldsHint")}</p>
                 <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg border border-neutral-200 p-3">
                   {ALL_PRODUCT_OPTIONAL_FIELDS.map((field) => (
                     <label key={field} className="flex items-center gap-1.5 text-xs text-neutral-700">
@@ -267,35 +310,19 @@ export function CategoryBar() {
                 {t("common.active")}
               </label>
 
-              <div className="flex items-center justify-between pt-2">
-                {editing ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDeleteTarget(editing);
-                      setShowForm(false);
-                    }}
-                    className="flex items-center gap-1.5 text-xs font-medium text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" /> {t("common.delete")}
+              <div className="flex justify-end gap-2 pt-2">
+                <Dialog.Close asChild>
+                  <button type="button" className="rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100">
+                    {t("common.cancel")}
                   </button>
-                ) : (
-                  <span />
-                )}
-                <div className="flex gap-2">
-                  <Dialog.Close asChild>
-                    <button type="button" className="rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100">
-                      {t("common.cancel")}
-                    </button>
-                  </Dialog.Close>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-60"
-                  >
-                    {saving ? t("common.saving") : editing ? t("common.saveChanges") : t("categoryBar.create")}
-                  </button>
-                </div>
+                </Dialog.Close>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="rounded-lg bg-royal-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-sm disabled:opacity-60"
+                >
+                  {saving ? t("common.saving") : editing ? t("common.saveChanges") : t("categoryBar.create")}
+                </button>
               </div>
             </form>
           </Dialog.Content>
@@ -321,7 +348,7 @@ export function CategoryBar() {
               <button
                 onClick={handleDelete}
                 disabled={deleteMutation.isPending}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-60"
+                className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-60"
               >
                 {deleteMutation.isPending ? t("categoryBar.deleting") : t("common.delete")}
               </button>

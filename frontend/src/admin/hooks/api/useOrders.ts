@@ -1,14 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/admin/api/client";
 import type { PaginatedResult } from "@/admin/types/api";
-import type { OrderDetail, OrderListItem, OrderStatus } from "@/admin/types/order";
+import type { OrderDetail, OrderListItem, OrderStatus, PaymentStatus } from "@/admin/types/order";
 
 interface ListParams {
   page: number;
   pageSize: number;
   search?: string;
   status?: OrderStatus;
+  paymentStatus?: PaymentStatus;
   categoryId?: string;
+  date?: string;
 }
 
 export function useOrders(params: ListParams) {

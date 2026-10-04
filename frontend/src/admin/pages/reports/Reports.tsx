@@ -1,6 +1,7 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import { useTranslation } from "react-i18next";
-import { Download } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Download } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { useExportCsv } from "@/admin/hooks/useExportCsv";
@@ -22,14 +23,22 @@ export function Reports() {
         title={t("reports.title")}
         description={t("reports.description")}
         actions={
-          <button
-            type="button"
-            onClick={() => exportCsv({ days: 30, categoryId: selectedCategoryId ?? undefined })}
-            disabled={exporting}
-            className="flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
-          >
-            <Download className="h-4 w-4" /> {exporting ? t("common.exporting") : t("common.export")}
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="flex items-center gap-2 rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50"
+            >
+              <ArrowLeft className="h-4 w-4" /> {t("reports.backToDashboard")}
+            </Link>
+            <button
+              type="button"
+              onClick={() => exportCsv({ days: 30, categoryId: selectedCategoryId ?? undefined })}
+              disabled={exporting}
+              className="flex items-center gap-2 rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+            >
+              <Download className="h-4 w-4" /> {exporting ? t("common.exporting") : t("common.export")}
+            </button>
+          </div>
         }
       />
 

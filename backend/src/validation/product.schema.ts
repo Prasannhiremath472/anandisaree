@@ -12,6 +12,8 @@ export const productListQuerySchema = z.object({
   fabric: z.string().optional(),
   lowStockOnly: z.coerce.boolean().optional(),
   trashed: z.coerce.boolean().optional(),
+  minPrice: z.coerce.number().min(0).optional(),
+  maxPrice: z.coerce.number().min(0).optional(),
   sortBy: z.enum(["createdAt", "sellingPrice", "name", "stockQuantity"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
@@ -34,7 +36,9 @@ export const productCreateSchema = z.object({
   sareeLength: z.coerce.number().positive().optional(),
   blouseIncluded: z.coerce.boolean().optional(),
   blouseLength: z.coerce.number().positive().optional(),
+  blouseDetails: z.string().optional(),
   weightGrams: z.coerce.number().int().positive().optional(),
+  specialOfferPercent: z.coerce.number().min(0).max(100).optional(),
   craftOrigin: z.string().optional(),
   state: z.string().optional(),
   district: z.string().optional(),
@@ -73,6 +77,16 @@ export const productCreateSchema = z.object({
         barcode: z.string().optional(),
         imageUrl: z.string().optional(),
         isActive: z.coerce.boolean().optional(),
+      })
+    )
+    .optional(),
+  // Free-form label/value attributes scoped to this one product (e.g.
+  // "Zari Content" -> "Pure Gold Zari") — not a fixed Product column.
+  customFields: z
+    .array(
+      z.object({
+        label: z.string().min(1).max(191),
+        value: z.string().min(1).max(500),
       })
     )
     .optional(),

@@ -1,9 +1,8 @@
-import { Bell, KeyRound, LogOut, ShoppingBag, PackageX, Star, CheckCheck } from "lucide-react";
+import { Bell, ShoppingBag, PackageX, Star, CheckCheck } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useTranslation } from "react-i18next";
-import { useAppDispatch, useAppSelector } from "@/admin/hooks/redux";
-import { clearAuth } from "@/admin/store/authSlice";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useAppSelector } from "@/admin/hooks/redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import {
   useMarkAllNotificationsRead,
@@ -21,17 +20,19 @@ const NOTIFICATION_ICONS: Record<AdminNotification["type"], React.ElementType> =
 const TITLE_KEYS: Record<string, string> = {
   "/": "nav.dashboard",
   "/products": "nav.products",
+  "/categories": "nav.categories",
   "/orders": "nav.orders",
   "/customers": "nav.customers",
   "/coupons": "nav.coupons",
   "/banners": "nav.banners",
   "/cms": "nav.cmsBlog",
-  "/reviews": "nav.feedback",
+  "/reviews": "nav.reviews",
   "/reels": "nav.reels",
   "/newsletter": "nav.newsletter",
   "/marketing": "nav.marketing",
   "/reports": "nav.reports",
   "/settings": "nav.settings",
+  "/profile": "nav.profile",
 };
 
 function humanizeRole(role: string) {
@@ -45,7 +46,6 @@ function humanizeRole(role: string) {
 export function Topbar() {
   const { t } = useTranslation();
   const user = useAppSelector((s) => s.auth.user);
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { data: notifications } = useNotifications();
@@ -57,22 +57,17 @@ export function Topbar() {
     if (n.link) navigate(n.link);
   }
 
-  function handleLogout() {
-    dispatch(clearAuth());
-    navigate("/login");
-  }
-
   const titleKey = TITLE_KEYS[location.pathname];
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-black/5 bg-white px-6">
-      <h1 className="font-heading text-base font-semibold text-neutral-800">{titleKey ? t(titleKey) : t("nav.admin")}</h1>
+    <header className="flex h-12 shrink-0 items-center justify-between border-b border-black/5 bg-white px-5">
+      <h1 className="font-heading text-sm font-semibold text-neutral-800">{titleKey ? t(titleKey) : t("nav.admin")}</h1>
       <div className="flex items-center gap-5">
         <LanguageSwitcher />
 
         <DropdownMenu.Root>
           <DropdownMenu.Trigger asChild>
-            <button aria-label={t("topbar.notifications")} className="relative text-neutral-500 hover:text-royal-600">
+            <button aria-label={t("topbar.notifications")} title={t("topbar.notifications")} className="relative text-neutral-500 hover:text-royal-600">
               <Bell className="h-5 w-5" />
               {Boolean(notifications?.unreadCount) && (
                 <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
@@ -131,50 +126,15 @@ export function Topbar() {
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
 
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger asChild>
-            <button className="flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-neutral-50">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-royal-gradient text-xs font-semibold text-white shadow-sm">
-                {user?.name?.charAt(0) ?? "A"}
-              </div>
-              <div className="hidden text-left text-sm sm:block">
-                <p className="font-medium text-neutral-800">{user?.name ?? t("nav.admin")}</p>
-                <p className="text-xs text-neutral-500">{user?.role ? humanizeRole(user.role) : ""}</p>
-              </div>
-            </button>
-          </DropdownMenu.Trigger>
-
-          <DropdownMenu.Portal>
-            <DropdownMenu.Content
-              align="end"
-              sideOffset={8}
-              className="z-50 w-64 rounded-xl border border-black/5 bg-white p-3 shadow-xl"
-            >
-              <div className="border-b border-neutral-100 pb-3">
-                <p className="font-heading text-sm font-semibold text-neutral-800">{user?.name}</p>
-                <p className="mt-1 truncate text-xs text-neutral-500">{user?.email}</p>
-                {user?.phone && <p className="text-xs text-neutral-500">{user.phone}</p>}
-                <p className="mt-1 text-xs font-medium text-royal-600">{user?.role ? humanizeRole(user.role) : ""}</p>
-              </div>
-
-              <DropdownMenu.Item
-                onSelect={() => navigate("/login", { state: { forgotPassword: true } })}
-                className="mt-2 flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-neutral-700 outline-none hover:bg-neutral-50"
-              >
-                <KeyRound className="h-4 w-4" />
-                {t("topbar.resetPassword")}
-              </DropdownMenu.Item>
-
-              <DropdownMenu.Item
-                onSelect={handleLogout}
-                className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-red-600 outline-none hover:bg-red-50"
-              >
-                <LogOut className="h-4 w-4" />
-                {t("topbar.logout")}
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Portal>
-        </DropdownMenu.Root>
+        <Link to="/profile" title={t("topbar.profileSettings")} className="flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-neutral-50">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-royal-gradient text-xs font-semibold text-white shadow-sm">
+            {user?.name?.charAt(0) ?? "A"}
+          </div>
+          <div className="hidden text-left text-sm sm:block">
+            <p className="font-medium text-neutral-800">{user?.name ?? t("nav.admin")}</p>
+            <p className="text-xs text-neutral-500">{user?.role ? humanizeRole(user.role) : ""}</p>
+          </div>
+        </Link>
       </div>
     </header>
   );

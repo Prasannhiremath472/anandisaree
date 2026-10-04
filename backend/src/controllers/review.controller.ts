@@ -10,9 +10,10 @@ export const listReviews = asyncHandler(async (req: Request, res: Response) => {
   const pagination = getPagination(req);
   const status = req.query.status as string | undefined;
   const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId : undefined;
+  const rating = req.query.rating ? Number(req.query.rating) : undefined;
 
   const conditions: string[] = ["1=1"];
-  const params: string[] = [];
+  const params: (string | number)[] = [];
   if (status) {
     conditions.push("r.status = ?");
     params.push(status);
@@ -20,6 +21,10 @@ export const listReviews = asyncHandler(async (req: Request, res: Response) => {
   if (categoryId) {
     conditions.push("EXISTS (SELECT 1 FROM `ProductCategory` pc WHERE pc.productId = r.productId AND pc.categoryId = ?)");
     params.push(categoryId);
+  }
+  if (rating) {
+    conditions.push("r.rating = ?");
+    params.push(rating);
   }
   const whereClause = conditions.join(" AND ");
 
@@ -60,9 +65,10 @@ export const listReviews = asyncHandler(async (req: Request, res: Response) => {
 export const exportReviews = asyncHandler(async (req: Request, res: Response) => {
   const status = req.query.status as string | undefined;
   const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId : undefined;
+  const rating = req.query.rating ? Number(req.query.rating) : undefined;
 
   const conditions: string[] = ["1=1"];
-  const params: string[] = [];
+  const params: (string | number)[] = [];
   if (status) {
     conditions.push("r.status = ?");
     params.push(status);
@@ -70,6 +76,10 @@ export const exportReviews = asyncHandler(async (req: Request, res: Response) =>
   if (categoryId) {
     conditions.push("EXISTS (SELECT 1 FROM `ProductCategory` pc WHERE pc.productId = r.productId AND pc.categoryId = ?)");
     params.push(categoryId);
+  }
+  if (rating) {
+    conditions.push("r.rating = ?");
+    params.push(rating);
   }
   const whereClause = conditions.join(" AND ");
 

@@ -85,8 +85,10 @@ export function ProductDetailModal({ productId, onOpenChange }: ProductDetailMod
                 <DetailRow label={t("productForm.mrp")} value={`₹${Number(product.mrp).toLocaleString("en-IN")}`} />
                 <DetailRow label={t("productForm.sellingPrice")} value={`₹${Number(product.sellingPrice).toLocaleString("en-IN")}`} />
                 <DetailRow label={t("productForm.gst")} value={`${product.gstPercent}%`} />
+                {product.specialOfferPercent && (
+                  <DetailRow label={t("productForm.specialOfferPercent")} value={`${product.specialOfferPercent}%`} />
+                )}
                 <DetailRow label={t("productForm.stockQuantity")} value={product.stockQuantity} />
-                <DetailRow label={t("productForm.lowStockThreshold")} value={product.lowStockThreshold} />
               </AccordionContent>
             </AccordionItem>
 
@@ -99,9 +101,7 @@ export function ProductDetailModal({ productId, onOpenChange }: ProductDetailMod
                 <DetailRow label={t("productForm.weavingTechnique")} value={product.weavingTechnique} />
                 <DetailRow label={t("productForm.borderType")} value={product.borderType} />
                 <DetailRow label={t("productForm.palluDesign")} value={product.palluDesign} />
-                <DetailRow label={t("productForm.blouseLength")} value={product.blouseLength ? `${product.blouseLength} m` : undefined} />
-                <DetailRow label={t("productForm.weightGrams")} value={product.weightGrams} />
-                <DetailRow label={t("productForm.blouseIncluded")} value={product.blouseIncluded ? t("common.yes") : t("common.no")} />
+                <DetailRow label={t("productForm.blouseDetails")} value={product.blouseDetails} />
                 {product.washCare && (
                   <div className="py-1">
                     <p className="text-sm text-neutral-500">{t("productForm.washCare")}</p>
@@ -110,6 +110,17 @@ export function ProductDetailModal({ productId, onOpenChange }: ProductDetailMod
                 )}
               </AccordionContent>
             </AccordionItem>
+
+            {Boolean(product.customFields?.length) && (
+              <AccordionItem value="customFields" className="border-b border-neutral-100">
+                <AccordionTrigger>{t("productForm.customFields")}</AccordionTrigger>
+                <AccordionContent>
+                  {product.customFields!.map((f) => (
+                    <DetailRow key={f.id} label={f.label} value={f.value} />
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            )}
 
             {product.variants.length > 0 && (
               <AccordionItem value="variants" className="border-b border-neutral-100">

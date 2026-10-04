@@ -7,9 +7,19 @@ import { ApiError } from "../utils/ApiError";
 export const listSubscribers = asyncHandler(async (req: Request, res: Response) => {
   const pagination = getPagination(req);
   const search = req.query.search as string | undefined;
+  const isSubscribed = req.query.isSubscribed as string | undefined;
 
-  const whereClause = search ? "email LIKE ?" : "1=1";
-  const params = search ? [`%${search}%`] : [];
+  const conditions: string[] = ["1=1"];
+  const params: (string | number)[] = [];
+  if (search) {
+    conditions.push("email LIKE ?");
+    params.push(`%${search}%`);
+  }
+  if (isSubscribed !== undefined) {
+    conditions.push("isSubscribed = ?");
+    params.push(isSubscribed === "true" ? 1 : 0);
+  }
+  const whereClause = conditions.join(" AND ");
 
   const items = await query(
     `SELECT * FROM \`NewsletterSubscriber\` WHERE ${whereClause} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,

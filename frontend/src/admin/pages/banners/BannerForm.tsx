@@ -6,6 +6,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { BackLink } from "@/admin/components/ui/BackLink";
 import { Field, inputClass } from "@/admin/components/ui/Field";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { useBanners, useCreateBanner, useUpdateBanner, type BannerPlacement } from "@/admin/hooks/api/useBanners";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 
@@ -121,14 +122,16 @@ export function BannerForm() {
           {form.imageUrl ? (
             <div className="relative w-full max-w-xs">
               <img src={form.imageUrl} alt={t("bannerForm.bannerPreviewAlt")} className="aspect-video w-full rounded-lg object-cover" />
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, imageUrl: "" })}
-                aria-label={t("common.remove")}
-                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip label={t("common.remove")} className="absolute -right-2 -top-2">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, imageUrl: "" })}
+                  aria-label={t("common.remove")}
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             </div>
           ) : (
             <button
@@ -164,14 +167,16 @@ export function BannerForm() {
           {form.mobileImageUrl ? (
             <div className="relative w-32">
               <img src={form.mobileImageUrl} alt={t("bannerForm.mobileBannerPreviewAlt")} className="aspect-[9/16] w-full rounded-lg object-cover" />
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, mobileImageUrl: "" })}
-                aria-label={t("common.remove")}
-                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip label={t("common.remove")} className="absolute -right-2 -top-2">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, mobileImageUrl: "" })}
+                  aria-label={t("common.remove")}
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             </div>
           ) : (
             <button

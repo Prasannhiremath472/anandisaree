@@ -7,7 +7,7 @@ import { useAppDispatch } from "@/admin/hooks/redux";
 import { setCredentials } from "@/admin/store/authSlice";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-royal-500 focus:outline-none";
+  "mt-1 w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm transition-colors focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-200";
 
 type Step = "login" | "forgotRequest" | "forgotVerify";
 
@@ -19,6 +19,7 @@ export function Login() {
   );
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [identifierError, setIdentifierError] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [resetEmail, setResetEmail] = useState("");
   const [code, setCode] = useState("");
@@ -27,8 +28,21 @@ export function Login() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  function isValidIdentifier(value: string) {
+    const trimmed = value.trim();
+    if (trimmed.includes("@")) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    }
+    return /^\d{10,}$/.test(trimmed.replace(/\D/g, "")) && trimmed.replace(/\D/g, "").length >= 10;
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    if (!isValidIdentifier(identifier)) {
+      setIdentifierError(t("login.invalidIdentifier"));
+      return;
+    }
+    setIdentifierError("");
     setLoading(true);
     try {
       const res = await apiClient.post("/auth/admin/login", { identifier, password });
@@ -75,8 +89,12 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-royal-gradient px-4">
-      <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-2xl">
+    <div
+      className="relative flex min-h-screen items-center justify-center bg-royal-gradient bg-cover bg-center px-4"
+      style={{ backgroundImage: "url('/images/Elegant Purple Saree Heritage Portrait.png')" }}
+    >
+      <div className="absolute inset-0 bg-black/15" />
+      <div className="relative w-full max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-500 rounded-xl bg-white p-8 shadow-2xl">
         <img src="/images/anandi-sarees-logo-crop.png" alt={t("login.logoAlt")} className="h-16 rounded-lg" />
         <p className="mt-4 text-sm text-neutral-500">
           {step === "login" && t("login.signInToManageStore")}
@@ -88,16 +106,20 @@ export function Login() {
           <form onSubmit={handleLogin}>
             <div className="mt-6 space-y-4">
               <div>
-                <label className="text-sm font-medium text-neutral-700">{t("login.mobileNumber")}</label>
+                <label className="text-sm font-medium text-neutral-700">{t("login.emailOrMobile")}</label>
                 <input
                   type="text"
-                  inputMode="tel"
                   required
                   autoFocus
+                  placeholder={t("login.emailOrMobilePlaceholder")}
                   value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  className={inputClass}
+                  onChange={(e) => {
+                    setIdentifier(e.target.value);
+                    if (identifierError) setIdentifierError("");
+                  }}
+                  className={`${inputClass} ${identifierError ? "border-red-400 focus:border-red-500" : ""}`}
                 />
+                {identifierError && <p className="mt-1 text-xs text-red-600">{identifierError}</p>}
               </div>
               <div>
                 <label className="text-sm font-medium text-neutral-700">{t("login.password")}</label>

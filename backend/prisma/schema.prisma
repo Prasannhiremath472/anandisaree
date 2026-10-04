@@ -357,6 +357,7 @@ model Product {
   stockMovements     StockMovement[]
   recentlyViewedBy   RecentlyViewed[]
   tags               ProductTagAssignment[]
+  customFields       ProductCustomField[]
 
   @@index([fabric])
   @@index([color])
@@ -381,6 +382,22 @@ model ProductCategory {
 
   @@id([productId, categoryId])
   @@index([categoryId])
+}
+
+// Free-form label/value attributes an admin can add to one specific product
+// (e.g. "Zari Content" → "Pure Gold Zari") that don't correspond to any of
+// the fixed Product columns. Shown read-only on the product detail view,
+// alongside the fixed Craft Details fields.
+model ProductCustomField {
+  id        String   @id @default(cuid())
+  productId String
+  label     String
+  value     String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }
 
 // Free-form merchandising labels an admin can create on the fly (e.g. "Gift

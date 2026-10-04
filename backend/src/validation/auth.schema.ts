@@ -55,7 +55,17 @@ export const resetPasswordSchema = z.object({
     .regex(/[0-9]/, "Password must contain a number"),
 });
 
+export const updateProfileSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100).optional(),
+  email: z.string().email("Invalid email address").optional(),
+  phone: z
+    .string()
+    .regex(/^[6-9]\d{9}$/, "Invalid Indian phone number")
+    .optional(),
+});
+
 export type RegisterRequestOtpInput = z.infer<typeof registerRequestOtpSchema>;
 export type RegisterVerifyOtpInput = z.infer<typeof registerVerifyOtpSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

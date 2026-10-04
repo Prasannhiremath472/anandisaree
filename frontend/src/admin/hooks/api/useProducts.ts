@@ -12,6 +12,8 @@ interface ListParams {
   fabric?: string;
   lowStockOnly?: boolean;
   categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export function useProducts(params: ListParams) {

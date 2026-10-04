@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.me = exports.resetPassword = exports.forgotPassword = exports.verifyOtpAndLogin = exports.requestOtp = exports.logout = exports.refresh = exports.adminLogin = exports.login = exports.verifyRegisterOtp = exports.requestRegisterOtp = void 0;
+exports.updateProfile = exports.me = exports.resetPassword = exports.forgotPassword = exports.verifyOtpAndLogin = exports.requestOtp = exports.logout = exports.refresh = exports.adminLogin = exports.login = exports.verifyRegisterOtp = exports.requestRegisterOtp = void 0;
 const asyncHandler_1 = require("../utils/asyncHandler");
 const env_1 = require("../config/env");
 const authService = __importStar(require("../services/auth.service"));
@@ -139,5 +139,10 @@ exports.me = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     if (!user)
         throw ApiError_1.ApiError.notFound("User not found");
     res.json({ success: true, data: authService.sanitizeUser(user) });
+});
+exports.updateProfile = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    const input = auth_schema_1.updateProfileSchema.parse(req.body);
+    const user = await authService.updateOwnProfile(req.user.userId, input);
+    res.json({ success: true, data: user });
 });
 //# sourceMappingURL=auth.controller.js.map

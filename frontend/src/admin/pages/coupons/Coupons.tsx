@@ -9,6 +9,7 @@ import { DataTable, type Column } from "@/admin/components/ui/DataTable";
 import { Pagination } from "@/admin/components/ui/Pagination";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { ConfirmDialog } from "@/admin/components/ui/ConfirmDialog";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { useExportCsv } from "@/admin/hooks/useExportCsv";
 import { useCoupons, useDeleteCoupon, type Coupon } from "@/admin/hooks/api/useCoupons";
 
@@ -16,10 +17,18 @@ export function Coupons() {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"active" | "inactive" | "">("");
+  const [typeFilter, setTypeFilter] = useState<"PERCENTAGE" | "FLAT" | "BOGO" | "">("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const { data, isLoading } = useCoupons({ page, pageSize: 10, search: search || undefined });
+  const { data, isLoading } = useCoupons({
+    page,
+    pageSize: 10,
+    search: search || undefined,
+    isActive: statusFilter === "active" ? true : statusFilter === "inactive" ? false : undefined,
+    type: typeFilter || undefined,
+  });
   const deleteMutation = useDeleteCoupon();
   const { exportCsv, exporting } = useExportCsv("/admin/coupons/export", "coupons.csv");
 
@@ -58,12 +67,16 @@ export function Coupons() {
       key: "actions",
       render: (c) => (
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(`/coupons/${c.id}/edit`)} aria-label={t("common.edit")} className="text-neutral-500 hover:text-royal-600">
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button onClick={() => setDeletingId(c.id)} aria-label={t("coupons.deactivateAria")} className="text-neutral-500 hover:text-red-600">
-            <Trash2 className="h-4 w-4" />
-          </button>
+          <Tooltip label={t("common.edit")}>
+            <button onClick={() => navigate(`/coupons/${c.id}/edit`)} aria-label={t("common.edit")} className="text-neutral-500 hover:text-royal-600">
+              <Pencil className="h-4 w-4" />
+            </button>
+          </Tooltip>
+          <Tooltip label={t("coupons.deactivateAria")}>
+            <button onClick={() => setDeletingId(c.id)} aria-label={t("coupons.deactivateAria")} className="text-neutral-500 hover:text-red-600">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </Tooltip>
         </div>
       ),
     },
@@ -78,15 +91,21 @@ export function Coupons() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => exportCsv({ search: search || undefined })}
+              onClick={() =>
+                exportCsv({
+                  search: search || undefined,
+                  isActive: statusFilter === "active" ? true : statusFilter === "inactive" ? false : undefined,
+                  type: typeFilter || undefined,
+                })
+              }
               disabled={exporting}
-              className="flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
             >
               <Download className="h-4 w-4" /> {exporting ? t("common.exporting") : t("common.export")}
             </button>
             <Link
               to="/coupons/new"
-              className="flex items-center gap-2 rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm"
+              className="flex items-center gap-2 rounded-lg bg-royal-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-sm"
             >
               <Plus className="h-4 w-4" /> {t("coupons.createCoupon")}
             </Link>
@@ -94,8 +113,27 @@ export function Coupons() {
         }
       />
 
-      <div className="mb-4">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("coupons.searchPlaceholder")} />
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value as typeof statusFilter); setPage(1); }}
+          className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs focus:border-royal-500 focus:outline-none"
+        >
+          <option value="">{t("products.allStatuses")}</option>
+          <option value="active">{t("status.ACTIVE")}</option>
+          <option value="inactive">{t("status.INACTIVE")}</option>
+        </select>
+        <select
+          value={typeFilter}
+          onChange={(e) => { setTypeFilter(e.target.value as typeof typeFilter); setPage(1); }}
+          className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs focus:border-royal-500 focus:outline-none"
+        >
+          <option value="">{t("coupons.allTypes")}</option>
+          <option value="PERCENTAGE">{t("coupons.typePercentage")}</option>
+          <option value="FLAT">{t("coupons.typeFlat")}</option>
+          <option value="BOGO">{t("coupons.bogo")}</option>
+        </select>
       </div>
 
       <DataTable

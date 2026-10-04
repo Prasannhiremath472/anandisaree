@@ -6,6 +6,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { BackLink } from "@/admin/components/ui/BackLink";
 import { Field, inputClass } from "@/admin/components/ui/Field";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { useReels, useCreateReel, useUpdateReel } from "@/admin/hooks/api/useReels";
 import { useCategoriesLookup } from "@/admin/hooks/api/useProducts";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
@@ -121,14 +122,16 @@ export function ReelForm() {
           {form.thumbnailUrl ? (
             <div className="relative w-32">
               <img src={form.thumbnailUrl} alt={t("reelForm.thumbnailPreviewAlt")} className="aspect-[9/16] w-full rounded-lg object-cover" />
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, thumbnailUrl: "" })}
-                aria-label={t("reelForm.removeThumbnail")}
-                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip label={t("reelForm.removeThumbnail")} className="absolute -right-2 -top-2">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, thumbnailUrl: "" })}
+                  aria-label={t("reelForm.removeThumbnail")}
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             </div>
           ) : (
             <button

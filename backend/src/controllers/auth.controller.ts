@@ -10,6 +10,7 @@ import {
   registerVerifyOtpSchema,
   requestOtpSchema,
   resetPasswordSchema,
+  updateProfileSchema,
   verifyOtpSchema,
 } from "../validation/auth.schema";
 import { queryOne, execute } from "../config/db";
@@ -135,4 +136,10 @@ export const me = asyncHandler(async (req: Request, res: Response) => {
   const user = await queryOne<UserRow>("SELECT * FROM `User` WHERE id = ? LIMIT 1", [req.user!.userId]);
   if (!user) throw ApiError.notFound("User not found");
   res.json({ success: true, data: authService.sanitizeUser(user) });
+});
+
+export const updateProfile = asyncHandler(async (req: Request, res: Response) => {
+  const input = updateProfileSchema.parse(req.body);
+  const user = await authService.updateOwnProfile(req.user!.userId, input);
+  res.json({ success: true, data: user });
 });

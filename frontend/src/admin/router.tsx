@@ -4,6 +4,7 @@ import { ProtectedRoute } from "@/admin/components/ProtectedRoute";
 import { Login } from "@/admin/pages/Login";
 import { Dashboard } from "@/admin/pages/Dashboard";
 import { Products } from "@/admin/pages/products/Products";
+import { Categories } from "@/admin/pages/categories/Categories";
 import { ProductForm } from "@/admin/pages/products/ProductForm";
 import { ProductTrash } from "@/admin/pages/products/ProductTrash";
 import { Orders } from "@/admin/pages/orders/Orders";
@@ -23,6 +24,7 @@ import { Newsletter } from "@/admin/pages/newsletter/Newsletter";
 import { Marketing } from "@/admin/pages/marketing/Marketing";
 import { Reports } from "@/admin/pages/reports/Reports";
 import { Settings } from "@/admin/pages/settings/Settings";
+import { Profile } from "@/admin/pages/profile/Profile";
 
 export const adminRouter = createBrowserRouter(
   [
@@ -36,6 +38,7 @@ export const adminRouter = createBrowserRouter(
             { index: true, element: <Dashboard /> },
 
             { path: "products", element: <Products /> },
+            { path: "categories", element: <Categories /> },
             { path: "products/trash", element: <ProductTrash /> },
             { path: "products/new", element: <ProductForm /> },
             { path: "products/:id/edit", element: <ProductForm /> },
@@ -66,6 +69,7 @@ export const adminRouter = createBrowserRouter(
             { path: "marketing", element: <Marketing /> },
             { path: "reports", element: <Reports /> },
             { path: "settings", element: <Settings /> },
+            { path: "profile", element: <Profile /> },
           ],
         },
       ],

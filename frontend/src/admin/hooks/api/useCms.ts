@@ -52,7 +52,7 @@ export function useUpsertCmsPage() {
   });
 }
 
-export function useBlogPosts(params: { page: number; pageSize: number; search?: string }) {
+export function useBlogPosts(params: { page: number; pageSize: number; search?: string; isPublished?: boolean }) {
   return useQuery({
     queryKey: ["blog-posts", params],
     queryFn: async () => {

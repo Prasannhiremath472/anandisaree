@@ -14,9 +14,15 @@ export function Customers() {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"active" | "inactive" | "">("");
   const navigate = useNavigate();
 
-  const { data, isLoading } = useCustomers({ page, pageSize: 10, search: search || undefined });
+  const { data, isLoading } = useCustomers({
+    page,
+    pageSize: 10,
+    search: search || undefined,
+    isActive: statusFilter === "active" ? true : statusFilter === "inactive" ? false : undefined,
+  });
   const { exportCsv, exporting } = useExportCsv("/admin/customers/export", "customers.csv");
 
   const columns: Column<CustomerListItem>[] = [
@@ -44,17 +50,31 @@ export function Customers() {
         actions={
           <button
             type="button"
-            onClick={() => exportCsv({ search: search || undefined })}
+            onClick={() =>
+              exportCsv({
+                search: search || undefined,
+                isActive: statusFilter === "active" ? true : statusFilter === "inactive" ? false : undefined,
+              })
+            }
             disabled={exporting}
-            className="flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+            className="flex items-center gap-2 rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
           >
             <Download className="h-4 w-4" /> {exporting ? t("common.exporting") : t("common.export")}
           </button>
         }
       />
 
-      <div className="mb-4">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("customers.searchPlaceholder")} />
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value as typeof statusFilter); setPage(1); }}
+          className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs focus:border-royal-500 focus:outline-none"
+        >
+          <option value="">{t("products.allStatuses")}</option>
+          <option value="active">{t("status.ACTIVE")}</option>
+          <option value="inactive">{t("status.INACTIVE")}</option>
+        </select>
       </div>
 
       <DataTable

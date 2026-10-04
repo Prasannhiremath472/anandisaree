@@ -32,6 +32,8 @@ interface ListParams {
   page: number;
   pageSize: number;
   search?: string;
+  isActive?: boolean;
+  type?: "PERCENTAGE" | "FLAT" | "BOGO";
 }
 
 export function useCoupons(params: ListParams) {

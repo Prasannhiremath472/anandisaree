@@ -16,5 +16,6 @@ router.post("/otp/verify", authLimiter, authController.verifyOtpAndLogin);
 router.post("/forgot-password", authLimiter, authController.forgotPassword);
 router.post("/reset-password", authLimiter, authController.resetPassword);
 router.get("/me", authenticate, authController.me);
+router.patch("/me", authenticate, authController.updateProfile);
 
 export default router;

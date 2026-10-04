@@ -5,6 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Modal } from "@/admin/components/ui/Modal";
 import { Field, inputClass } from "@/admin/components/ui/Field";
 import { SearchableSelect } from "@/admin/components/ui/SearchableSelect";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { useCustomers, useCustomer } from "@/admin/hooks/api/useCustomers";
 import { useProducts } from "@/admin/hooks/api/useProducts";
 import { useCreateOrder, type CreateOrderInput } from "@/admin/hooks/api/useOrders";
@@ -282,14 +283,16 @@ export function CreateOrderModal({ open, onOpenChange }: CreateOrderModalProps) 
                         className={inputClass}
                       />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeLineItem(item.key)}
-                      aria-label={t("common.remove")}
-                      className="shrink-0 rounded-lg p-2 text-neutral-400 hover:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <Tooltip label={t("common.remove")}>
+                      <button
+                        type="button"
+                        onClick={() => removeLineItem(item.key)}
+                        aria-label={t("common.remove")}
+                        className="shrink-0 rounded-lg p-2 text-neutral-400 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </Tooltip>
                   </div>
                 );
               })}

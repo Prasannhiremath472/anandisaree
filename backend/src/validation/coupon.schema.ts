@@ -5,6 +5,7 @@ export const couponListQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).optional(),
   search: z.string().optional(),
   isActive: z.coerce.boolean().optional(),
+  type: z.enum(["PERCENTAGE", "FLAT", "BOGO"]).optional(),
 });
 
 export const couponCreateSchema = z.object({

@@ -1,14 +1,46 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { IndianRupee, ShoppingBag, UserPlus, PackageX } from "lucide-react";
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
+import { IndianRupee, ShoppingBag, UserPlus, PackageX, BarChart3 } from "lucide-react";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
-import { useDashboard } from "@/admin/hooks/api/useDashboard";
+import { DataTable, type Column } from "@/admin/components/ui/DataTable";
+import { useDashboard, type DashboardSummary } from "@/admin/hooks/api/useDashboard";
+import { useSalesReport } from "@/admin/hooks/api/useReports";
 import { useAppSelector } from "@/admin/hooks/redux";
+
+type RecentOrder = DashboardSummary["recentOrders"][number];
+type TopProduct = DashboardSummary["topProducts"][number];
 
 export function Dashboard() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
   const { data, isLoading } = useDashboard(selectedCategoryId);
+  const { data: sales } = useSalesReport(30, selectedCategoryId);
+
+  const recentOrderColumns: Column<RecentOrder>[] = [
+    {
+      header: t("orders.columnOrder"),
+      key: "orderNumber",
+      render: (o) => <span className="font-medium text-neutral-800">{o.orderNumber}</span>,
+    },
+    { header: t("common.customer"), key: "customer", render: (o) => o.user.name },
+    { header: t("common.status"), key: "status", render: (o) => <StatusBadge status={o.status} /> },
+    {
+      header: t("orders.columnTotal"),
+      key: "totalAmount",
+      render: (o) => <span className="font-medium">₹{Number(o.totalAmount).toLocaleString("en-IN")}</span>,
+    },
+  ];
+
+  const topProductColumns: Column<TopProduct>[] = [
+    { header: t("products.columnProduct"), key: "name", render: (p) => <span className="font-medium text-neutral-800">{p.name}</span> },
+    {
+      header: t("dashboard.columnSold"),
+      key: "soldCount",
+      render: (p) => <span className="text-neutral-500">{t("dashboard.soldCount", { count: p.soldCount })}</span>,
+    },
+  ];
 
   const statCards = [
     {
@@ -63,6 +95,41 @@ export function Dashboard() {
         ))}
       </div>
 
+      <div className="rounded-xl bg-white p-6 shadow-sm">
+        <div className="mb-1 flex items-center justify-between">
+          <h2 className="font-heading text-base font-semibold text-neutral-800">{t("dashboard.revenueChart")}</h2>
+          <button
+            type="button"
+            onClick={() => navigate("/reports")}
+            className="flex items-center gap-1.5 rounded-lg bg-royal-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-sm"
+          >
+            <BarChart3 className="h-3.5 w-3.5" /> {t("dashboard.viewReports")}
+          </button>
+        </div>
+        <p className="text-xs text-neutral-400">{t("dashboard.chartClickHint")}</p>
+        <div className="mt-4 h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={sales?.series ?? []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Line
+                type="monotone"
+                dataKey="revenue"
+                stroke="#54208C"
+                strokeWidth={2}
+                dot={{ r: 3, cursor: "pointer" }}
+                activeDot={{ r: 5, cursor: "pointer", onClick: (_e: unknown, payload: any) => {
+                  const date = payload?.payload?.date;
+                  if (date) navigate(`/orders?date=${date}`);
+                } }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
@@ -71,24 +138,14 @@ export function Dashboard() {
               {t("dashboard.viewAll")}
             </Link>
           </div>
-          {!data?.recentOrders.length ? (
-            <p className="text-sm text-neutral-400">{t("common.noOrdersYet")}</p>
-          ) : (
-            <ul className="divide-y divide-neutral-100">
-              {data.recentOrders.map((o) => (
-                <li key={o.id} className="flex items-center justify-between py-2.5 text-sm">
-                  <div>
-                    <p className="font-medium text-neutral-800">{o.orderNumber}</p>
-                    <p className="text-xs text-neutral-400">{o.user.name}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <StatusBadge status={o.status} />
-                    <span className="font-medium">₹{Number(o.totalAmount).toLocaleString("en-IN")}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+          <DataTable
+            columns={recentOrderColumns}
+            rows={data?.recentOrders ?? []}
+            rowKey={(o) => o.id}
+            loading={isLoading}
+            emptyMessage={t("common.noOrdersYet")}
+            onRowClick={(o) => navigate(`/orders/${o.id}`)}
+          />
         </div>
 
         <div className="rounded-xl bg-white p-6 shadow-sm">
@@ -98,18 +155,13 @@ export function Dashboard() {
               {t("dashboard.viewReports")}
             </Link>
           </div>
-          {!data?.topProducts.length ? (
-            <p className="text-sm text-neutral-400">{t("dashboard.noSalesDataYet")}</p>
-          ) : (
-            <ul className="divide-y divide-neutral-100">
-              {data.topProducts.map((p) => (
-                <li key={p.id} className="flex items-center justify-between py-2.5 text-sm">
-                  <p className="font-medium text-neutral-800">{p.name}</p>
-                  <span className="text-neutral-500">{t("dashboard.soldCount", { count: p.soldCount })}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <DataTable
+            columns={topProductColumns}
+            rows={data?.topProducts ?? []}
+            rowKey={(p) => p.id}
+            loading={isLoading}
+            emptyMessage={t("dashboard.noSalesDataYet")}
+          />
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { ImagePlus, Loader2, Plus, Trash2, X } from "lucide-react";
 import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
 import { SearchableMultiSelect } from "@/admin/components/ui/SearchableMultiSelect";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 import { useVariantValues } from "@/admin/hooks/api/useProducts";
 
@@ -151,9 +152,11 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
                 >
                   {t("common.edit")}
                 </button>
-                <button type="button" onClick={() => deleteOption(option.id)} aria-label={t("variantsCard.deleteOptionAria")} className="text-neutral-400 hover:text-red-600">
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <Tooltip label={t("variantsCard.deleteOptionAria")}>
+                  <button type="button" onClick={() => deleteOption(option.id)} aria-label={t("variantsCard.deleteOptionAria")} className="text-neutral-400 hover:text-red-600">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </Tooltip>
               </div>
             </div>
           )
@@ -238,29 +241,33 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
                     {v.imageUrl ? (
                       <div className="relative h-12 w-10">
                         <img src={v.imageUrl} alt={v.key} className="h-full w-full rounded object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => updateVariantField(v.key, "imageUrl", "")}
-                          aria-label={t("variantsCard.removeVariantImageAria")}
-                          className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-neutral-500 shadow"
-                        >
-                          <X className="h-2.5 w-2.5" />
-                        </button>
+                        <Tooltip label={t("variantsCard.removeVariantImageAria")} className="absolute -right-1.5 -top-1.5">
+                          <button
+                            type="button"
+                            onClick={() => updateVariantField(v.key, "imageUrl", "")}
+                            aria-label={t("variantsCard.removeVariantImageAria")}
+                            className="flex h-4 w-4 items-center justify-center rounded-full bg-white text-neutral-500 shadow"
+                          >
+                            <X className="h-2.5 w-2.5" />
+                          </button>
+                        </Tooltip>
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRefs.current[v.key]?.click()}
-                        disabled={uploadingKey === v.key}
-                        className="flex h-12 w-10 items-center justify-center rounded border border-dashed border-neutral-300 text-neutral-400 hover:border-royal-300 hover:text-royal-500 disabled:opacity-60"
-                        aria-label={t("variantsCard.uploadVariantImageAria")}
-                      >
-                        {uploadingKey === v.key ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <ImagePlus className="h-4 w-4" />
-                        )}
-                      </button>
+                      <Tooltip label={t("variantsCard.uploadVariantImageAria")}>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRefs.current[v.key]?.click()}
+                          disabled={uploadingKey === v.key}
+                          className="flex h-12 w-10 items-center justify-center rounded border border-dashed border-neutral-300 text-neutral-400 hover:border-royal-300 hover:text-royal-500 disabled:opacity-60"
+                          aria-label={t("variantsCard.uploadVariantImageAria")}
+                        >
+                          {uploadingKey === v.key ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <ImagePlus className="h-4 w-4" />
+                          )}
+                        </button>
+                      </Tooltip>
                     )}
                   </td>
                   <td className="px-3 py-2">

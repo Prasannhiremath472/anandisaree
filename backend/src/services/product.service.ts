@@ -12,6 +12,8 @@ interface ListFilters {
   fabric?: string;
   lowStockOnly?: boolean;
   trashed?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
@@ -50,6 +52,10 @@ async function attachRelations(products: Record<string, unknown>[]) {
         brandIds
       )
     : [];
+  const variants = await query<{ productId: string; color: string | null; size: string | null }>(
+    `SELECT productId, color, size FROM \`ProductVariant\` WHERE productId IN (${placeholders})`,
+    ids
+  );
 
   return products.map((product) => ({
     ...product,
@@ -62,6 +68,7 @@ async function attachRelations(products: Record<string, unknown>[]) {
         category: { id: c.id, name: c.name, slug: c.slug, group: c.group, parentId: c.parentId },
       })),
     brand: brands.find((b) => b.id === product.brandId) ?? null,
+    variants: variants.filter((v) => v.productId === product.id),
   }));
 }
 
@@ -83,6 +90,14 @@ function buildProductListWhere(filters: ListFilters): { whereClause: string; par
   }
   if (filters.lowStockOnly) {
     conditions.push("stockQuantity <= lowStockThreshold");
+  }
+  if (filters.minPrice !== undefined) {
+    conditions.push("sellingPrice >= ?");
+    params.push(filters.minPrice);
+  }
+  if (filters.maxPrice !== undefined) {
+    conditions.push("sellingPrice <= ?");
+    params.push(filters.maxPrice);
   }
   if (filters.categoryId) {
     conditions.push("id IN (SELECT productId FROM `ProductCategory` WHERE categoryId = ?)");
@@ -243,6 +258,10 @@ export async function getProductById(id: string) {
      WHERE pt.productId = ?`,
     [id]
   );
+  const customFields = await query<{ id: string; label: string; value: string; sortOrder: number }>(
+    "SELECT id, label, value, sortOrder FROM `ProductCustomField` WHERE productId = ? ORDER BY sortOrder ASC, createdAt ASC",
+    [id]
+  );
 
   const [withCategoryAndImages] = await attachRelations([product]);
 
@@ -265,6 +284,7 @@ export async function getProductById(id: string) {
       tagId: t.tagId,
       tag: { id: t.id, name: t.name, slug: t.slug },
     })),
+    customFields,
   };
 }
 
@@ -286,6 +306,7 @@ const PRODUCT_COLUMNS = [
   "sareeLength",
   "blouseIncluded",
   "blouseLength",
+  "blouseDetails",
   "weightGrams",
   "craftOrigin",
   "state",
@@ -294,6 +315,7 @@ const PRODUCT_COLUMNS = [
   "mrp",
   "sellingPrice",
   "gstPercent",
+  "specialOfferPercent",
   "stockQuantity",
   "lowStockThreshold",
   "dispatchDays",
@@ -319,7 +341,8 @@ export async function createProduct(input: ProductCreateInput) {
   const existingSlug = await queryOne("SELECT id FROM `Product` WHERE slug = ? LIMIT 1", [input.slug]);
   if (existingSlug) throw ApiError.conflict("A product with this slug already exists");
 
-  const { categoryIds, collectionIds, occasionIds, tagIds, images, variants, ...productData } = input as Record<string, unknown>;
+  const { categoryIds, collectionIds, occasionIds, tagIds, images, variants, customFields, ...productData } =
+    input as Record<string, unknown>;
 
   if ((variants as { sku: string }[] | undefined)?.length) {
     const skus = (variants as { sku: string }[]).map((v) => v.sku);
@@ -397,6 +420,18 @@ export async function createProduct(input: ProductCreateInput) {
         );
       }
     }
+
+    const customFieldList = customFields as { label: string; value: string }[] | undefined;
+    if (customFieldList?.length) {
+      for (let i = 0; i < customFieldList.length; i++) {
+        const field = customFieldList[i];
+        if (!field.label?.trim() || !field.value?.trim()) continue;
+        await conn.query(
+          "INSERT INTO `ProductCustomField` (id, productId, label, value, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, NOW(3))",
+          [createId(), productId, field.label.trim(), field.value.trim(), i]
+        );
+      }
+    }
   });
 
   return getProductById(productId);
@@ -405,7 +440,8 @@ export async function createProduct(input: ProductCreateInput) {
 export async function updateProduct(id: string, input: ProductUpdateInput) {
   await getProductById(id);
 
-  const { categoryIds, collectionIds, occasionIds, tagIds, images, variants, ...productData } = input as Record<string, unknown>;
+  const { categoryIds, collectionIds, occasionIds, tagIds, images, variants, customFields, ...productData } =
+    input as Record<string, unknown>;
 
   if (input.sku) {
     const existing = await queryOne("SELECT id FROM `Product` WHERE sku = ? AND id != ? LIMIT 1", [input.sku, id]);
@@ -489,6 +525,19 @@ export async function updateProduct(id: string, input: ProductUpdateInput) {
             variant.barcode ?? null,
             variant.imageUrl ?? null,
           ]
+        );
+      }
+    }
+
+    const customFieldList = customFields as { label: string; value: string }[] | undefined;
+    if (customFieldList) {
+      await conn.query("DELETE FROM `ProductCustomField` WHERE productId = ?", [id]);
+      for (let i = 0; i < customFieldList.length; i++) {
+        const field = customFieldList[i];
+        if (!field.label?.trim() || !field.value?.trim()) continue;
+        await conn.query(
+          "INSERT INTO `ProductCustomField` (id, productId, label, value, sortOrder, createdAt) VALUES (?, ?, ?, ?, ?, NOW(3))",
+          [createId(), id, field.label.trim(), field.value.trim(), i]
         );
       }
     }

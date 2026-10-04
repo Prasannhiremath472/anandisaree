@@ -7,11 +7,18 @@ export interface ProductImage {
 }
 
 export interface ProductCategoryRef {
-  category: { id: string; name: string; slug: string; group: string };
+  category: { id: string; name: string; slug: string; group: string; parentId: string | null };
 }
 
 export interface ProductTagRef {
   tag: { id: string; name: string; slug: string };
+}
+
+export interface ProductCustomField {
+  id: string;
+  label: string;
+  value: string;
+  sortOrder: number;
 }
 
 export interface ProductVariant {
@@ -45,12 +52,14 @@ export interface Product {
   craftOrigin?: string | null;
   district?: string | null;
   blouseLength?: string | null;
+  blouseDetails?: string | null;
   weightGrams?: number | null;
   washCare?: string | null;
   blouseIncluded: boolean;
   mrp: string;
   sellingPrice: string;
   gstPercent: string;
+  specialOfferPercent?: string | null;
   stockQuantity: number;
   lowStockThreshold: number;
   isActive: boolean;
@@ -68,6 +77,7 @@ export interface Product {
   categories: ProductCategoryRef[];
   variants: ProductVariant[];
   tags?: ProductTagRef[];
+  customFields?: ProductCustomField[];
 }
 
 export interface CategoryLookup {

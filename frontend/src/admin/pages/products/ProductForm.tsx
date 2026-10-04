@@ -6,10 +6,12 @@ import { ImagePlus, Loader2, X, Minus, Plus } from "lucide-react";
 import { BackLink } from "@/admin/components/ui/BackLink";
 import { Card } from "@/admin/components/ui/Card";
 import { Field, inputClass } from "@/admin/components/ui/Field";
+import { Modal } from "@/admin/components/ui/Modal";
 import { SearchableSelect } from "@/admin/components/ui/SearchableSelect";
 import { SearchableMultiSelect } from "@/admin/components/ui/SearchableMultiSelect";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { useCreateProduct, useGenerateDescription, useNextSku, useProduct, useUpdateProduct } from "@/admin/hooks/api/useProducts";
-import { useCategories } from "@/admin/hooks/api/useCategories";
+import { useCategories, useCreateCategory } from "@/admin/hooks/api/useCategories";
 import { useCreateProductTag, useProductTags } from "@/admin/hooks/api/useProductTags";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 import { useAppSelector } from "@/admin/hooks/redux";
@@ -43,13 +45,14 @@ const emptyForm = {
   description: "",
   images: [] as string[],
   categoryId: "",
+  subCategoryId: "",
 
   // Pricing & inventory
   mrp: "",
   sellingPrice: "",
   gstPercent: "5",
+  specialOfferPercent: "",
   stockQuantity: "0",
-  lowStockThreshold: "5",
 
   // Craft details
   fabric: "",
@@ -58,8 +61,7 @@ const emptyForm = {
   weavingTechnique: "",
   borderType: "",
   palluDesign: "",
-  blouseLength: "0.8",
-  weightGrams: "",
+  blouseDetails: "",
   washCare: "",
 
   // Flags
@@ -71,9 +73,10 @@ const emptyForm = {
   isTodaysDeal: false,
   isLiveSpecial: false,
   isTopSelection: false,
-  blouseIncluded: true,
   isHandloom: false,
 };
+
+const DEFAULT_LOW_STOCK_THRESHOLD = 5;
 
 export function ProductForm() {
   const { t } = useTranslation();
@@ -85,9 +88,14 @@ export function ProductForm() {
 
   const { data: existing, isLoading } = useProduct(id ?? null);
   const { data: categories } = useCategories();
+  const createCategoryMutation = useCreateCategory();
+  const [showNewCategory, setShowNewCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryAsSub, setNewCategoryAsSub] = useState(true);
   const { data: productTags } = useProductTags();
   const createTagMutation = useCreateProductTag();
   const [tagNames, setTagNames] = useState<string[]>([]);
+  const [customFields, setCustomFields] = useState<{ key: string; label: string; value: string }[]>([]);
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const uploadMutation = useImageUpload();
@@ -112,7 +120,9 @@ export function ProductForm() {
   // already sitting on this screen, instead of only picking it up on mount.
   useEffect(() => {
     if (isEdit) return;
-    setForm((f) => (f.categoryId === (lockedCategoryId ?? "") ? f : { ...f, categoryId: lockedCategoryId ?? "" }));
+    setForm((f) =>
+      f.categoryId === (lockedCategoryId ?? "") ? f : { ...f, categoryId: lockedCategoryId ?? "", subCategoryId: "" }
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lockedCategoryId, isEdit]);
   // Auto-fill SKU from the category-based sequence for new products; the
@@ -254,20 +264,25 @@ export function ProductForm() {
         shortDescription: existing.shortDescription ?? "",
         description: existing.description ?? "",
         images: existing.images.map((img) => img.url),
-        categoryId: existing.categories[0]?.category.id ?? "",
+        ...(() => {
+          const sub = existing.categories.find((c) => c.category.parentId);
+          const top = existing.categories.find((c) => !c.category.parentId);
+          return sub
+            ? { categoryId: sub.category.parentId ?? top?.category.id ?? "", subCategoryId: sub.category.id }
+            : { categoryId: top?.category.id ?? existing.categories[0]?.category.id ?? "", subCategoryId: "" };
+        })(),
         mrp: existing.mrp,
         sellingPrice: existing.sellingPrice,
         gstPercent: existing.gstPercent,
+        specialOfferPercent: existing.specialOfferPercent ?? "",
         stockQuantity: String(existing.stockQuantity),
-        lowStockThreshold: String(existing.lowStockThreshold),
         fabric: existing.fabric,
         color: existing.color,
         sareeLength: existing.sareeLength ?? "",
         weavingTechnique: existing.weavingTechnique ?? "",
         borderType: existing.borderType ?? "",
         palluDesign: existing.palluDesign ?? "",
-        blouseLength: existing.blouseLength ?? "",
-        weightGrams: existing.weightGrams ? String(existing.weightGrams) : "",
+        blouseDetails: existing.blouseDetails ?? "",
         washCare: existing.washCare ?? "",
         isActive: existing.isActive,
         status: existing.status,
@@ -277,10 +292,12 @@ export function ProductForm() {
         isTodaysDeal: existing.isTodaysDeal,
         isLiveSpecial: existing.isLiveSpecial ?? false,
         isTopSelection: existing.isTopSelection ?? false,
-        blouseIncluded: existing.blouseIncluded,
         isHandloom: existing.isHandloom,
       });
       setTagNames(existing.tags?.map((t) => t.tag.name) ?? []);
+      setCustomFields(
+        existing.customFields?.map((f) => ({ key: f.id, label: f.label, value: f.value })) ?? []
+      );
 
       // Fields that were never set on this product start out removed from
       // view, rather than showing a wall of blank optional inputs.
@@ -289,8 +306,7 @@ export function ProductForm() {
       if (!existing.weavingTechnique) emptyOnLoad.push("weavingTechnique");
       if (!existing.borderType) emptyOnLoad.push("borderType");
       if (!existing.palluDesign) emptyOnLoad.push("palluDesign");
-      if (!existing.blouseLength) emptyOnLoad.push("blouseLength");
-      if (!existing.weightGrams) emptyOnLoad.push("weightGrams");
+      if (!existing.blouseDetails) emptyOnLoad.push("blouseDetails");
       if (!existing.washCare) emptyOnLoad.push("washCare");
       setRemovedFields(new Set(emptyOnLoad));
 
@@ -327,6 +343,36 @@ export function ProductForm() {
     }));
   }
 
+  async function handleCreateCategory(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCategoryName.trim()) return;
+    const asSub = newCategoryAsSub && Boolean(form.categoryId);
+    try {
+      const created = await createCategoryMutation.mutateAsync({
+        name: newCategoryName.trim(),
+        parentId: asSub ? form.categoryId : undefined,
+      });
+      setForm((f) => (asSub ? { ...f, subCategoryId: created.id } : { ...f, categoryId: created.id, subCategoryId: "" }));
+      setNewCategoryName("");
+      setShowNewCategory(false);
+      toast.success(t("categoryBar.categoryCreated"));
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? t("categoryBar.failedToSaveCategory"));
+    }
+  }
+
+  function addCustomField() {
+    setCustomFields((prev) => [...prev, { key: crypto.randomUUID(), label: "", value: "" }]);
+  }
+
+  function updateCustomField(key: string, patch: Partial<{ label: string; value: string }>) {
+    setCustomFields((prev) => prev.map((f) => (f.key === key ? { ...f, ...patch } : f)));
+  }
+
+  function removeCustomField(key: string) {
+    setCustomFields((prev) => prev.filter((f) => f.key !== key));
+  }
+
   async function resolveTagIds(): Promise<string[]> {
     const ids: string[] = [];
     for (const name of tagNames) {
@@ -358,15 +404,14 @@ export function ProductForm() {
       weavingTechnique: removedFields.has("weavingTechnique") ? undefined : form.weavingTechnique || undefined,
       borderType: removedFields.has("borderType") ? undefined : form.borderType || undefined,
       palluDesign: removedFields.has("palluDesign") ? undefined : form.palluDesign || undefined,
-      blouseLength:
-        removedFields.has("blouseLength") || !form.blouseLength ? undefined : Number(form.blouseLength),
-      weightGrams: removedFields.has("weightGrams") || !form.weightGrams ? undefined : Number(form.weightGrams),
+      blouseDetails: removedFields.has("blouseDetails") ? undefined : form.blouseDetails || undefined,
       washCare: removedFields.has("washCare") ? undefined : form.washCare || undefined,
       mrp: Number(form.mrp),
       sellingPrice: Number(form.sellingPrice),
       gstPercent: Number(form.gstPercent),
+      specialOfferPercent: form.specialOfferPercent ? Number(form.specialOfferPercent) : undefined,
       stockQuantity: Number(form.stockQuantity),
-      lowStockThreshold: Number(form.lowStockThreshold),
+      lowStockThreshold: isEdit ? undefined : DEFAULT_LOW_STOCK_THRESHOLD,
       isActive: form.isActive,
       status: form.status,
       isFeatured: form.isFeatured,
@@ -375,9 +420,15 @@ export function ProductForm() {
       isTodaysDeal: form.isTodaysDeal,
       isLiveSpecial: form.isLiveSpecial,
       isTopSelection: form.isTopSelection,
-      blouseIncluded: removedFields.has("blouseIncluded") ? undefined : form.blouseIncluded,
       isHandloom: form.isHandloom,
-      categoryIds: form.categoryId ? [form.categoryId] : [],
+      // When a sub-category is chosen (e.g. Paithani), the product is tagged
+      // with both it and its parent (e.g. Saree) so it still shows up under
+      // the parent's tab/filter in the admin and storefront.
+      categoryIds: form.subCategoryId
+        ? [form.subCategoryId, form.categoryId].filter(Boolean)
+        : form.categoryId
+          ? [form.categoryId]
+          : [],
       tagIds,
       images: form.images.map((url, i) => ({ url, isPrimary: i === 0 })),
       variants: variants.length
@@ -390,6 +441,9 @@ export function ProductForm() {
             imageUrl: v.imageUrl || undefined,
           }))
         : undefined,
+      customFields: customFields
+        .filter((f) => f.label.trim() && f.value.trim())
+        .map((f) => ({ label: f.label.trim(), value: f.value.trim() })),
     };
 
     try {
@@ -497,14 +551,16 @@ export function ProductForm() {
                           {t("productForm.primary")}
                         </span>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        aria-label={t("productForm.removeImage")}
-                        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
+                      <Tooltip label={t("productForm.removeImage")} className="absolute -right-2 -top-2">
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          aria-label={t("productForm.removeImage")}
+                          className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-600 shadow"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </Tooltip>
                       {index !== 0 && (
                         <button
                           type="button"
@@ -566,6 +622,16 @@ export function ProductForm() {
                     className={`${inputClass} cursor-not-allowed bg-neutral-50 text-neutral-500`}
                   />
                 </Field>
+                <Field label={t("productForm.specialOfferPercent")} hint={<span className="text-xs text-neutral-400">{t("productForm.specialOfferHint")}</span>}>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={form.specialOfferPercent}
+                    onChange={(e) => setForm({ ...form, specialOfferPercent: e.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
               </div>
             </Card>
 
@@ -614,19 +680,52 @@ export function ProductForm() {
                     </p>
                   </>
                 ) : (
-                  <SearchableSelect
-                    value={form.categoryId}
-                    onChange={(categoryId) => setForm({ ...form, categoryId })}
-                    placeholder={t("productForm.selectCategory")}
-                    options={
-                      categories?.map((c) => ({
-                        value: c.id,
-                        label: `${c.group === "MAHARASHTRIAN" ? "🪷 " : ""}${c.name}`,
-                      })) ?? []
-                    }
-                  />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <SearchableSelect
+                        value={form.categoryId}
+                        onChange={(categoryId) => setForm({ ...form, categoryId, subCategoryId: "" })}
+                        placeholder={t("productForm.selectCategory")}
+                        options={
+                          categories
+                            ?.filter((c) => !c.parentId)
+                            .map((c) => ({
+                              value: c.id,
+                              label: `${c.group === "MAHARASHTRIAN" ? "🪷 " : ""}${c.name}`,
+                            })) ?? []
+                        }
+                      />
+                    </div>
+                    <Tooltip label={t("productForm.newCategoryAria")}>
+                      <button
+                        type="button"
+                        onClick={() => setShowNewCategory(true)}
+                        aria-label={t("productForm.newCategoryAria")}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-neutral-300 text-neutral-500 hover:border-royal-400 hover:text-royal-600"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </Tooltip>
+                  </div>
                 )}
               </Field>
+              {(() => {
+                const subCategoryOptions = categories?.filter((c) => c.parentId === form.categoryId) ?? [];
+                if (!form.categoryId || subCategoryOptions.length === 0) return null;
+                return (
+                  <Field label={t("productForm.subCategory")} className="mt-4">
+                    <SearchableSelect
+                      value={form.subCategoryId}
+                      onChange={(subCategoryId) => setForm({ ...form, subCategoryId })}
+                      placeholder={t("productForm.selectSubCategoryOptional")}
+                      options={[
+                        { value: "", label: t("productForm.noSubCategory") },
+                        ...subCategoryOptions.map((c) => ({ value: c.id, label: c.name })),
+                      ]}
+                    />
+                  </Field>
+                );
+              })()}
               <Field label={t("productForm.sku")} required className="mt-4">
                 <input
                   required
@@ -643,25 +742,15 @@ export function ProductForm() {
             </Card>
 
             <Card title={t("productForm.inventory")}>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label={t("productForm.stockQuantity")} required>
-                  <input
-                    required
-                    type="number"
-                    value={form.stockQuantity}
-                    onChange={(e) => setForm({ ...form, stockQuantity: e.target.value })}
-                    className={inputClass}
-                  />
-                </Field>
-                <Field label={t("productForm.lowStockThreshold")}>
-                  <input
-                    type="number"
-                    value={form.lowStockThreshold}
-                    onChange={(e) => setForm({ ...form, lowStockThreshold: e.target.value })}
-                    className={inputClass}
-                  />
-                </Field>
-              </div>
+              <Field label={t("productForm.stockQuantity")} required>
+                <input
+                  required
+                  type="number"
+                  value={form.stockQuantity}
+                  onChange={(e) => setForm({ ...form, stockQuantity: e.target.value })}
+                  className={inputClass}
+                />
+              </Field>
             </Card>
 
             <Card title={t("productForm.craftDetails")}>
@@ -738,20 +827,14 @@ export function ProductForm() {
                     <input value={form.palluDesign} onChange={(e) => setForm({ ...form, palluDesign: e.target.value })} className={inputClass} />
                   </Field>
                 )}
-                {!removedFields.has("blouseLength") && (
-                  <Field label={t("productForm.blouseLength")} hint={<RemoveFieldButton onClick={() => removeField("blouseLength")} />}>
+                {!removedFields.has("blouseDetails") && (
+                  <Field label={t("productForm.blouseDetails")} hint={<RemoveFieldButton onClick={() => removeField("blouseDetails")} />}>
                     <input
-                      type="number"
-                      step="0.1"
-                      value={form.blouseLength}
-                      onChange={(e) => setForm({ ...form, blouseLength: e.target.value })}
+                      placeholder={t("productForm.blouseDetailsPlaceholder")}
+                      value={form.blouseDetails}
+                      onChange={(e) => setForm({ ...form, blouseDetails: e.target.value })}
                       className={inputClass}
                     />
-                  </Field>
-                )}
-                {!removedFields.has("weightGrams") && (
-                  <Field label={t("productForm.weightGrams")} hint={<RemoveFieldButton onClick={() => removeField("weightGrams")} />}>
-                    <input type="number" value={form.weightGrams} onChange={(e) => setForm({ ...form, weightGrams: e.target.value })} className={inputClass} />
                   </Field>
                 )}
               </div>
@@ -782,6 +865,47 @@ export function ProductForm() {
               )}
             </Card>
 
+            <Card title={t("productForm.customFields")}>
+              <p className="text-xs text-neutral-400">{t("productForm.customFieldsHint")}</p>
+              {customFields.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {customFields.map((field) => (
+                    <div key={field.key} className="flex items-start gap-2">
+                      <input
+                        placeholder={t("productForm.customFieldLabelPlaceholder")}
+                        value={field.label}
+                        onChange={(e) => updateCustomField(field.key, { label: e.target.value })}
+                        className={`${inputClass} w-2/5`}
+                      />
+                      <input
+                        placeholder={t("productForm.customFieldValuePlaceholder")}
+                        value={field.value}
+                        onChange={(e) => updateCustomField(field.key, { value: e.target.value })}
+                        className={`${inputClass} flex-1`}
+                      />
+                      <Tooltip label={t("common.remove")}>
+                        <button
+                          type="button"
+                          onClick={() => removeCustomField(field.key)}
+                          aria-label={t("common.remove")}
+                          className="mt-2 shrink-0 text-neutral-400 hover:text-red-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={addCustomField}
+                className="mt-3 flex items-center gap-1 text-xs font-medium text-royal-600 hover:text-royal-700"
+              >
+                <Plus className="h-3.5 w-3.5" /> {t("productForm.addCustomField")}
+              </button>
+            </Card>
+
             <Card title={t("productForm.merchandising")}>
               <div className="space-y-2.5">
                 {(
@@ -805,20 +929,6 @@ export function ProductForm() {
                     {label}
                   </label>
                 ))}
-                {!removedFields.has("blouseIncluded") && (
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-sm text-neutral-700">
-                      <input
-                        type="checkbox"
-                        checked={form.blouseIncluded}
-                        onChange={(e) => setForm({ ...form, blouseIncluded: e.target.checked })}
-                        className="h-4 w-4 rounded border-neutral-300 text-royal-600 focus:ring-royal-500"
-                      />
-                      {t("productForm.blouseIncluded")}
-                    </label>
-                    <RemoveFieldButton onClick={() => removeField("blouseIncluded")} />
-                  </div>
-                )}
               </div>
 
               <div className="mt-4 border-t border-neutral-100 pt-4">
@@ -849,6 +959,49 @@ export function ProductForm() {
           </button>
         </div>
       </form>
+
+      <Modal open={showNewCategory} onOpenChange={setShowNewCategory} title={t("categoryBar.addCategory")}>
+        <form onSubmit={handleCreateCategory} className="space-y-4">
+          <Field label={t("categoryBar.name")} required>
+            <input
+              required
+              autoFocus
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+          {form.categoryId && (
+            <label className="flex items-center gap-2 text-sm text-neutral-700">
+              <input
+                type="checkbox"
+                checked={newCategoryAsSub}
+                onChange={(e) => setNewCategoryAsSub(e.target.checked)}
+                className="h-4 w-4 rounded border-neutral-300 text-royal-600"
+              />
+              {t("productForm.createAsSubCategoryOf", {
+                parent: categories?.find((c) => c.id === form.categoryId)?.name ?? "",
+              })}
+            </label>
+          )}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowNewCategory(false)}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100"
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              type="submit"
+              disabled={createCategoryMutation.isPending}
+              className="rounded-lg bg-royal-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-sm disabled:opacity-60"
+            >
+              {createCategoryMutation.isPending ? t("common.saving") : t("categoryBar.create")}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

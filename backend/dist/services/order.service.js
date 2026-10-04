@@ -42,6 +42,10 @@ function buildOrderListWhere(filters) {
       )`);
         params.push(filters.categoryId);
     }
+    if (filters.date) {
+        conditions.push("DATE(o.createdAt) = ?");
+        params.push(filters.date);
+    }
     return { whereClause: conditions.join(" AND "), params };
 }
 async function listOrders(pagination, filters) {

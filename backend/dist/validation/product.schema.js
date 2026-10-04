@@ -13,6 +13,8 @@ exports.productListQuerySchema = zod_1.z.object({
     fabric: zod_1.z.string().optional(),
     lowStockOnly: zod_1.z.coerce.boolean().optional(),
     trashed: zod_1.z.coerce.boolean().optional(),
+    minPrice: zod_1.z.coerce.number().min(0).optional(),
+    maxPrice: zod_1.z.coerce.number().min(0).optional(),
     sortBy: zod_1.z.enum(["createdAt", "sellingPrice", "name", "stockQuantity"]).optional(),
     sortOrder: zod_1.z.enum(["asc", "desc"]).optional(),
 });
@@ -34,7 +36,9 @@ exports.productCreateSchema = zod_1.z.object({
     sareeLength: zod_1.z.coerce.number().positive().optional(),
     blouseIncluded: zod_1.z.coerce.boolean().optional(),
     blouseLength: zod_1.z.coerce.number().positive().optional(),
+    blouseDetails: zod_1.z.string().optional(),
     weightGrams: zod_1.z.coerce.number().int().positive().optional(),
+    specialOfferPercent: zod_1.z.coerce.number().min(0).max(100).optional(),
     craftOrigin: zod_1.z.string().optional(),
     state: zod_1.z.string().optional(),
     district: zod_1.z.string().optional(),

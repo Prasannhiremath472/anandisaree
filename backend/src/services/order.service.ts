@@ -18,6 +18,7 @@ interface ListFilters {
   status?: string;
   paymentStatus?: string;
   categoryId?: string;
+  date?: string;
 }
 
 function buildOrderListWhere(filters: ListFilters): { whereClause: string; params: QueryParams } {
@@ -46,6 +47,10 @@ function buildOrderListWhere(filters: ListFilters): { whereClause: string; param
       )`
     );
     params.push(filters.categoryId);
+  }
+  if (filters.date) {
+    conditions.push("DATE(o.createdAt) = ?");
+    params.push(filters.date);
   }
 
   return { whereClause: conditions.join(" AND "), params };

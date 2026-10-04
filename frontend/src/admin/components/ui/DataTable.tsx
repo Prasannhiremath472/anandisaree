@@ -6,6 +6,7 @@ export interface Column<T> {
   key: string;
   render?: (row: T) => React.ReactNode;
   className?: string;
+  stickyRight?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -21,11 +22,18 @@ export function DataTable<T>({ columns, rows, rowKey, loading, emptyMessage, onR
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto rounded-xl border border-black/5 bg-white">
-      <table className="w-full min-w-[640px] text-left text-sm">
+      <table className="w-full min-w-[640px] text-left text-xs">
         <thead>
           <tr className="border-b border-black/5 bg-neutral-50">
             {columns.map((col) => (
-              <th key={col.key} className={cn("px-4 py-3 font-heading font-semibold text-neutral-600", col.className)}>
+              <th
+                key={col.key}
+                className={cn(
+                  "px-3 py-2 font-heading font-semibold text-neutral-600",
+                  col.stickyRight && "sticky right-0 z-10 bg-neutral-50 shadow-[-4px_0_6px_-4px_rgba(0,0,0,0.12)]",
+                  col.className
+                )}
+              >
                 {col.header}
               </th>
             ))}
@@ -34,13 +42,13 @@ export function DataTable<T>({ columns, rows, rowKey, loading, emptyMessage, onR
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-10 text-center text-neutral-400">
+              <td colSpan={columns.length} className="px-3 py-8 text-center text-neutral-400">
                 {t("common.loading")}
               </td>
             </tr>
           ) : rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-10 text-center text-neutral-400">
+              <td colSpan={columns.length} className="px-3 py-8 text-center text-neutral-400">
                 {emptyMessage ?? t("common.noRecordsFound")}
               </td>
             </tr>
@@ -55,7 +63,14 @@ export function DataTable<T>({ columns, rows, rowKey, loading, emptyMessage, onR
                 )}
               >
                 {columns.map((col) => (
-                  <td key={col.key} className={cn("px-4 py-3 text-neutral-700", col.className)}>
+                  <td
+                    key={col.key}
+                    className={cn(
+                      "px-3 py-1.5 text-neutral-700",
+                      col.stickyRight && "sticky right-0 z-10 bg-white shadow-[-4px_0_6px_-4px_rgba(0,0,0,0.12)]",
+                      col.className
+                    )}
+                  >
                     {col.render ? col.render(row) : String((row as Record<string, unknown>)[col.key] ?? "")}
                   </td>
                 ))}

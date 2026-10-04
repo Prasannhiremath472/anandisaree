@@ -38,6 +38,7 @@ interface ListParams {
   page: number;
   pageSize: number;
   search?: string;
+  isActive?: boolean;
 }
 
 export function useCustomers(params: ListParams) {

@@ -49,5 +49,6 @@ router.post("/otp/verify", rateLimiter_1.authLimiter, authController.verifyOtpAn
 router.post("/forgot-password", rateLimiter_1.authLimiter, authController.forgotPassword);
 router.post("/reset-password", rateLimiter_1.authLimiter, authController.resetPassword);
 router.get("/me", auth_1.authenticate, authController.me);
+router.patch("/me", auth_1.authenticate, authController.updateProfile);
 exports.default = router;
 //# sourceMappingURL=auth.routes.js.map

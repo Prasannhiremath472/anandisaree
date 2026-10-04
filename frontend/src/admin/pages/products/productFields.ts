@@ -11,9 +11,7 @@ export const PRODUCT_OPTIONAL_FIELDS = {
   weavingTechnique: "Weaving Technique",
   borderType: "Border Type",
   palluDesign: "Pallu Design",
-  blouseIncluded: "Blouse Included",
-  blouseLength: "Blouse Length",
-  weightGrams: "Weight",
+  blouseDetails: "Blouse Details",
   washCare: "Wash Care Instructions",
 } as const;
 

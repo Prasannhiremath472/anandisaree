@@ -6,6 +6,7 @@ import { PageHeader } from "@/admin/components/ui/PageHeader";
 import { DataTable, type Column } from "@/admin/components/ui/DataTable";
 import { Pagination } from "@/admin/components/ui/Pagination";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { useExportCsv } from "@/admin/hooks/useExportCsv";
 import { useDeleteReview, useReviews, useSetReviewFeatured, useUpdateReviewStatus, type Review } from "@/admin/hooks/api/useReviews";
 import { useAppSelector } from "@/admin/hooks/redux";
@@ -16,6 +17,7 @@ export function Reviews() {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<(typeof STATUS_FILTERS)[number]>("PENDING");
+  const [ratingFilter, setRatingFilter] = useState<string>("");
   const selectedCategoryId = useAppSelector((s) => s.category.selectedCategoryId);
 
   const { data, isLoading } = useReviews({
@@ -23,6 +25,7 @@ export function Reviews() {
     pageSize: 10,
     status: status === "ALL" ? undefined : status,
     categoryId: selectedCategoryId ?? undefined,
+    rating: ratingFilter ? Number(ratingFilter) : undefined,
   });
 
   useEffect(() => {
@@ -91,25 +94,33 @@ export function Reviews() {
       render: (r) => (
         <div className="flex items-center gap-2">
           {r.status !== "APPROVED" && (
-            <button onClick={() => handleStatus(r.id, "APPROVED")} aria-label={t("reviews.approveAria")} className="text-green-600 hover:text-green-700">
-              <Check className="h-4 w-4" />
-            </button>
+            <Tooltip label={t("reviews.approveAria")}>
+              <button onClick={() => handleStatus(r.id, "APPROVED")} aria-label={t("reviews.approveAria")} className="text-green-600 hover:text-green-700">
+                <Check className="h-4 w-4" />
+              </button>
+            </Tooltip>
           )}
           {r.status !== "REJECTED" && (
-            <button onClick={() => handleStatus(r.id, "REJECTED")} aria-label={t("reviews.rejectAria")} className="text-red-600 hover:text-red-700">
-              <X className="h-4 w-4" />
-            </button>
+            <Tooltip label={t("reviews.rejectAria")}>
+              <button onClick={() => handleStatus(r.id, "REJECTED")} aria-label={t("reviews.rejectAria")} className="text-red-600 hover:text-red-700">
+                <X className="h-4 w-4" />
+              </button>
+            </Tooltip>
           )}
-          <button
-            onClick={() => handleFeatured(r)}
-            aria-label={t("reviews.toggleFeaturedAria")}
-            className={r.isFeatured ? "text-gold-600" : "text-neutral-400 hover:text-gold-600"}
-          >
-            <Star className={r.isFeatured ? "h-4 w-4 fill-gold-500" : "h-4 w-4"} />
-          </button>
-          <button onClick={() => handleDelete(r.id)} aria-label={t("common.delete")} className="text-neutral-400 hover:text-red-600">
-            <Trash2 className="h-4 w-4" />
-          </button>
+          <Tooltip label={t("reviews.toggleFeaturedAria")}>
+            <button
+              onClick={() => handleFeatured(r)}
+              aria-label={t("reviews.toggleFeaturedAria")}
+              className={r.isFeatured ? "text-gold-600" : "text-neutral-400 hover:text-gold-600"}
+            >
+              <Star className={r.isFeatured ? "h-4 w-4 fill-gold-500" : "h-4 w-4"} />
+            </button>
+          </Tooltip>
+          <Tooltip label={t("common.delete")}>
+            <button onClick={() => handleDelete(r.id)} aria-label={t("common.delete")} className="text-neutral-400 hover:text-red-600">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </Tooltip>
         </div>
       ),
     },
@@ -127,17 +138,18 @@ export function Reviews() {
               exportCsv({
                 status: status === "ALL" ? undefined : status,
                 categoryId: selectedCategoryId ?? undefined,
+                rating: ratingFilter ? Number(ratingFilter) : undefined,
               })
             }
             disabled={exporting}
-            className="flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+            className="flex items-center gap-2 rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
           >
             <Download className="h-4 w-4" /> {exporting ? t("common.exporting") : t("common.export")}
           </button>
         }
       />
 
-      <div className="mb-4 flex gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         {STATUS_FILTERS.map((s) => (
           <button
             key={s}
@@ -149,6 +161,16 @@ export function Reviews() {
             {t(`status.${s}`)}
           </button>
         ))}
+        <select
+          value={ratingFilter}
+          onChange={(e) => { setRatingFilter(e.target.value); setPage(1); }}
+          className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs focus:border-royal-500 focus:outline-none"
+        >
+          <option value="">{t("reviews.allRatings")}</option>
+          {[5, 4, 3, 2, 1].map((r) => (
+            <option key={r} value={r}>{t("reviews.starsCount", { count: r })}</option>
+          ))}
+        </select>
       </div>
 
       <DataTable columns={columns} rows={data?.items ?? []} rowKey={(r) => r.id} loading={isLoading} emptyMessage={t("reviews.emptyMessage")} />

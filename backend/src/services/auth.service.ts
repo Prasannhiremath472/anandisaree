@@ -8,7 +8,7 @@ import {
   refreshTokenExpiryDate,
   signAccessToken,
 } from "../utils/tokens";
-import type { AdminLoginInput, LoginInput, RegisterRequestOtpInput, RegisterVerifyOtpInput } from "../validation/auth.schema";
+import type { AdminLoginInput, LoginInput, RegisterRequestOtpInput, RegisterVerifyOtpInput, UpdateProfileInput } from "../validation/auth.schema";
 import { sendOtpEmail } from "./mailer.service";
 import { isProd } from "../config/env";
 import { logger } from "../config/logger";
@@ -200,4 +200,49 @@ export async function verifyOtp(identifier: string, code: string, purpose: strin
 export function sanitizeUser<T extends { passwordHash?: string | null }>(user: T) {
   const { passwordHash, ...rest } = user;
   return rest;
+}
+
+export async function updateOwnProfile(userId: string, input: UpdateProfileInput) {
+  if (input.email) {
+    const existing = await queryOne<{ id: string }>("SELECT id FROM `User` WHERE email = ? AND id != ? LIMIT 1", [
+      input.email,
+      userId,
+    ]);
+    if (existing) throw ApiError.conflict("This email is already in use by another account");
+  }
+  if (input.phone) {
+    const existing = await queryOne<{ id: string }>("SELECT id FROM `User` WHERE phone = ? AND id != ? LIMIT 1", [
+      input.phone,
+      userId,
+    ]);
+    if (existing) throw ApiError.conflict("This mobile number is already in use by another account");
+  }
+
+  const updates: string[] = [];
+  const params: (string | number)[] = [];
+  if (input.name !== undefined) {
+    updates.push("name = ?");
+    params.push(input.name);
+  }
+  if (input.email !== undefined) {
+    updates.push("email = ?");
+    params.push(input.email);
+  }
+  if (input.phone !== undefined) {
+    updates.push("phone = ?");
+    params.push(input.phone);
+  }
+
+  if (updates.length === 0) {
+    const user = await queryOne<UserRow>("SELECT * FROM `User` WHERE id = ? LIMIT 1", [userId]);
+    if (!user) throw ApiError.notFound("User not found");
+    return sanitizeUser(user);
+  }
+
+  params.push(userId);
+  await execute(`UPDATE \`User\` SET ${updates.join(", ")}, updatedAt = NOW(3) WHERE id = ?`, params);
+
+  const user = await queryOne<UserRow>("SELECT * FROM `User` WHERE id = ? LIMIT 1", [userId]);
+  if (!user) throw ApiError.notFound("User not found");
+  return sanitizeUser(user);
 }

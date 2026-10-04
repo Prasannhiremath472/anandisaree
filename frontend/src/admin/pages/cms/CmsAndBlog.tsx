@@ -8,6 +8,7 @@ import { DataTable, type Column } from "@/admin/components/ui/DataTable";
 import { Pagination } from "@/admin/components/ui/Pagination";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { ConfirmDialog } from "@/admin/components/ui/ConfirmDialog";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { useBlogPosts, useCmsPages, useDeleteBlogPost, type BlogPost } from "@/admin/hooks/api/useCms";
 import { CmsPageEditor } from "./CmsPageEditor";
 
@@ -17,7 +18,12 @@ export function CmsAndBlog() {
   const { data: pages } = useCmsPages();
 
   const [page, setPage] = useState(1);
-  const { data: posts, isLoading } = useBlogPosts({ page, pageSize: 10 });
+  const [statusFilter, setStatusFilter] = useState<"published" | "draft" | "">("");
+  const { data: posts, isLoading } = useBlogPosts({
+    page,
+    pageSize: 10,
+    isPublished: statusFilter === "published" ? true : statusFilter === "draft" ? false : undefined,
+  });
   const deleteMutation = useDeleteBlogPost();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -43,12 +49,16 @@ export function CmsAndBlog() {
       key: "actions",
       render: (p) => (
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(`/cms/blog/${p.id}/edit`)} aria-label={t("common.edit")} className="text-neutral-500 hover:text-royal-600">
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button onClick={() => setDeletingId(p.id)} aria-label={t("common.delete")} className="text-neutral-500 hover:text-red-600">
-            <Trash2 className="h-4 w-4" />
-          </button>
+          <Tooltip label={t("common.edit")}>
+            <button onClick={() => navigate(`/cms/blog/${p.id}/edit`)} aria-label={t("common.edit")} className="text-neutral-500 hover:text-royal-600">
+              <Pencil className="h-4 w-4" />
+            </button>
+          </Tooltip>
+          <Tooltip label={t("common.delete")}>
+            <button onClick={() => setDeletingId(p.id)} aria-label={t("common.delete")} className="text-neutral-500 hover:text-red-600">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </Tooltip>
         </div>
       ),
     },
@@ -63,7 +73,7 @@ export function CmsAndBlog() {
           tab === "blog" ? (
             <Link
               to="/cms/blog/new"
-              className="flex items-center gap-2 rounded-lg bg-royal-gradient px-4 py-2 text-sm font-semibold text-white shadow-sm"
+              className="flex items-center gap-2 rounded-lg bg-royal-gradient px-3 py-1.5 text-xs font-semibold text-white shadow-sm"
             >
               <Plus className="h-4 w-4" /> {t("cmsAndBlog.newPost")}
             </Link>
@@ -89,6 +99,17 @@ export function CmsAndBlog() {
         <CmsPageEditor pages={pages ?? []} />
       ) : (
         <>
+          <div className="mb-3 flex items-center gap-2">
+            <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value as typeof statusFilter); setPage(1); }}
+              className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs focus:border-royal-500 focus:outline-none"
+            >
+              <option value="">{t("products.allStatuses")}</option>
+              <option value="published">{t("status.ACTIVE")}</option>
+              <option value="draft">{t("status.INACTIVE")}</option>
+            </select>
+          </div>
           <DataTable
             columns={columns}
             rows={posts?.items ?? []}

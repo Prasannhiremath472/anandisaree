@@ -8,6 +8,7 @@ import { DataTable, type Column } from "@/admin/components/ui/DataTable";
 import { Pagination } from "@/admin/components/ui/Pagination";
 import { StatusBadge } from "@/admin/components/ui/StatusBadge";
 import { ConfirmDialog } from "@/admin/components/ui/ConfirmDialog";
+import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { apiClient } from "@/admin/api/client";
 import { useDeleteSubscriber, useSubscribers, type Subscriber } from "@/admin/hooks/api/useNewsletter";
 
@@ -15,10 +16,16 @@ export function Newsletter() {
   const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"subscribed" | "unsubscribed" | "">("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
 
-  const { data, isLoading } = useSubscribers({ page, pageSize: 15, search: search || undefined });
+  const { data, isLoading } = useSubscribers({
+    page,
+    pageSize: 15,
+    search: search || undefined,
+    isSubscribed: statusFilter === "subscribed" ? true : statusFilter === "unsubscribed" ? false : undefined,
+  });
   const deleteMutation = useDeleteSubscriber();
 
   async function handleExport() {
@@ -57,9 +64,11 @@ export function Newsletter() {
       header: t("common.actions"),
       key: "actions",
       render: (s) => (
-        <button onClick={() => setDeletingId(s.id)} aria-label={t("newsletter.removeAria")} className="text-neutral-400 hover:text-red-600">
-          <Trash2 className="h-4 w-4" />
-        </button>
+        <Tooltip label={t("newsletter.removeAria")}>
+          <button onClick={() => setDeletingId(s.id)} aria-label={t("newsletter.removeAria")} className="text-neutral-400 hover:text-red-600">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </Tooltip>
       ),
     },
   ];
@@ -80,8 +89,17 @@ export function Newsletter() {
         }
       />
 
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <SearchInput value={search} onChange={(v) => { setSearch(v); setPage(1); }} placeholder={t("newsletter.searchPlaceholder")} />
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value as typeof statusFilter); setPage(1); }}
+          className="rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs focus:border-royal-500 focus:outline-none"
+        >
+          <option value="">{t("products.allStatuses")}</option>
+          <option value="subscribed">{t("status.ACTIVE")}</option>
+          <option value="unsubscribed">{t("status.INACTIVE")}</option>
+        </select>
       </div>
 
       <DataTable columns={columns} rows={data?.items ?? []} rowKey={(s) => s.id} loading={isLoading} emptyMessage={t("newsletter.emptyMessage")} />

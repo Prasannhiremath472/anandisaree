@@ -14,7 +14,7 @@ export interface Review {
   product: { name: string; images: { url: string }[] };
 }
 
-export function useReviews(params: { page: number; pageSize: number; status?: string; categoryId?: string }) {
+export function useReviews(params: { page: number; pageSize: number; status?: string; categoryId?: string; rating?: number }) {
   return useQuery({
     queryKey: ["reviews", params],
     queryFn: async () => {

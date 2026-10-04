@@ -12,6 +12,7 @@ exports.revokeRefreshToken = revokeRefreshToken;
 exports.requestOtp = requestOtp;
 exports.verifyOtp = verifyOtp;
 exports.sanitizeUser = sanitizeUser;
+exports.updateOwnProfile = updateOwnProfile;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const db_1 = require("../config/db");
 const id_1 = require("../utils/id");
@@ -141,5 +142,49 @@ async function verifyOtp(identifier, code, purpose) {
 function sanitizeUser(user) {
     const { passwordHash, ...rest } = user;
     return rest;
+}
+async function updateOwnProfile(userId, input) {
+    if (input.email) {
+        const existing = await (0, db_1.queryOne)("SELECT id FROM `User` WHERE email = ? AND id != ? LIMIT 1", [
+            input.email,
+            userId,
+        ]);
+        if (existing)
+            throw ApiError_1.ApiError.conflict("This email is already in use by another account");
+    }
+    if (input.phone) {
+        const existing = await (0, db_1.queryOne)("SELECT id FROM `User` WHERE phone = ? AND id != ? LIMIT 1", [
+            input.phone,
+            userId,
+        ]);
+        if (existing)
+            throw ApiError_1.ApiError.conflict("This mobile number is already in use by another account");
+    }
+    const updates = [];
+    const params = [];
+    if (input.name !== undefined) {
+        updates.push("name = ?");
+        params.push(input.name);
+    }
+    if (input.email !== undefined) {
+        updates.push("email = ?");
+        params.push(input.email);
+    }
+    if (input.phone !== undefined) {
+        updates.push("phone = ?");
+        params.push(input.phone);
+    }
+    if (updates.length === 0) {
+        const user = await (0, db_1.queryOne)("SELECT * FROM `User` WHERE id = ? LIMIT 1", [userId]);
+        if (!user)
+            throw ApiError_1.ApiError.notFound("User not found");
+        return sanitizeUser(user);
+    }
+    params.push(userId);
+    await (0, db_1.execute)(`UPDATE \`User\` SET ${updates.join(", ")}, updatedAt = NOW(3) WHERE id = ?`, params);
+    const user = await (0, db_1.queryOne)("SELECT * FROM `User` WHERE id = ? LIMIT 1", [userId]);
+    if (!user)
+        throw ApiError_1.ApiError.notFound("User not found");
+    return sanitizeUser(user);
 }
 //# sourceMappingURL=auth.service.js.map
