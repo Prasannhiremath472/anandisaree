@@ -14,11 +14,17 @@ interface Slide {
   mobileImage?: string;
 }
 
+// Hero banners are wide letterbox images (1600×466, ~3.43:1) rather than a
+// tall viewport-filling photo, so the slider's height tracks the image's own
+// aspect ratio via aspect-ratio instead of a fixed vh crop — the full image
+// is always visible, nothing is cropped off the top/bottom on any screen.
+const HERO_ASPECT_RATIO = "1600 / 466";
+
 export function HeroSlider() {
   const { data: banners, isLoading } = useStorefrontBanners("HOMEPAGE_SLIDER");
 
   if (isLoading) {
-    return <section className="h-[65vh] min-h-[520px] w-full animate-pulse bg-royal-900/10 sm:h-[80vh]" />;
+    return <section className="w-full animate-pulse bg-royal-900/10" style={{ aspectRatio: HERO_ASPECT_RATIO }} />;
   }
 
   const slides: Slide[] = banners?.length
@@ -34,7 +40,8 @@ export function HeroSlider() {
         autoplay={{ delay: 5500, disableOnInteraction: false }}
         pagination={{ clickable: true }}
         loop
-        className="hero-swiper h-[65vh] min-h-[520px] w-full sm:h-[80vh]"
+        className="hero-swiper w-full"
+        style={{ aspectRatio: HERO_ASPECT_RATIO }}
       >
         {slides.map((slide) => (
           <SwiperSlide key={slide.key}>

@@ -3,6 +3,8 @@ import { createId } from "../utils/id";
 import { ApiError } from "../utils/ApiError";
 import type { CategoryCreateInput, CategoryUpdateInput } from "../validation/category.schema";
 
+const JSON_COLUMNS = new Set(["enabledFields", "customFieldSuggestions"]);
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -27,14 +29,14 @@ export async function listCategories() {
 export async function createCategory(input: CategoryCreateInput) {
   const slug = input.slug ? slugify(input.slug) : slugify(input.name);
 
-  const existing = await queryOne("SELECT id FROM `Category` WHERE slug = ?", [slug]);
+  const existing = await queryOne("SELECT id FROM `Category` WHERE slug = ? AND deletedAt IS NULL", [slug]);
   if (existing) throw ApiError.conflict("A category with this name/slug already exists");
 
   const id = createId();
   await execute(
     `INSERT INTO \`Category\`
-      (id, name, slug, description, \`group\`, imageUrl, parentId, isActive, sortOrder, metaTitle, metaDescription, enabledFields, createdAt, updatedAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(3), NOW(3))`,
+      (id, name, slug, description, \`group\`, imageUrl, parentId, isActive, sortOrder, metaTitle, metaDescription, enabledFields, customFieldSuggestions, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(3), NOW(3))`,
     [
       id,
       input.name,
@@ -48,6 +50,7 @@ export async function createCategory(input: CategoryCreateInput) {
       input.metaTitle ?? null,
       input.metaDescription ?? null,
       input.enabledFields ? JSON.stringify(input.enabledFields) : null,
+      input.customFieldSuggestions ? JSON.stringify(input.customFieldSuggestions) : null,
     ]
   );
 
@@ -60,7 +63,7 @@ export async function updateCategory(id: string, input: CategoryUpdateInput) {
 
   if (input.slug || input.name) {
     const slug = input.slug ? slugify(input.slug) : slugify(input.name!);
-    const slugConflict = await queryOne("SELECT id FROM `Category` WHERE slug = ? AND id != ?", [slug, id]);
+    const slugConflict = await queryOne("SELECT id FROM `Category` WHERE slug = ? AND id != ? AND deletedAt IS NULL", [slug, id]);
     if (slugConflict) throw ApiError.conflict("A category with this name/slug already exists");
     input = { ...input, slug };
   }
@@ -71,7 +74,7 @@ export async function updateCategory(id: string, input: CategoryUpdateInput) {
   for (const [key, value] of Object.entries(input)) {
     if (value === undefined) continue;
     fields.push(`\`${key}\` = ?`);
-    values.push(key === "enabledFields" ? (value ? JSON.stringify(value) : null) : (value as string | number | boolean | null));
+    values.push(JSON_COLUMNS.has(key) ? (value ? JSON.stringify(value) : null) : (value as string | number | boolean | null));
   }
 
   if (fields.length === 0) {
@@ -84,8 +87,15 @@ export async function updateCategory(id: string, input: CategoryUpdateInput) {
 }
 
 export async function deleteCategory(id: string) {
-  const existing = await queryOne("SELECT id FROM `Category` WHERE id = ? AND deletedAt IS NULL", [id]);
+  const existing = await queryOne<{ id: string; slug: string }>(
+    "SELECT id, slug FROM `Category` WHERE id = ? AND deletedAt IS NULL",
+    [id]
+  );
   if (!existing) throw ApiError.notFound("Category not found");
 
-  await execute("UPDATE `Category` SET deletedAt = NOW(3) WHERE id = ?", [id]);
+  // slug has a DB-level unique constraint that isn't scoped to deletedAt, so
+  // a soft-deleted row would otherwise keep blocking a new/recreated
+  // category from reusing the same name. Free it up by suffixing the slug.
+  const freedSlug = `${existing.slug}-deleted-${Date.now()}`;
+  await execute("UPDATE `Category` SET deletedAt = NOW(3), slug = ? WHERE id = ?", [freedSlug, id]);
 }

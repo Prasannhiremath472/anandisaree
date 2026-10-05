@@ -8,6 +8,7 @@ import { SearchableMultiSelect } from "@/admin/components/ui/SearchableMultiSele
 import { Tooltip } from "@/admin/components/ui/Tooltip";
 import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 import { useVariantValues } from "@/admin/hooks/api/useProducts";
+import { STANDARD_SIZES } from "./productFields";
 
 export interface VariantOption {
   id: string;
@@ -55,6 +56,10 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
   const [draftValues, setDraftValues] = useState<string[]>([]);
   const knownOptionName = draftName.trim() === "Color" || draftName.trim() === "Size" ? (draftName.trim() as "Color" | "Size") : undefined;
   const { data: valueSuggestions } = useVariantValues(knownOptionName);
+  const mergedSuggestions =
+    knownOptionName === "Size"
+      ? [...new Set([...STANDARD_SIZES, ...(valueSuggestions ?? [])])]
+      : valueSuggestions ?? [];
 
   function startAddOption() {
     const id = crypto.randomUUID();
@@ -175,7 +180,7 @@ export function VariantsCard({ options, onOptionsChange, variants, onVariantsCha
             </Field>
             <Field label={t("variantsCard.optionValues")} required>
               <SearchableMultiSelect
-                suggestions={valueSuggestions ?? []}
+                suggestions={mergedSuggestions}
                 values={draftValues}
                 onChange={setDraftValues}
                 placeholder={t("variantsCard.optionValuesPlaceholder")}

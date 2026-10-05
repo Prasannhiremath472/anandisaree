@@ -59,6 +59,20 @@ PREPARE stmt FROM @sqlEnabledFields;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- ---- 2b. Category.customFieldSuggestions ----
+SET @hasCustomFieldSuggestions = (
+  SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Category' AND COLUMN_NAME = 'customFieldSuggestions'
+);
+SET @sqlCustomFieldSuggestions = IF(
+  @hasCustomFieldSuggestions = 0,
+  'ALTER TABLE `Category` ADD COLUMN `customFieldSuggestions` JSON NULL AFTER `enabledFields`',
+  'SELECT ''customFieldSuggestions already exists, skipping'''
+);
+PREPARE stmt FROM @sqlCustomFieldSuggestions;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- ---- 3. Banner.mobileImageUrl ----
 SET @hasMobileImageUrl = (
   SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
@@ -271,6 +285,9 @@ FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 
 UNION ALL
 SELECT 'Category.enabledFields', COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Category' AND COLUMN_NAME = 'enabledFields'
+UNION ALL
+SELECT 'Category.customFieldSuggestions', COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Category' AND COLUMN_NAME = 'customFieldSuggestions'
 UNION ALL
 SELECT 'Banner.mobileImageUrl', COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Banner' AND COLUMN_NAME = 'mobileImageUrl'

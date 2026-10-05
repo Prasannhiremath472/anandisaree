@@ -58,6 +58,7 @@ const emptyForm = {
   fabric: "",
   color: "",
   sareeLength: "5.5",
+  availableSizes: [] as string[],
   weavingTechnique: "",
   borderType: "",
   palluDesign: "",
@@ -192,6 +193,20 @@ export function ProductForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.categoryId, categories, isEdit]);
 
+  // Custom-field label suggestions for the selected category, preferring the
+  // sub-category's own list (e.g. Paithani) and falling back to the parent's
+  // (e.g. Saree) when the sub-category hasn't defined any of its own.
+  const activeCategoryForSuggestions = form.subCategoryId
+    ? categories?.find((c) => c.id === form.subCategoryId)
+    : categories?.find((c) => c.id === form.categoryId);
+  const customFieldSuggestions =
+    activeCategoryForSuggestions?.customFieldSuggestions?.length
+      ? activeCategoryForSuggestions.customFieldSuggestions
+      : categories?.find((c) => c.id === form.categoryId)?.customFieldSuggestions ?? [];
+  const unusedSuggestions = customFieldSuggestions.filter(
+    (s) => !customFields.some((f) => f.label.trim().toLowerCase() === s.toLowerCase())
+  );
+
   async function handleGenerateDescription() {
     if (!form.name || !form.fabric || !form.color) {
       toast.error(t("productForm.addTitleFabricColorFirst"));
@@ -279,6 +294,7 @@ export function ProductForm() {
         fabric: existing.fabric,
         color: existing.color,
         sareeLength: existing.sareeLength ?? "",
+        availableSizes: existing.availableSizes ?? [],
         weavingTechnique: existing.weavingTechnique ?? "",
         borderType: existing.borderType ?? "",
         palluDesign: existing.palluDesign ?? "",
@@ -361,8 +377,8 @@ export function ProductForm() {
     }
   }
 
-  function addCustomField() {
-    setCustomFields((prev) => [...prev, { key: crypto.randomUUID(), label: "", value: "" }]);
+  function addCustomField(label = "") {
+    setCustomFields((prev) => [...prev, { key: crypto.randomUUID(), label, value: "" }]);
   }
 
   function updateCustomField(key: string, patch: Partial<{ label: string; value: string }>) {
@@ -401,6 +417,7 @@ export function ProductForm() {
       fabric: form.fabric,
       color: form.color,
       sareeLength: removedFields.has("sareeLength") || !form.sareeLength ? undefined : Number(form.sareeLength),
+      availableSizes: form.availableSizes.length ? form.availableSizes : undefined,
       weavingTechnique: removedFields.has("weavingTechnique") ? undefined : form.weavingTechnique || undefined,
       borderType: removedFields.has("borderType") ? undefined : form.borderType || undefined,
       palluDesign: removedFields.has("palluDesign") ? undefined : form.palluDesign || undefined,
@@ -441,11 +458,9 @@ export function ProductForm() {
             imageUrl: v.imageUrl || undefined,
           }))
         : undefined,
-      customFields: removedFields.has("customFields")
-        ? []
-        : customFields
-            .filter((f) => f.label.trim() && f.value.trim())
-            .map((f) => ({ label: f.label.trim(), value: f.value.trim() })),
+      customFields: customFields
+        .filter((f) => f.label.trim() && f.value.trim())
+        .map((f) => ({ label: f.label.trim(), value: f.value.trim() })),
     };
 
     try {
@@ -867,59 +882,60 @@ export function ProductForm() {
               )}
             </Card>
 
-            {!removedFields.has("customFields") ? (
-              <Card title={t("productForm.customFields")}>
-                <p className="text-xs text-neutral-400">{t("productForm.customFieldsHint")}</p>
-                {customFields.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {customFields.map((field) => (
-                      <div key={field.key} className="flex items-start gap-2">
-                        <input
-                          placeholder={t("productForm.customFieldLabelPlaceholder")}
-                          value={field.label}
-                          onChange={(e) => updateCustomField(field.key, { label: e.target.value })}
-                          className={`${inputClass} w-2/5`}
-                        />
-                        <input
-                          placeholder={t("productForm.customFieldValuePlaceholder")}
-                          value={field.value}
-                          onChange={(e) => updateCustomField(field.key, { value: e.target.value })}
-                          className={`${inputClass} flex-1`}
-                        />
-                        <Tooltip label={t("common.remove")}>
-                          <button
-                            type="button"
-                            onClick={() => removeCustomField(field.key)}
-                            aria-label={t("common.remove")}
-                            className="mt-2 shrink-0 text-neutral-400 hover:text-red-600"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </Tooltip>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="mt-3 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={addCustomField}
-                    className="flex items-center gap-1 text-xs font-medium text-royal-600 hover:text-royal-700"
-                  >
-                    <Plus className="h-3.5 w-3.5" /> {t("productForm.addCustomField")}
-                  </button>
-                  <RemoveFieldButton onClick={() => removeField("customFields")} />
+            <Card title={t("productForm.customFields")}>
+              <p className="text-xs text-neutral-400">{t("productForm.customFieldsHint")}</p>
+              {unusedSuggestions.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {unusedSuggestions.map((label) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => addCustomField(label)}
+                      className="flex items-center gap-1 rounded-full border border-dashed border-royal-300 px-2.5 py-1 text-xs text-royal-600 hover:bg-royal-50"
+                    >
+                      <Plus className="h-3 w-3" /> {label}
+                    </button>
+                  ))}
                 </div>
-              </Card>
-            ) : (
+              )}
+              {customFields.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {customFields.map((field) => (
+                    <div key={field.key} className="flex items-start gap-2">
+                      <input
+                        placeholder={t("productForm.customFieldLabelPlaceholder")}
+                        value={field.label}
+                        onChange={(e) => updateCustomField(field.key, { label: e.target.value })}
+                        className={`${inputClass} w-2/5`}
+                      />
+                      <input
+                        placeholder={t("productForm.customFieldValuePlaceholder")}
+                        value={field.value}
+                        onChange={(e) => updateCustomField(field.key, { value: e.target.value })}
+                        className={`${inputClass} flex-1`}
+                      />
+                      <Tooltip label={t("common.remove")}>
+                        <button
+                          type="button"
+                          onClick={() => removeCustomField(field.key)}
+                          aria-label={t("common.remove")}
+                          className="mt-2 shrink-0 text-neutral-400 hover:text-red-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                    </div>
+                  ))}
+                </div>
+              )}
               <button
                 type="button"
-                onClick={() => restoreField("customFields")}
-                className="flex items-center gap-1 self-start rounded-full border border-dashed border-neutral-300 px-2.5 py-1 text-xs text-neutral-500 hover:border-royal-400 hover:text-royal-600"
+                onClick={() => addCustomField()}
+                className="mt-3 flex items-center gap-1 text-xs font-medium text-royal-600 hover:text-royal-700"
               >
-                <Plus className="h-3 w-3" /> {t(`productFields.customFields`)}
+                <Plus className="h-3.5 w-3.5" /> {t("productForm.addCustomField")}
               </button>
-            )}
+            </Card>
 
             <Card title={t("productForm.merchandising")}>
               <div className="space-y-2.5">

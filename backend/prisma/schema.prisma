@@ -216,6 +216,10 @@ model Category {
   // keys from the fixed set the admin product form knows how to render;
   // null/empty means "show all fields" (no restriction configured yet).
   enabledFields Json?
+  // Suggested custom-field labels for this category (e.g. "Jewelry Metal")
+  // shown as quick-add buttons in the product form's free-form Custom
+  // Fields section. Suggestions only -- admin can still type any label.
+  customFieldSuggestions Json?
   deletedAt   DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -302,6 +306,10 @@ model Product {
 
   // Physical specs
   sareeLength        Decimal?  @db.Decimal(5, 2) // in meters
+  // Standalone list of available sizes (e.g. ["M","L","XL"]) shown on the
+  // storefront product detail page -- independent of ProductVariant, which
+  // is for per-size stock/price tracking.
+  availableSizes      Json?
   blouseIncluded      Boolean   @default(false)
   blouseLength        Decimal?  @db.Decimal(5, 2)
   weightGrams          Int?

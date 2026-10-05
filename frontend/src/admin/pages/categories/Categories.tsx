@@ -15,7 +15,6 @@ import {
   type Category,
   type CategoryFormInput,
 } from "@/admin/hooks/api/useCategories";
-import { ALL_PRODUCT_OPTIONAL_FIELDS, type ProductOptionalField } from "@/admin/pages/products/productFields";
 
 const inputClass =
   "w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500";
@@ -25,7 +24,6 @@ const emptyForm: CategoryFormInput = {
   group: "PAN_INDIAN",
   isActive: true,
   parentId: undefined,
-  enabledFields: [...ALL_PRODUCT_OPTIONAL_FIELDS],
 };
 
 export function Categories() {
@@ -68,17 +66,8 @@ export function Categories() {
       group: category.group,
       isActive: category.isActive,
       parentId: category.parentId ?? undefined,
-      enabledFields: category.enabledFields?.length ? category.enabledFields : [...ALL_PRODUCT_OPTIONAL_FIELDS],
     });
     setShowForm(true);
-  }
-
-  function toggleField(field: ProductOptionalField) {
-    setForm((f) => {
-      const current = f.enabledFields ?? [];
-      const next = current.includes(field) ? current.filter((x) => x !== field) : [...current, field];
-      return { ...f, enabledFields: next };
-    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -282,24 +271,6 @@ export function Categories() {
                     ))}
                 </select>
               </div>
-              <div>
-                <label className="text-sm font-medium text-neutral-700">{t("categoryBar.productFieldsLabel")}</label>
-                <p className="mt-0.5 text-xs text-neutral-400">{t("categoryBar.productFieldsHint")}</p>
-                <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 rounded-lg border border-neutral-200 p-3">
-                  {ALL_PRODUCT_OPTIONAL_FIELDS.map((field) => (
-                    <label key={field} className="flex items-center gap-1.5 text-xs text-neutral-700">
-                      <input
-                        type="checkbox"
-                        checked={(form.enabledFields ?? []).includes(field)}
-                        onChange={() => toggleField(field)}
-                        className="h-3.5 w-3.5 rounded border-neutral-300 text-royal-600"
-                      />
-                      {t(`productFields.${field}`)}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               <label className="flex items-center gap-2 text-sm text-neutral-700">
                 <input
                   type="checkbox"

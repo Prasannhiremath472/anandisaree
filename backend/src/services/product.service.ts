@@ -315,6 +315,7 @@ const PRODUCT_COLUMNS = [
   "color",
   "secondaryColors",
   "sareeLength",
+  "availableSizes",
   "blouseIncluded",
   "blouseLength",
   "blouseDetails",
@@ -345,6 +346,16 @@ const PRODUCT_COLUMNS = [
   "metaDescription",
 ] as const;
 
+const PRODUCT_JSON_COLUMNS = new Set(["availableSizes"]);
+
+function toColumnValue(col: string, value: unknown): string | number | boolean | null {
+  if (PRODUCT_JSON_COLUMNS.has(col)) {
+    const arr = value as string[] | null | undefined;
+    return arr?.length ? JSON.stringify(arr) : null;
+  }
+  return value as string | number | boolean | null;
+}
+
 export async function createProduct(input: ProductCreateInput) {
   const existingSku = await queryOne("SELECT id FROM `Product` WHERE sku = ? LIMIT 1", [input.sku]);
   if (existingSku) throw ApiError.conflict("A product with this SKU already exists");
@@ -368,7 +379,7 @@ export async function createProduct(input: ProductCreateInput) {
 
   await withTransaction(async (conn) => {
     const columns = PRODUCT_COLUMNS.filter((col) => productData[col] !== undefined);
-    const values = columns.map((col) => productData[col] as string | number | boolean | null);
+    const values = columns.map((col) => toColumnValue(col, productData[col]));
 
     await conn.query(
       `INSERT INTO \`Product\` (id, ${columns.map((c) => `\`${c}\``).join(", ")}, createdAt, updatedAt)
@@ -471,7 +482,7 @@ export async function updateProduct(id: string, input: ProductUpdateInput) {
   await withTransaction(async (conn) => {
     const columns = PRODUCT_COLUMNS.filter((col) => productData[col] !== undefined);
     if (columns.length) {
-      const values = columns.map((col) => productData[col] as string | number | boolean | null);
+      const values = columns.map((col) => toColumnValue(col, productData[col]));
       await conn.query(
         `UPDATE \`Product\` SET ${columns.map((c) => `\`${c}\` = ?`).join(", ")}, updatedAt = NOW(3) WHERE id = ?`,
         [...values, id]

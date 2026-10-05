@@ -49,6 +49,7 @@ export interface Product {
   designPattern?: string | null;
   color: string;
   sareeLength?: string | null;
+  availableSizes?: string[] | null;
   craftOrigin?: string | null;
   district?: string | null;
   blouseLength?: string | null;
@@ -95,6 +96,7 @@ export interface ProductFormValues {
   fabric: string;
   color: string;
   sareeLength: number;
+  availableSizes: string[];
   mrp: number;
   sellingPrice: number;
   stockQuantity: number;

@@ -35,6 +35,10 @@ export const productCreateSchema = z.object({
   color: z.string().min(1),
   secondaryColors: z.string().optional(),
   sareeLength: z.coerce.number().positive().optional(),
+  // Standalone list of available sizes (e.g. ["M","L","XL"]) shown on the
+  // storefront product detail page — independent of the ProductVariant
+  // system used for per-size stock/price tracking.
+  availableSizes: z.array(z.string().min(1).max(20)).optional(),
   blouseIncluded: z.coerce.boolean().optional(),
   blouseLength: z.coerce.number().positive().optional(),
   blouseDetails: z.string().optional(),

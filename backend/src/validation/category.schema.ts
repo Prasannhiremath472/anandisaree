@@ -13,6 +13,9 @@ export const categoryCreateSchema = z.object({
   metaDescription: z.string().optional(),
   // Null/omitted means "no restriction" — the product form shows every field.
   enabledFields: z.array(z.string()).nullable().optional(),
+  // Suggested custom-field labels shown as quick-add buttons on the product
+  // form for this category (e.g. "Jewelry Metal"). Suggestions only.
+  customFieldSuggestions: z.array(z.string().min(1).max(100)).nullable().optional(),
 });
 
 export const categoryUpdateSchema = categoryCreateSchema.partial();

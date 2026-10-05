@@ -64,6 +64,7 @@
     "done": "Done",
     "remove": "Remove",
     "removeValue": "Remove {{value}}",
+    "add": "Add",
     "search": "Search...",
     "pleaseWait": "Please wait...",
     "noRecordsFound": "No records found.",
@@ -217,6 +218,9 @@
     "mainMenu": "Main menu",
     "productFieldsLabel": "Fields to show for this category",
     "productFieldsHint": "Only checked fields show by default when adding a product in this category. You can still add an unchecked field to one specific product if needed.",
+    "customFieldSuggestionsLabel": "Custom field suggestions",
+    "customFieldSuggestionsHint": "Quick-add labels (e.g. \"Jewelry Metal\") offered when adding a custom field to a product in this category. Admins can still type any other label.",
+    "customFieldSuggestionsPlaceholder": "e.g. Jewelry Metal",
     "create": "Create",
     "deleteConfirmTitle": "Delete \"{{name}}\"?",
     "deleteConfirmWithProducts": "This category has {{count}} product(s) linked to it. They will keep their other categories, but lose this one.",
@@ -314,12 +318,14 @@
   },
   "bannerForm": {
     "guidance": {
-      "HOMEPAGE_SLIDER": "Best size: 1600 × 600px (wide banner), landscape, under 1 MB.",
-      "FESTIVAL_BANNER": "Best size: 1600 × 500px (wide banner), landscape, under 1 MB.",
-      "OFFER_BANNER": "Best size: 1200 × 400px (wide banner), landscape, under 1 MB.",
-      "COLLECTION_BANNER": "Best size: 1200 × 900px (portrait or square), under 1 MB.",
-      "POPUP_BANNER": "Best size: 800 × 800px (square), under 1 MB."
+      "HOMEPAGE_SLIDER": "Required size: exactly 1600 × 466px (wide banner), under 1 MB.",
+      "FESTIVAL_BANNER": "Required size: exactly 1600 × 500px (wide banner), under 1 MB.",
+      "OFFER_BANNER": "Required size: exactly 1200 × 400px (wide banner), under 1 MB.",
+      "COLLECTION_BANNER": "Required size: exactly 1200 × 900px (portrait or square), under 1 MB.",
+      "POPUP_BANNER": "Required size: exactly 800 × 800px (square), under 1 MB."
     },
+    "wrongDimensions": "This image is {{width}}×{{height}}px. This banner placement requires exactly {{requiredWidth}}×{{requiredHeight}}px — please resize and re-upload.",
+    "failedToReadImage": "Could not read this image's dimensions. Please try a different file.",
     "failedToUploadImage": "Failed to upload image",
     "pleaseUploadBannerImage": "Please upload a banner image",
     "bannerUpdated": "Banner updated",
@@ -735,7 +741,6 @@
     "craftOrigin": "Made In (Place)",
     "district": "District",
     "blouseDetails": "Blouse Details",
-    "washCare": "Wash Care Instructions",
-    "customFields": "Custom Fields"
+    "washCare": "Wash Care Instructions"
   }
 }

@@ -14,6 +14,8 @@ export interface Category {
   productCount: number;
   /** Which optional product fields apply to this category. Null/empty = show all fields (no restriction set). */
   enabledFields: string[] | null;
+  /** Suggested custom-field labels shown as quick-add buttons on the product form for this category. */
+  customFieldSuggestions: string[] | null;
 }
 
 export interface CategoryFormInput {
@@ -26,6 +28,7 @@ export interface CategoryFormInput {
   isActive?: boolean;
   sortOrder?: number;
   enabledFields?: string[] | null;
+  customFieldSuggestions?: string[] | null;
 }
 
 export function useCategories() {

@@ -12,6 +12,35 @@ import { useImageUpload } from "@/admin/hooks/api/useImageUpload";
 
 const emptyForm = { title: "", subtitle: "", imageUrl: "", mobileImageUrl: "", linkUrl: "", ctaLabel: "", placement: "HOMEPAGE_SLIDER" as BannerPlacement, sortOrder: "0", isActive: true };
 
+// Required pixel dimensions per placement, matching the guidance text shown
+// below the upload button. Enforced (not just suggested) so every slide in
+// a given placement renders at a consistent, uncropped aspect ratio on the
+// storefront — a mismatched image would otherwise get force-cropped by
+// object-cover and lose part of the design.
+const REQUIRED_DIMENSIONS: Record<BannerPlacement, { width: number; height: number }> = {
+  HOMEPAGE_SLIDER: { width: 1600, height: 466 },
+  FESTIVAL_BANNER: { width: 1600, height: 500 },
+  OFFER_BANNER: { width: 1200, height: 400 },
+  COLLECTION_BANNER: { width: 1200, height: 900 },
+  POPUP_BANNER: { width: 800, height: 800 },
+};
+
+function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Could not read image dimensions"));
+    };
+    img.src = url;
+  });
+}
+
 export function BannerForm() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -31,6 +60,27 @@ export function BannerForm() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+
+    if (field === "imageUrl") {
+      const required = REQUIRED_DIMENSIONS[form.placement];
+      try {
+        const { width, height } = await readImageDimensions(file);
+        if (width !== required.width || height !== required.height) {
+          toast.error(
+            t("bannerForm.wrongDimensions", {
+              width,
+              height,
+              requiredWidth: required.width,
+              requiredHeight: required.height,
+            })
+          );
+          return;
+        }
+      } catch {
+        toast.error(t("bannerForm.failedToReadImage"));
+        return;
+      }
+    }
 
     try {
       const { dataUri } = await uploadMutation.mutateAsync(file);
@@ -121,7 +171,12 @@ export function BannerForm() {
           />
           {form.imageUrl ? (
             <div className="relative w-full max-w-xs">
-              <img src={form.imageUrl} alt={t("bannerForm.bannerPreviewAlt")} className="aspect-video w-full rounded-lg object-cover" />
+              <img
+                src={form.imageUrl}
+                alt={t("bannerForm.bannerPreviewAlt")}
+                className="w-full rounded-lg border border-neutral-100 object-contain"
+                style={{ aspectRatio: `${REQUIRED_DIMENSIONS[form.placement].width} / ${REQUIRED_DIMENSIONS[form.placement].height}` }}
+              />
               <Tooltip label={t("common.remove")} className="absolute -right-2 -top-2">
                 <button
                   type="button"

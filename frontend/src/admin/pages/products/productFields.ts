@@ -13,9 +13,13 @@ export const PRODUCT_OPTIONAL_FIELDS = {
   palluDesign: "Pallu Design",
   blouseDetails: "Blouse Details",
   washCare: "Wash Care Instructions",
-  customFields: "Custom Fields",
 } as const;
 
 export type ProductOptionalField = keyof typeof PRODUCT_OPTIONAL_FIELDS;
 
 export const ALL_PRODUCT_OPTIONAL_FIELDS = Object.keys(PRODUCT_OPTIONAL_FIELDS) as ProductOptionalField[];
+
+// Standard apparel size scale offered as quick-pick suggestions wherever a
+// size is chosen (the variant Size option, and the standalone Available
+// Sizes field) — admins can still type/add a custom size (e.g. "Free Size").
+export const STANDARD_SIZES = ["S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL", "6XL"];
