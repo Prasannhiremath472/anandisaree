@@ -20,6 +20,7 @@ import { BlogForm } from "@/admin/pages/cms/BlogForm";
 import { Reviews } from "@/admin/pages/reviews/Reviews";
 import { Reels } from "@/admin/pages/reels/Reels";
 import { ReelForm } from "@/admin/pages/reels/ReelForm";
+import { TodaysLive } from "@/admin/pages/live/TodaysLive";
 import { Newsletter } from "@/admin/pages/newsletter/Newsletter";
 import { Marketing } from "@/admin/pages/marketing/Marketing";
 import { Reports } from "@/admin/pages/reports/Reports";
@@ -65,6 +66,7 @@ export const adminRouter = createBrowserRouter(
             { path: "reels", element: <Reels /> },
             { path: "reels/new", element: <ReelForm /> },
             { path: "reels/:id/edit", element: <ReelForm /> },
+            { path: "todays-live", element: <TodaysLive /> },
             { path: "newsletter", element: <Newsletter /> },
             { path: "marketing", element: <Marketing /> },
             { path: "reports", element: <Reports /> },

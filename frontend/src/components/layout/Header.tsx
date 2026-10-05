@@ -1,21 +1,18 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { Heart, Menu, ShoppingBag, User, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { toggleDrawer } from "@/store/cartSlice";
 import { BUSINESS } from "@/data/business";
 import { TopAnnouncementBar } from "./TopAnnouncementBar";
+import { SearchBar } from "./SearchBar";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { label: "Home", to: "/" },
   { label: "Products", to: "/products" },
   { label: "Category", to: "/category" },
-  { label: "Blog", to: "/blog" },
-  { label: "Gallery", to: "/gallery" },
-  { label: "About", to: "/about" },
-  { label: "Contact", to: "/contact" },
 ];
 
 export function Header() {
@@ -29,12 +26,12 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-gold-200/60 bg-cream-100/90 backdrop-blur-md">
       <TopAnnouncementBar />
 
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-ds-6 py-ds-6 lg:px-ds-8">
+      <div className="mx-auto flex max-w-7xl items-center gap-ds-6 px-ds-6 py-ds-6 lg:px-ds-8">
         <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
           <Menu className="h-6 w-6 text-royal-600" />
         </button>
 
-        <Link to="/" className="flex items-center" aria-label={BUSINESS.name}>
+        <Link to="/" className="flex shrink-0 items-center" aria-label={BUSINESS.name}>
           <img
             src="/images/anandi-sarees-logo-crop.png"
             alt={BUSINESS.name}
@@ -42,7 +39,7 @@ export function Header() {
           />
         </Link>
 
-        <nav className="hidden gap-ds-8 lg:flex">
+        <nav className="hidden shrink-0 gap-5 lg:ml-ds-8 lg:flex">
           {NAV_LINKS.map((link) => (
             <NavLink
               key={link.to}
@@ -50,7 +47,7 @@ export function Header() {
               end={link.to === "/"}
               className={({ isActive }) =>
                 cn(
-                  "relative py-1 font-heading text-ds-sm font-medium transition-colors",
+                  "relative py-1 font-heading text-[13px] font-medium transition-colors",
                   isActive
                     ? "text-royal-600 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-gold-gradient"
                     : "text-charcoal hover:text-royal-500"
@@ -62,10 +59,13 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-ds-6">
-          <button aria-label="Search" className="text-charcoal hover:text-royal-500">
-            <Search className="h-5 w-5" />
-          </button>
+        <SearchBar
+          className="hidden flex-1 md:ml-ds-8 md:block md:max-w-xl"
+          inputClassName="py-3 pl-12 text-ds-sm"
+          iconClassName="h-5 w-5"
+        />
+
+        <div className="flex shrink-0 items-center gap-ds-6">
           <Link to="/wishlist" aria-label="Wishlist" className="text-charcoal hover:text-royal-500">
             <Heart className="h-5 w-5" />
           </Link>
@@ -90,6 +90,12 @@ export function Header() {
           </button>
         </div>
       </div>
+
+      <SearchBar
+        className="px-ds-6 pb-ds-5 md:hidden"
+        inputClassName="py-2.5 pl-11 text-ds-sm"
+        iconClassName="h-4 w-4"
+      />
     </header>
 
     <AnimatePresence>

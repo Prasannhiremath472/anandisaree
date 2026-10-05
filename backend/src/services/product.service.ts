@@ -14,6 +14,7 @@ interface ListFilters {
   trashed?: boolean;
   minPrice?: number;
   maxPrice?: number;
+  isLiveSpecial?: boolean;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
 }
@@ -98,6 +99,10 @@ function buildProductListWhere(filters: ListFilters): { whereClause: string; par
   if (filters.maxPrice !== undefined) {
     conditions.push("sellingPrice <= ?");
     params.push(filters.maxPrice);
+  }
+  if (filters.isLiveSpecial !== undefined) {
+    conditions.push("isLiveSpecial = ?");
+    params.push(filters.isLiveSpecial);
   }
   if (filters.categoryId) {
     conditions.push("id IN (SELECT productId FROM `ProductCategory` WHERE categoryId = ?)");
@@ -190,9 +195,15 @@ export async function listPublicProducts(pagination: PaginationParams, filters: 
     params.push(filters.categoryId);
   }
   if (filters.search) {
-    conditions.push("(name LIKE ? OR fabric LIKE ?)");
+    conditions.push(
+      `(name LIKE ? OR fabric LIKE ? OR color LIKE ? OR id IN (
+        SELECT pc.productId FROM \`ProductCategory\` pc
+        JOIN \`Category\` c ON c.id = pc.categoryId
+        WHERE c.name LIKE ?
+      ))`
+    );
     const like = `%${filters.search}%`;
-    params.push(like, like);
+    params.push(like, like, like, like);
   }
   if (filters.isNewArrival) conditions.push("isNewArrival = 1");
   if (filters.isBestSeller) conditions.push("isBestSeller = 1");

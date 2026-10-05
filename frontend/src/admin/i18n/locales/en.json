@@ -9,6 +9,7 @@
     "reports": "Reports",
     "coupons": "Coupons",
     "reels": "Reels",
+    "todaysLive": "Today's Live",
     "banners": "Banners",
     "newsletter": "Newsletter",
     "cmsBlog": "Pages & Blog",
@@ -489,6 +490,22 @@
     "openReelAria": "Open reel: {{caption}}",
     "deleteConfirmTitle": "Delete reel?",
     "deleteConfirmDescription": "This reel will be removed from the storefront."
+  },
+  "todaysLive": {
+    "title": "Today's Live",
+    "description": "Pick the products to feature as today's live specials on the storefront homepage.",
+    "addProduct": "Add Product",
+    "add": "Add",
+    "pickerHint": "Search for a product and add it to today's live specials.",
+    "searchPlaceholder": "Search products by name or SKU",
+    "noProductsFound": "No products found.",
+    "emptyMessage": "No products added to Today's Live yet. Click \"Add Product\" to feature one.",
+    "liveBadge": "Live",
+    "removeFromLive": "Remove from Today's Live",
+    "added": "{{name}} added to Today's Live",
+    "removed": "{{name}} removed from Today's Live",
+    "failedToAdd": "Failed to add product",
+    "failedToRemove": "Failed to remove product"
   },
   "cmsAndBlog": {
     "blogPostDeleted": "Blog post deleted",

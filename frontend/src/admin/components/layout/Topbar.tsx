@@ -28,6 +28,7 @@ const TITLE_KEYS: Record<string, string> = {
   "/cms": "nav.cmsBlog",
   "/reviews": "nav.reviews",
   "/reels": "nav.reels",
+  "/todays-live": "nav.todaysLive",
   "/newsletter": "nav.newsletter",
   "/marketing": "nav.marketing",
   "/reports": "nav.reports",

@@ -10,6 +10,7 @@ import {
   BarChart3,
   Tag,
   Clapperboard,
+  Radio,
   Image,
   Mail,
   FileText,
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { key: "nav.reports", to: "/reports", icon: BarChart3 },
   { key: "nav.coupons", to: "/coupons", icon: Tag },
   { key: "nav.reels", to: "/reels", icon: Clapperboard },
+  { key: "nav.todaysLive", to: "/todays-live", icon: Radio },
 ] as const;
 
 const MARKETING_ITEMS = [

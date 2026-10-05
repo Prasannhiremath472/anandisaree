@@ -14,6 +14,7 @@ export const productListQuerySchema = z.object({
   trashed: z.coerce.boolean().optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
+  isLiveSpecial: z.coerce.boolean().optional(),
   sortBy: z.enum(["createdAt", "sellingPrice", "name", "stockQuantity"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });

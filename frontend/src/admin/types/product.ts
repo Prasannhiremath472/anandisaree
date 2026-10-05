@@ -105,6 +105,7 @@ export interface ProductFormValues {
   isBestSeller: boolean;
   blouseIncluded: boolean;
   isHandloom: boolean;
+  isLiveSpecial: boolean;
   categoryIds: string[];
   images: { url: string }[];
 }

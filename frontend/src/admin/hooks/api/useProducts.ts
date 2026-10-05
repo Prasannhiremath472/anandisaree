@@ -14,6 +14,7 @@ interface ListParams {
   categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
+  isLiveSpecial?: boolean;
 }
 
 export function useProducts(params: ListParams) {
