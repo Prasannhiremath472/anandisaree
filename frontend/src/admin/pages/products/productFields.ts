@@ -13,6 +13,7 @@ export const PRODUCT_OPTIONAL_FIELDS = {
   palluDesign: "Pallu Design",
   blouseDetails: "Blouse Details",
   washCare: "Wash Care Instructions",
+  customFields: "Custom Fields",
 } as const;
 
 export type ProductOptionalField = keyof typeof PRODUCT_OPTIONAL_FIELDS;

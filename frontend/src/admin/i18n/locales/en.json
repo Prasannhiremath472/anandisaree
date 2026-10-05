@@ -735,6 +735,7 @@
     "craftOrigin": "Made In (Place)",
     "district": "District",
     "blouseDetails": "Blouse Details",
-    "washCare": "Wash Care Instructions"
+    "washCare": "Wash Care Instructions",
+    "customFields": "Custom Fields"
   }
 }
