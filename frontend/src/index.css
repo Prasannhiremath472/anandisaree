@@ -1,65 +1,118 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
+  :root {
+    --color-primary: #53208C;
+    --color-primary-dark: #3B1366;
+    --color-primary-deep: #2A0B4C;
+    --color-primary-light: #6E32B6;
+    --color-primary-tint: #F5EEFA;
+    --color-gold: #D4AF37;
+    --color-gold-light: #F7E7B4;
+    --color-gold-dark: #A67C1E;
+    --color-ivory: #FAF7F2;
+    --color-white: #FFFFFF;
+    --color-cream: #F4EFE6;
+    --color-border: #E8DDF0;
+    --color-border-gold: #D4AF37;
+    --color-text: #2A0B4C;
+    --color-text-muted: #5E4675;
+    --gold-gradient: linear-gradient(135deg, #F9E7B9 0%, #D4AF37 50%, #A67C1E 100%);
+    --purple-gradient: linear-gradient(135deg, #53208C 0%, #3B1366 100%);
+    --royal-gradient: linear-gradient(180deg, #53208C 0%, #2A0B4C 100%);
   }
 
   body {
-    @apply bg-cream-200 text-charcoal font-body antialiased overflow-x-clip;
+    font-family: 'Jost', system-ui, -apple-system, sans-serif;
+    color: var(--color-text);
+    background-color: var(--color-ivory);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1,
-  h2,
-  h3 {
-    @apply font-display;
-  }
-
-  ::selection {
-    @apply bg-gold-300 text-royal-800;
-  }
-
-  /* Consistent keyboard-focus indicator across every interactive element,
-     visible only for keyboard/assistive-tech users (not mouse clicks). */
-  a,
-  button,
-  input,
-  select,
-  textarea,
-  [tabindex]:not([tabindex="-1"]) {
-    @apply outline-none;
-  }
-
-  a:focus-visible,
-  button:focus-visible,
-  input:focus-visible,
-  select:focus-visible,
-  textarea:focus-visible,
-  [tabindex]:not([tabindex="-1"]):focus-visible {
-    @apply ring-2 ring-gold-500 ring-offset-2 ring-offset-cream-200;
-  }
-
-  button:disabled,
-  input:disabled,
-  select:disabled,
-  textarea:disabled {
-    @apply cursor-not-allowed opacity-50;
+  h1, h2, h3, h4, h5, h6, .font-serif {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    letter-spacing: 0.02em;
   }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Metallic Gold Text and Gradients */
+.text-gold-gradient {
+  background: linear-gradient(135deg, #FDE68A 0%, #D4AF37 50%, #B45309 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-  .text-gradient-gold {
-    @apply bg-gold-gradient bg-clip-text text-transparent;
-  }
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #FBE094 0%, #D4AF37 50%, #B8860B 100%);
+}
 
-  .text-gradient-royal {
-    background-image: linear-gradient(120deg, #8746c4, #54208c 60%, #2d124c);
-    @apply bg-clip-text text-transparent;
-  }
+.border-gold-gradient {
+  border-image: linear-gradient(135deg, #FBE094, #D4AF37, #996515) 1;
+}
+
+/* Royal Purple Textures & Gradients */
+.bg-royal-purple {
+  background: linear-gradient(135deg, #53208C 0%, #3B1366 100%);
+}
+
+.bg-deep-purple {
+  background: linear-gradient(180deg, #3B1366 0%, #220738 100%);
+}
+
+/* 8-Lobed Indian Medallion Silhouette (as in Reference Screenshot Page 1) */
+.clip-8lobed-medallion {
+  clip-path: polygon(
+    50% 0%, 65% 5%, 75% 15%, 85% 15%, 95% 25%, 95% 35%, 100% 50%,
+    95% 65%, 95% 75%, 85% 85%, 75% 85%, 65% 95%, 50% 100%,
+    35% 95%, 25% 85%, 15% 85%, 5% 75%, 5% 65%, 0% 50%,
+    5% 35%, 5% 25%, 15% 15%, 25% 15%, 35% 5%
+  );
+}
+
+/* Capsule / Arch Top Silhouette (as in Reference Screenshot Page 2) */
+.clip-arch-capsule {
+  border-top-left-radius: 9999px;
+  border-top-right-radius: 9999px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+/* Traditional Jharokha Scalloped Silhouette */
+.clip-jharokha-scallop {
+  clip-path: polygon(
+    0% 20%, 6% 14%, 18% 9%, 32% 5%, 50% 0%, 68% 5%, 82% 9%, 94% 14%, 100% 20%,
+    100% 92%, 94% 97%, 85% 100%, 15% 100%, 6% 97%, 0% 92%
+  );
+}
+
+/* Royal Luxury Shadows */
+.royal-gold-shadow {
+  box-shadow: 0 10px 30px -5px rgba(83, 32, 140, 0.2), 0 0 15px rgba(212, 175, 55, 0.25);
+}
+
+.royal-purple-shadow {
+  box-shadow: 0 12px 36px -8px rgba(83, 32, 140, 0.35);
+}
+
+.gold-glow {
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.45));
+}
+
+/* Parchment texture with purple/gold hint */
+.bg-parchment-royal {
+  background-color: #FAF7F2;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.08) 0%, transparent 80%),
+    radial-gradient(#E8DDF0 0.75px, transparent 0.75px);
+  background-size: 100% 100%, 32px 32px;
+}
+
+/* Hide Scrollbar */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
