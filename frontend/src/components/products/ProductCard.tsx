@@ -128,7 +128,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Product Content Details */}
-      <div className="p-3 sm:p-3.5 flex flex-col flex-1 justify-between bg-[#FFFFFF]">
+      <div className="p-2 sm:p-3.5 flex flex-col flex-1 justify-between bg-[#FFFFFF]">
         <div>
           {/* Category / Origin subtitled tag */}
           <span className="text-[10px] tracking-wider uppercase text-[#D4AF37] font-bold block mb-0.5">

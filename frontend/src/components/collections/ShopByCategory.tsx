@@ -15,16 +15,16 @@ export const ShopByCategory: React.FC = () => {
           ornament="mandala"
         />
 
-        {/* 6 Visual Scalloped Medallion Category Cards (Reference Screenshot Page 1) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 mt-10">
+        {/* 6 Visual Scalloped Medallion Category Cards (Reference Screenshot Page 1) - Horizontal Story Rail on Mobile, Grid on Tablet/Desktop */}
+        <div className="flex overflow-x-auto gap-3 sm:gap-6 pb-4 pt-1 snap-x snap-mandatory hide-scrollbar sm:grid sm:grid-cols-3 lg:grid-cols-6 sm:overflow-visible mt-6 sm:mt-10 px-1">
           {categories.map((category) => (
             <Link
               key={category.id}
               to={`/collections/${category.slug}`}
-              className="group flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2 focus:outline-none"
+              className="shrink-0 snap-center w-32 sm:w-auto group flex flex-col items-center text-center transition-transform duration-300 hover:-translate-y-2 focus:outline-none"
             >
               {/* Custom 8-Lobed Scalloped Indian Medallion Shape */}
-              <div className="relative w-36 sm:w-40 md:w-44 aspect-square flex items-center justify-center p-2">
+              <div className="relative w-32 sm:w-40 md:w-44 aspect-square flex items-center justify-center p-1.5 sm:p-2">
                 
                 {/* SVG Decorative 8-Lobed Gold Border Frame (Page 1) */}
                 <svg 
@@ -58,7 +58,7 @@ export const ShopByCategory: React.FC = () => {
                 </svg>
 
                 {/* Circular Masked Model / Fabric Image inside the Medallion */}
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-30 md:h-30 rounded-full overflow-hidden shadow-inner border border-[#D4AF37]">
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-30 md:h-30 rounded-full overflow-hidden shadow-inner border border-[#D4AF37]">
                   <img
                     src={category.image}
                     alt={category.name}
@@ -70,11 +70,11 @@ export const ShopByCategory: React.FC = () => {
               </div>
 
               {/* Category Name & Count */}
-              <div className="mt-2 text-center">
-                <h3 className="font-serif text-sm sm:text-base font-bold text-[#53208C] group-hover:text-[#D4AF37] transition-colors leading-tight uppercase tracking-wider">
+              <div className="mt-1.5 sm:mt-2 text-center w-full px-1">
+                <h3 className="font-serif text-xs sm:text-base font-bold text-[#53208C] group-hover:text-[#D4AF37] transition-colors leading-tight uppercase tracking-wider truncate">
                   {category.name}
                 </h3>
-                <span className="text-[10px] sm:text-[11px] text-[#5E4675] tracking-wider block mt-0.5 font-medium">
+                <span className="text-[9px] sm:text-[11px] text-[#5E4675] tracking-wider block mt-0.5 font-medium truncate">
                   {category.highlightText}
                 </span>
               </div>

@@ -37,7 +37,7 @@ export const App: React.FC = () => {
           <Header />
 
           {/* Main Viewport */}
-          <main className="flex-1">
+          <main className="flex-1 pb-16 lg:pb-0">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/collections" element={<CollectionsPage />} />

@@ -468,7 +468,7 @@ export const ProductDetailsPage: React.FC = () => {
 
         {/* Related Products Carousel */}
         {relatedProducts.length > 0 && (
-          <div className="mt-16">
+          <div className="mt-16 pb-20 sm:pb-0">
             <ProductCarousel
               title="You May Also Cherish"
               subtitle="Complementary Weaves from the Same Artisan Cluster"
@@ -479,6 +479,44 @@ export const ProductDetailsPage: React.FC = () => {
           </div>
         )}
 
+      </div>
+
+      {/* Mobile Sticky Purchase Bar (Pinned above bottom nav on scroll) */}
+      <div className="fixed bottom-14 left-0 right-0 z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-[#D4AF37]/40 px-3 py-2 sm:hidden flex items-center justify-between gap-2 shadow-2xl">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <img
+            src={product.images[0]}
+            alt={product.name}
+            className="w-10 h-12 object-cover object-top rounded-xs border border-[#D4AF37]/50 shrink-0"
+          />
+          <div className="min-w-0">
+            <div className="text-[11px] font-serif font-bold text-[#3B1366] truncate">{product.name}</div>
+            <div className="text-xs font-bold text-[#53208C]">
+              ₹{product.price.toLocaleString('en-IN')}
+              {product.originalPrice && (
+                <span className="text-[10px] text-[#3B1366]/50 line-through font-normal ml-1">
+                  ₹{product.originalPrice.toLocaleString('en-IN')}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => addToCart(product, quantity, product.color, selectedBlouse)}
+            className="px-3 py-2 text-[11px] font-bold rounded-xs uppercase tracking-wider bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] text-[#3B1366] shadow-sm hover:brightness-105 active:scale-98 transition-all"
+          >
+            Add to Bag
+          </button>
+          <button
+            type="button"
+            onClick={handleBuyNow}
+            className="px-3.5 py-2 text-[11px] font-bold rounded-xs uppercase tracking-wider bg-[#53208C] text-[#FAF7F2] shadow-sm border border-[#D4AF37]/50 hover:bg-[#3B1366] active:scale-98 transition-all"
+          >
+            Buy Now
+          </button>
+        </div>
       </div>
     </div>
   );

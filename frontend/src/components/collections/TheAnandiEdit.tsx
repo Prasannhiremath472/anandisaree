@@ -85,13 +85,13 @@ export const TheAnandiEdit: React.FC = () => {
           </div>
         </div>
 
-        {/* 5 Unique Framed Model Photographs (Reference Screenshot Page 3) */}
+        {/* 5 Unique Framed Model Photographs (Reference Screenshot Page 3) - Mobile Snap Rail */}
         <div 
           ref={scrollRef}
-          className="flex gap-4 sm:gap-8 overflow-x-auto pb-6 pt-2 hide-scrollbar items-center justify-start lg:justify-center"
+          className="flex gap-3 sm:gap-8 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory hide-scrollbar items-center justify-start lg:justify-center -mx-4 px-4 sm:mx-0 sm:px-0"
         >
           {edits.map((item, idx) => (
-            <div key={idx} className="shrink-0">
+            <div key={idx} className="shrink-0 snap-center">
               <OrnamentalModelFrame
                 image={item.image}
                 title={item.title}

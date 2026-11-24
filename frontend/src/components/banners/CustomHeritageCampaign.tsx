@@ -49,7 +49,7 @@ export const CustomHeritageCampaign: React.FC = () => {
         <CornerFlourish position="top-right" className="top-4 right-4" size={56} color="#D4AF37" />
 
         {/* 3 Circular Ornamental Medallion Models with Gold Mandala Rings (Reference Screenshot Page 4) */}
-        <div className="flex items-center justify-center gap-6 sm:gap-10 md:gap-16 pt-2 pb-6">
+        <div className="flex items-center justify-center gap-2 sm:gap-10 md:gap-16 pt-2 pb-6">
           {medallionModels.map((item, idx) => (
             <OrnamentalModelFrame
               key={idx}
@@ -62,42 +62,38 @@ export const CustomHeritageCampaign: React.FC = () => {
         </div>
 
         {/* Central Editorial Statement in Royal Purple & Gold */}
-        <div className="text-center max-w-3xl mx-auto mt-4">
-          <span className="text-[11px] sm:text-xs tracking-[0.25em] uppercase text-[#D4AF37] font-bold block mb-1">
+        <div className="text-center max-w-3xl mx-auto mt-4 px-2">
+          <span className="text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase text-[#D4AF37] font-bold block mb-1">
             Story of Maharashtra & India’s Hidden Gems
           </span>
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#53208C] tracking-tight">
+          <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl font-medium text-[#53208C] tracking-tight">
             Every Saree Tells a Story
           </h2>
           <p className="text-xs sm:text-sm text-[#5E4675] max-w-xl mx-auto mt-2 leading-relaxed font-light">
             Each warp and weft celebrates the sacred hands of master artisans. From the royal court drapes of the Maratha Empire to the vibrant festivities of today.
           </p>
 
-          <div className="mt-5">
+          <div className="mt-4 sm:mt-5">
             <Link
               to="/collections/all"
-              className="inline-block bg-[#53208C] hover:bg-[#3B1366] text-[#FAF7F2] text-xs font-bold px-8 py-3 rounded-xs uppercase tracking-[0.16em] transition-all shadow-md hover:shadow-xl border border-[#D4AF37]"
+              className="inline-block bg-[#53208C] hover:bg-[#3B1366] text-[#FAF7F2] text-xs font-bold px-6 sm:px-8 py-2.5 sm:py-3 rounded-xs uppercase tracking-[0.16em] transition-all shadow-md hover:shadow-xl border border-[#D4AF37] active:scale-95"
             >
               Explore Collections
             </Link>
           </div>
         </div>
 
-        {/* Saree Craft Sub-Links with Gold Dots */}
-        <div className="mt-8 pt-6 border-t border-[#D4AF37]/30 max-w-4xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-[#53208C]">
+        {/* Saree Craft Sub-Links - Clean Tap-Friendly Pills on Mobile */}
+        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-[#D4AF37]/30 max-w-4xl mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-[#53208C]">
             {craftLinks.map((item, idx) => (
-              <React.Fragment key={idx}>
-                <Link
-                  to={item.link}
-                  className="hover:text-[#D4AF37] hover:font-semibold transition-colors"
-                >
-                  {item.label}
-                </Link>
-                {idx < craftLinks.length - 1 && (
-                  <span className="text-[#D4AF37]">•</span>
-                )}
-              </React.Fragment>
+              <Link
+                key={idx}
+                to={item.link}
+                className="px-2.5 py-1 rounded-full bg-white/70 hover:bg-[#53208C] hover:text-[#FAF7F2] border border-[#D4AF37]/50 transition-all font-medium active:scale-95 shadow-2xs"
+              >
+                {item.label}
+              </Link>
             ))}
           </div>
         </div>

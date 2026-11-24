@@ -47,7 +47,7 @@ export const OrnamentalModelFrame: React.FC<OrnamentalModelFrameProps> = ({
           </svg>
 
           {/* Model Circular Image */}
-          <div className="relative w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full overflow-hidden shadow-lg border-2 border-[#53208C]">
+          <div className="relative w-22 h-22 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full overflow-hidden shadow-lg border-2 border-[#53208C]">
             <img 
               src={image} 
               alt={title}
@@ -58,8 +58,8 @@ export const OrnamentalModelFrame: React.FC<OrnamentalModelFrameProps> = ({
         </div>
 
         {title && (
-          <div className="mt-3">
-            <span className="font-serif text-base sm:text-lg font-semibold text-[#53208C] group-hover:text-[#D4AF37] transition-colors uppercase tracking-wider">
+          <div className="mt-1.5 sm:mt-3 text-center">
+            <span className="font-serif text-xs sm:text-lg font-semibold text-[#53208C] group-hover:text-[#D4AF37] transition-colors uppercase tracking-wider block truncate max-w-[95px] sm:max-w-none">
               {title}
             </span>
           </div>

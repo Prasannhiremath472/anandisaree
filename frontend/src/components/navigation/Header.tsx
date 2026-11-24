@@ -5,6 +5,7 @@ import { AnnouncementBar } from './AnnouncementBar';
 import { AnandiLogo } from './AnandiLogo';
 import { CustomTraditionalMegaMenu } from './CustomTraditionalMegaMenu';
 import { MobileMenuDrawer } from './MobileMenuDrawer';
+import { MobileBottomNav } from './MobileBottomNav';
 import { useShop } from '../../context/ShopContext';
 
 export const Header: React.FC = () => {
@@ -280,6 +281,11 @@ export const Header: React.FC = () => {
       <MobileMenuDrawer 
         isOpen={isMobileMenuOpen} 
         onClose={() => setIsMobileMenuOpen(false)} 
+      />
+
+      {/* Sticky Bottom Thumb-Zone Navigation on Mobile */}
+      <MobileBottomNav 
+        onOpenCategories={() => setIsMobileMenuOpen(true)} 
       />
     </>
   );

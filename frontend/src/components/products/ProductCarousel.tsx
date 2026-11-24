@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Product } from '../../types';
@@ -20,11 +20,30 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   bgVariant = 'ivory',
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Automatic smooth horizontal scrolling that pauses on user hover or touch
+  useEffect(() => {
+    if (isHovered) return;
+    const interval = setInterval(() => {
+      if (!scrollRef.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      // If reached end, smooth scroll back to start, else scroll one card width
+      if (scrollLeft >= scrollWidth - clientWidth - 10) {
+        scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        const step = clientWidth > 640 ? 290 : 180;
+        scrollRef.current.scrollBy({ left: step, behavior: 'smooth' });
+      }
+    }, 3200);
+
+    return () => clearInterval(interval);
+  }, [isHovered]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollAmount = clientWidth * 0.75;
+      const scrollAmount = clientWidth > 640 ? clientWidth * 0.75 : 200;
       scrollRef.current.scrollTo({
         left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
         behavior: 'smooth'
@@ -39,7 +58,13 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   }[bgVariant];
 
   return (
-    <section className={`py-12 sm:py-16 ${bgClasses} relative select-none`}>
+    <section 
+      className={`py-12 sm:py-16 ${bgClasses} relative select-none`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsHovered(true)}
+      onTouchEnd={() => setTimeout(() => setIsHovered(false), 2000)}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header with Title & View All */}
         <div className="flex items-end justify-between mb-8 pb-3 border-b border-[#D4AF37]/30">
@@ -69,7 +94,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
               <button
                 type="button"
                 onClick={() => scroll('left')}
-                className="w-8 h-8 rounded-full border border-[#53208C] text-[#53208C] hover:bg-[#53208C] hover:text-[#FAF7F2] flex items-center justify-center transition-colors focus:outline-none"
+                className="w-8 h-8 rounded-full border border-[#53208C] text-[#53208C] hover:bg-[#53208C] hover:text-[#FAF7F2] flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
                 aria-label="Scroll left"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -77,7 +102,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
               <button
                 type="button"
                 onClick={() => scroll('right')}
-                className="w-8 h-8 rounded-full border border-[#53208C] text-[#53208C] hover:bg-[#53208C] hover:text-[#FAF7F2] flex items-center justify-center transition-colors focus:outline-none"
+                className="w-8 h-8 rounded-full border border-[#53208C] text-[#53208C] hover:bg-[#53208C] hover:text-[#FAF7F2] flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
                 aria-label="Scroll right"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -86,15 +111,16 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
           </div>
         </div>
 
-        {/* Carousel Scroll Container */}
+        {/* Carousel Scroll Container (Auto-sliding + Touch-swipe + Snap) */}
         <div 
           ref={scrollRef}
-          className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory hide-scrollbar"
+          className="flex gap-3 sm:gap-6 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scroll-smooth hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {products.map(product => (
             <div 
               key={product.id}
-              className="w-[260px] sm:w-[280px] md:w-[300px] shrink-0 snap-start"
+              className="w-[160px] sm:w-[220px] md:w-[270px] shrink-0 snap-start"
             >
               <ProductCard product={product} />
             </div>

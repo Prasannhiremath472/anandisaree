@@ -56,13 +56,13 @@ export const ShopByCraft: React.FC = () => {
           </div>
         </div>
 
-        {/* 8 Custom Ethnic Card Silhouettes (Reference Screenshot Page 1 & Vastranand inspiration) */}
+        {/* 8 Custom Ethnic Card Silhouettes (Reference Screenshot Page 1 & Vastranand inspiration) - Mobile Snap Rail */}
         <div 
           ref={scrollRef}
-          className="flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto pb-6 pt-2 hide-scrollbar items-center justify-start lg:justify-center"
+          className="flex gap-3 sm:gap-6 md:gap-8 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory hide-scrollbar items-center justify-start lg:justify-center -mx-4 px-4 sm:mx-0 sm:px-0"
         >
           {craftStories.map((craft) => (
-            <div key={craft.id} className="shrink-0">
+            <div key={craft.id} className="shrink-0 snap-center">
               <CraftCardSilhouette craft={craft} />
             </div>
           ))}
